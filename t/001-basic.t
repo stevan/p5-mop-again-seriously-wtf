@@ -42,7 +42,6 @@ is_deeply([ $Foo->superclasses ], [], '... got the superclasses we expected');
 
     ok(!$foo->can('name'), '... we are not our meta-object');
     ok($foo->can('foo'), '... we are our own object');
-
 }
 
 is($Bar->name,       'Bar',         '... got the name we expected');
@@ -59,5 +58,15 @@ my $Class = mop::class->new('mop::class');
 isa_ok($Class, 'mop::class');
 
 is($Class, $Class->class, '... Class is an instance of Class');
+is($Class, $Class->class->class, '... Class is an instance of Class (really)');
+is($Class, $Class->class->class->class, '... Class is an instance of Class (no, really)');
+
+is($Class->class, $Class->class->class, '... Class is an instance of Class (you think I am kidding)');
+is($Class->class, $Class->class->class->class, '... Class is an instance of Class (really)');
+
+is($Class->class->class, $Class->class->class->class, '... Class is an instance of Class (still the same)');
 
 done_testing;
+
+
+
