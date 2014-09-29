@@ -1,6 +1,6 @@
 package mop::class;
 
-use v5.20.1;
+use v5.20;
 use warnings;
 use experimental 'signatures', 'postderef';
 
