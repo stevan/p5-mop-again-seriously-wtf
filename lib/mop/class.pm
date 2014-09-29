@@ -4,6 +4,7 @@ use v5.20;
 use warnings;
 use experimental 'signatures', 'postderef';
 
+use B               ();
 use Variable::Magic ();
 
 my $ID  = 0;
@@ -22,9 +23,7 @@ sub new ($class, $name) {
         Variable::Magic::cast( %{ $name . '::' }, $WIZ, {
             id    => $ID++,
             class => \$self,
-            slots => {
-                '$!name' => $name,
-            }
+            slots => {}
         });
     }
 
@@ -45,8 +44,7 @@ sub class ($self) {
 }
 
 sub name ($self) { 
-    my $opaque = Variable::Magic::getdata( %$self, $WIZ );
-    return $opaque->{slots}->{'$!name'};
+    B::svref_2object( $self )->NAME;
 }
 
 sub version ($self) { 
@@ -64,8 +62,6 @@ sub superclasses ($self) {
     return () unless $ISA;
     return @{ *{ $ISA }{'ARRAY'} };
 }
-
-
 
 1;
 
