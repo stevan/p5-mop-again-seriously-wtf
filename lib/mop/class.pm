@@ -63,6 +63,10 @@ sub superclasses ($self) {
     return @{ *{ $ISA }{'ARRAY'} };
 }
 
+sub construct_instance ($self, $repr) {
+    return bless $repr => $self->name;
+}
+
 1;
 
 __END__

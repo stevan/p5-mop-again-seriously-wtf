@@ -10,7 +10,9 @@ BEGIN {
     use_ok('mop::class');
 }
 
-package Foo 0.01 {} 
+package Foo 0.01 {
+    sub foo { 'Foo::foo' }
+} 
 package Bar {
 
     our $VERSION   = '0.01';
@@ -33,6 +35,15 @@ is($Foo->name,       'Foo',  '... got the name we expected');
 is($Foo->version,    '0.01', '... got the version we expected');
 is($Foo->authority,   undef, '... got the authority we expected');
 is_deeply([ $Foo->superclasses ], [], '... got the superclasses we expected');
+
+{
+    my $foo = $Foo->construct_instance({});
+    isa_ok($foo, 'Foo');
+
+    ok(!$foo->can('name'), '... we are not our meta-object');
+    ok($foo->can('foo'), '... we are our own object');
+
+}
 
 is($Bar->name,       'Bar',         '... got the name we expected');
 is($Bar->version,    '0.01',        '... got the version we expected');
