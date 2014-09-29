@@ -10,6 +10,8 @@ BEGIN {
     use_ok('mop::class');
 }
 
+# set up some test packages ...
+
 package Foo 0.01 {
     sub foo { 'Foo::foo' }
 } 
@@ -21,6 +23,8 @@ package Bar {
     use base 'Foo';
 } 
 package Baz { our @ISA = ('Bar') }
+
+# test them ...
 
 my $Foo = mop::class->new( 'Foo' );
 isa_ok($Foo, 'mop::class');
@@ -35,6 +39,7 @@ is($Foo->name,       'Foo',  '... got the name we expected');
 is($Foo->version,    '0.01', '... got the version we expected');
 is($Foo->authority,   undef, '... got the authority we expected');
 is_deeply([ $Foo->superclasses ], [], '... got the superclasses we expected');
+is_deeply([ $Foo->mro ], ['Foo'], '... got the mro we expected');
 
 {
     my $foo = $Foo->construct_instance({});
@@ -48,11 +53,13 @@ is($Bar->name,       'Bar',         '... got the name we expected');
 is($Bar->version,    '0.01',        '... got the version we expected');
 is($Bar->authority,  'cpan:STEVAN', '... got the authority we expected');
 is_deeply([ $Bar->superclasses ], ['Foo'], '... got the superclasses we expected');
+is_deeply([ $Bar->mro ], ['Bar', 'Foo'], '... got the mro we expected');
 
 is($Baz->name,       'Baz', '... got the name we expected');
 is($Baz->version,    undef, '... got the version we expected');
 is($Baz->authority,  undef, '... got the authority we expected');
 is_deeply([ $Baz->superclasses ], ['Bar'], '... got the superclasses we expected');
+is_deeply([ $Baz->mro ], ['Baz', 'Bar', 'Foo'], '... got the mro we expected');
 
 my $Class = mop::class->new('mop::class');
 isa_ok($Class, 'mop::class');

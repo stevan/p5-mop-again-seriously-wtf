@@ -1,6 +1,7 @@
 package mop::class;
 
 use v5.20;
+use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
@@ -61,6 +62,10 @@ sub superclasses ($self) {
     my $ISA = $self->{'ISA'};
     return () unless $ISA;
     return @{ *{ $ISA }{'ARRAY'} };
+}
+
+sub mro ($self, $type = mro::get_mro( $self->name )) { 
+    return @{ mro::get_linear_isa( $self->name, $type ) };
 }
 
 sub construct_instance ($self, $repr) {
