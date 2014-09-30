@@ -10,7 +10,7 @@ use mop::class;
 use Scalar::Util ();
 
 sub meta ($instance) {
-    mop::class->new( name => Scalar::Util::blessed( $instance ) );
+    mop::class->new( name => Scalar::Util::blessed( $instance ) || $instance );
 }
 
 1;
