@@ -29,7 +29,8 @@ package Baz { our @ISA = ('Bar') }
 my $Foo = mop::class->new( name => 'Foo' );
 isa_ok($Foo, 'mop::class');
 
-my $Bar = mop::class->new( name => 'Bar' );
+# also contruct the meta this way ...
+my $Bar = mop::meta( 'Bar' );
 isa_ok($Bar, 'mop::class');
 
 my $Baz = mop::class->new( name => 'Baz' );
@@ -47,6 +48,8 @@ is_deeply([ $Foo->mro ], ['Foo'], '... got the mro we expected');
 
     ok(!$foo->can('name'), '... we are not our meta-object');
     ok($foo->can('foo'), '... we are our own object');
+
+    is(mop::meta($foo), $Foo, '... the metaclass is as expected');
 }
 
 is($Bar->name,       'Bar',         '... got the name we expected');
