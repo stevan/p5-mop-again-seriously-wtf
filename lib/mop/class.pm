@@ -5,44 +5,31 @@ use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
+use mop::internal::util;
+
 use B               ();
 use Variable::Magic ();
 
-my $ID  = 0;
-my $WIZ = Variable::Magic::wizard( data => sub { $_[1] } );
+sub new ($class, %args) {
 
-sub new ($class, $name) {
-
-    my $self;
+    my $name = $args{'name'} || die 'The class `name` is required';
 
     no strict 'refs';
 
     # no need to add magic if 
     # this magic has already 
     # been attached to it 
-    unless ( Variable::Magic::getdata( %{ $name . '::' }, $WIZ ) ) {
-        Variable::Magic::cast( %{ $name . '::' }, $WIZ, {
-            id    => $ID++,
-            class => \$self,
+    unless ( Variable::Magic::getdata( %{ $name . '::' }, mop::internal::util::get_wiz() ) ) {
+        Variable::Magic::cast( %{ $name . '::' }, mop::internal::util::get_wiz(), {
+            id    => mop::internal::util::next_oid(),
             slots => {}
         });
     }
 
-    # but still want to return
-    # the reference just the 
-    # same
-    $self = bless \%{ $name . '::' } => $class;
+    bless \%{ $name . '::' } => $class;
 }
 
-sub id ($self) { 
-    my $opaque = Variable::Magic::getdata( %$self, $WIZ );
-    return $opaque->{id};
-}
-
-sub class ($self) { 
-    my $opaque = Variable::Magic::getdata( %$self, $WIZ );
-    return $opaque->{class}->$*;
-}
+# meta-info 
 
 sub name ($self) { 
     B::svref_2object( $self )->NAME;
@@ -58,6 +45,8 @@ sub authority ($self) {
     return $self->{'AUTHORITY'}->*{'SCALAR'}->$*;
 }
 
+# inheritance 
+
 sub superclasses ($self) {
     my $ISA = $self->{'ISA'};
     return () unless $ISA;
@@ -67,6 +56,8 @@ sub superclasses ($self) {
 sub mro ($self, $type = mro::get_mro( $self->name )) { 
     return @{ mro::get_linear_isa( $self->name, $type ) };
 }
+
+# instance management
 
 sub construct_instance ($self, $repr) {
     return bless $repr => $self->name;
