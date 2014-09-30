@@ -10,6 +10,7 @@ use mop::internal::util;
 use B               ();
 use Variable::Magic ();
 
+our @ISA = ('mop::object');
 sub new ($class, %args) {
 
     my $name = $args{'name'} || die 'The class `name` is required';
