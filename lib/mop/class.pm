@@ -11,15 +11,23 @@ use B               ();
 use Variable::Magic ();
 
 our @ISA = ('mop::object');
+
+# NOTE:
+# this will always be a specialized
+# constructor because of bootstrapping
+# issues, but that is okay since we 
+# want this to be more specialized 
+# anyway.
 sub new ($class, %args) {
 
     my $name = $args{'name'} || die 'The class `name` is required';
 
     no strict 'refs';
 
-    # no need to add magic if 
-    # this magic has already 
-    # been attached to it 
+    # no need to add magic if the magic has 
+    # already been applied, this is a special
+    # case since package stashes are essentially
+    # singletons anyway.
     unless ( Variable::Magic::getdata( %{ $name . '::' }, mop::internal::util::get_wiz() ) ) {
         Variable::Magic::cast( %{ $name . '::' }, mop::internal::util::get_wiz(), {
             id    => mop::internal::util::next_oid(),
