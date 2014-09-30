@@ -9,15 +9,38 @@ use mop::internal::util;
 use Variable::Magic ();
 
 sub new ($class, %args) {
-
     my %self;
+    $class->BLESS( 
+        $class->CREATE( 
+            \%self, %args 
+        ) 
+    )->BUILDALL( 
+        \%args 
+    );
+}
 
-    Variable::Magic::cast( %self, mop::internal::util::get_wiz(), {
-        id    => mop::internal::util::next_oid(),
-        slots => { %args }
-    });
+sub CREATE ($class, $repr, %args) {
 
-    mop::meta( $class )->construct_instance( \%self );
+    Variable::Magic::cast( 
+        %$repr, 
+        mop::internal::util::get_wiz(), 
+        {
+            id    => mop::internal::util::next_oid(),
+            slots => { %args }
+        }
+    );    
+
+    return $repr;
+}
+
+sub BLESS ($class, $repr) {
+    return bless $repr => $class;
+}
+
+sub BUILDALL ($self, $args) {
+    # ...
+
+    return $self;
 }
 
 1;

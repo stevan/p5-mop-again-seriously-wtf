@@ -24,18 +24,21 @@ sub new ($class, %args) {
 
     no strict 'refs';
 
-    # no need to add magic if the magic has 
-    # already been applied, this is a special
-    # case since package stashes are essentially
-    # singletons anyway.
     unless ( Variable::Magic::getdata( %{ $name . '::' }, mop::internal::util::get_wiz() ) ) {
-        Variable::Magic::cast( %{ $name . '::' }, mop::internal::util::get_wiz(), {
-            id    => mop::internal::util::next_oid(),
-            slots => {}
-        });
+        # no need to add magic if the magic has 
+        # already been applied, this is a special
+        # case since package stashes are essentially
+        # singletons anyway.
+        $class->BLESS( 
+            $class->CREATE( 
+                \%{ $name . '::' }, %args 
+            ) 
+        )->BUILDALL( 
+            \%args 
+        );
     }
 
-    bless \%{ $name . '::' } => $class;
+    $class->BLESS( \%{ $name . '::' } );
 }
 
 # meta-info 
