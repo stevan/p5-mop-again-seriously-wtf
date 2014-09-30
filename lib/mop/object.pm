@@ -17,7 +17,7 @@ sub new ($class, %args) {
         slots => { %args }
     });
 
-    bless \%self => $class;
+    mop::meta( $class )->construct_instance( \%self );
 }
 
 1;
