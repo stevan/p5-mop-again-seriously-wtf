@@ -12,6 +12,7 @@ BEGIN {
 
 my $Class = mop::class->new( name => 'mop::class' );
 isa_ok($Class, 'mop::class');
+isa_ok($Class, 'mop::object');
 
 is($Class, mop::meta($Class), '... Class is an instance of Class');
 is($Class, mop::meta(mop::meta($Class)), '... Class is an instance of Class (really)');

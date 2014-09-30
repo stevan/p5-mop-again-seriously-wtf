@@ -28,13 +28,16 @@ package Baz { our @ISA = ('Bar') }
 
 my $Foo = mop::class->new( name => 'Foo' );
 isa_ok($Foo, 'mop::class');
+isa_ok($Foo, 'mop::object');
 
 # also contruct the meta this way ...
 my $Bar = mop::meta( 'Bar' );
 isa_ok($Bar, 'mop::class');
+isa_ok($Bar, 'mop::object');
 
 my $Baz = mop::class->new( name => 'Baz' );
 isa_ok($Baz, 'mop::class');
+isa_ok($Baz, 'mop::object');
 
 is($Foo->name,       'Foo',  '... got the name we expected');
 is($Foo->version,    '0.01', '... got the version we expected');
