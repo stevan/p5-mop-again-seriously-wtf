@@ -7,7 +7,7 @@ use Test::More;
 use Data::Dumper;
 
 BEGIN {
-    use_ok('mop::class');
+    use_ok('mop');
 }
 
 # set up some test packages ...
@@ -26,13 +26,13 @@ package Baz { our @ISA = ('Bar') }
 
 # test them ...
 
-my $Foo = mop::class->new( 'Foo' );
+my $Foo = mop::class->new( name => 'Foo' );
 isa_ok($Foo, 'mop::class');
 
-my $Bar = mop::class->new( 'Bar' );
+my $Bar = mop::class->new( name => 'Bar' );
 isa_ok($Bar, 'mop::class');
 
-my $Baz = mop::class->new( 'Baz' );
+my $Baz = mop::class->new( name => 'Baz' );
 isa_ok($Baz, 'mop::class');
 
 is($Foo->name,       'Foo',  '... got the name we expected');
@@ -61,17 +61,6 @@ is($Baz->authority,  undef, '... got the authority we expected');
 is_deeply([ $Baz->superclasses ], ['Bar'], '... got the superclasses we expected');
 is_deeply([ $Baz->mro ], ['Baz', 'Bar', 'Foo'], '... got the mro we expected');
 
-my $Class = mop::class->new('mop::class');
-isa_ok($Class, 'mop::class');
-
-is($Class, $Class->class, '... Class is an instance of Class');
-is($Class, $Class->class->class, '... Class is an instance of Class (really)');
-is($Class, $Class->class->class->class, '... Class is an instance of Class (no, really)');
-
-is($Class->class, $Class->class->class, '... Class is an instance of Class (you think I am kidding)');
-is($Class->class, $Class->class->class->class, '... Class is an instance of Class (really)');
-
-is($Class->class->class, $Class->class->class->class, '... Class is an instance of Class (still the same)');
 
 done_testing;
 
