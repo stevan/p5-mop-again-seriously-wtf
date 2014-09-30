@@ -29,16 +29,12 @@ sub new ($class, %args) {
         # already been applied, this is a special
         # case since package stashes are essentially
         # singletons anyway.
-        $class->BLESS( 
-            $class->CREATE( 
-                \%{ $name . '::' }, %args 
-            ) 
-        )->BUILDALL( 
-            \%args 
-        );
+        my $self = $class->BLESS( $class->CREATE( \%{ $name . '::' }, %args ) );
+        $self->BUILDALL( \%args );
+        return $self;
     }
 
-    $class->BLESS( \%{ $name . '::' } );
+    return $class->BLESS( \%{ $name . '::' } );
 }
 
 # meta-info 
