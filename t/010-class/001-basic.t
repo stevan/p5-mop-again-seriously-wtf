@@ -17,6 +17,8 @@ package Foo 0.01 {
 } 
 package Bar {
 
+    use Scalar::Util qw[ blessed ];
+
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
 
@@ -28,22 +30,31 @@ package Baz { our @ISA = ('Bar') }
 
 my $Foo = mop::class->new( name => 'Foo' );
 isa_ok($Foo, 'mop::class');
-isa_ok($Foo, 'mop::object');
 
 # also contruct the meta this way ...
 my $Bar = mop::meta( 'Bar' );
 isa_ok($Bar, 'mop::class');
-isa_ok($Bar, 'mop::object');
 
 my $Baz = mop::class->new( name => 'Baz' );
 isa_ok($Baz, 'mop::class');
-isa_ok($Baz, 'mop::object');
 
 is($Foo->name,       'Foo',  '... got the name we expected');
 is($Foo->version,    '0.01', '... got the version we expected');
 is($Foo->authority,   undef, '... got the authority we expected');
 is_deeply([ $Foo->superclasses ], [], '... got the superclasses we expected');
 is_deeply([ $Foo->mro ], ['Foo'], '... got the mro we expected');
+ok($Foo->has_method('foo'), '... we have a &foo method');
+ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
+
+{
+    my $code = $Foo->get_method('foo');
+    ok(defined $code, '... got the &foo method');
+    is($code->(), 'Foo::foo', '... got the expected behavior from the &foo method');
+
+    my @methods = $Foo->methods;
+    is(scalar @methods, 1, '... got the amount of method we expected');
+    is($methods[0], $code, '... got the methods we expected in the set');
+}
 
 {
     my $foo = $Foo->construct_instance({});
@@ -55,18 +66,45 @@ is_deeply([ $Foo->mro ], ['Foo'], '... got the mro we expected');
     is(mop::meta($foo), $Foo, '... the metaclass is as expected');
 }
 
+{
+    my $code = $Foo->delete_method('foo');
+    ok(defined $code, '... got the deleted &foo method');
+    is($code->(), 'Foo::foo', '... got the expected behavior from the deleted &foo method');
+    ok(!$Foo->has_method('foo'), '... we no longer have a &foo method');
+
+    my @methods = $Foo->methods;
+    is(scalar @methods, 0, '... got the amount of method we expected');
+}
+
 is($Bar->name,       'Bar',         '... got the name we expected');
 is($Bar->version,    '0.01',        '... got the version we expected');
 is($Bar->authority,  'cpan:STEVAN', '... got the authority we expected');
 is_deeply([ $Bar->superclasses ], ['Foo'], '... got the superclasses we expected');
 is_deeply([ $Bar->mro ], ['Bar', 'Foo'], '... got the mro we expected');
+ok(!$Bar->has_method('bar'), '... we do not have a &bar method');
+ok(!$Bar->has_method('blessed'), '... we do not have the imported &blessed function showing up as a method');
+
+{
+    my @methods = $Bar->methods;
+    is(scalar @methods, 0, '... got the amount of method we expected');
+}
+
+{
+    my $code = sub { 'Bar::bar' };
+    $Bar->add_method( bar => $code );
+    ok($Bar->has_method('bar'), '... we now have a &bar method');
+    is($Bar->get_method('bar'), $code, '... got the same &bar method back');
+
+    my @methods = $Bar->methods;
+    is(scalar @methods, 1, '... got the amount of method we expected');
+    is($methods[0], $code, '... got the methods we expected in the set');
+}
 
 is($Baz->name,       'Baz', '... got the name we expected');
 is($Baz->version,    undef, '... got the version we expected');
 is($Baz->authority,  undef, '... got the authority we expected');
 is_deeply([ $Baz->superclasses ], ['Bar'], '... got the superclasses we expected');
 is_deeply([ $Baz->mro ], ['Baz', 'Bar', 'Foo'], '... got the mro we expected');
-
 
 done_testing;
 

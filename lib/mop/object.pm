@@ -10,38 +10,19 @@ use Variable::Magic ();
 
 sub new ($class, %args) {
     my %repr;
-    my $self = $class->BLESS( $class->CREATE( \%repr, %args ) );
-    $self->BUILDALL( \%args );
-    $self;
-}
-
-
-# the CREATE method takes the repr
-# or representation of the instance
-# we want and and the arguments and
-# returns an appropriately set up 
-# instance representation that is 
-# suitable for passing to BLESS.
-sub CREATE ($class, $repr, %args) {
 
     Variable::Magic::cast( 
-        %$repr, 
+        %repr, 
         mop::internal::util::get_wiz(), 
         {
             id    => mop::internal::util::next_oid(),
             slots => { %args }
         }
-    );    
+    ); 
 
-    return $repr;
-}
-
-
-# the BLESS method performs the blessing
-# necessary to associate a given repr with 
-# a given class/package
-sub BLESS ($class, $repr) {
-    return bless $repr => $class;
+    my $self = bless \%repr => $class;
+    $self->BUILDALL( \%args );
+    $self;
 }
 
 # the BUILDALL method calls all the BUILD
