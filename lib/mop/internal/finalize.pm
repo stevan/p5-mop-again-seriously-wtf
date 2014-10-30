@@ -33,7 +33,7 @@ sub import_into {
             {
                 no strict 'refs';
                 foreach my $name ( keys %$methods ) {
-                    *{'mop::class::' . $name} = $methods->{ $name };
+                    *{'mop::class::' . $name} = $methods->{ $name }->$*;
                 }
             }
         }

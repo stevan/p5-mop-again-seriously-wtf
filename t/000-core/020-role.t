@@ -42,7 +42,7 @@ is($Role->authority, 'cpan:STEVAN', '... got the expected value ->authority');
 
 is_deeply([ sort map { $_->name } $Role->methods ], [ sort @METHODS ], '... got the expected value from ->methods');
 
-is($Role->get_method('name'), \&mop::role::name, '... got the expected value from ->get_method');
+is($Role->get_method('name')->body, \&mop::role::name, '... got the expected value from ->get_method');
 
 like(
     exception { $Role->add_method('foo' => sub {}) },

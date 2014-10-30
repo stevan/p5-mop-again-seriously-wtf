@@ -41,6 +41,14 @@ package Baz {
 my $Foo = mop::class->new( name => 'Foo' );
 isa_ok($Foo, 'mop::class');
 
+isnt($Foo, mop::class->new( name => 'Foo' ), '... they are not always the same instances');
+
+{
+    my $FooRole = mop::role->new( name => 'Foo' );
+    isa_ok($FooRole, 'mop::role');
+    isa_ok($Foo, 'mop::class');
+}
+
 # also contruct the meta this way ...
 my $Bar = mop::meta( 'Bar' );
 isa_ok($Bar, 'mop::class');
@@ -59,11 +67,11 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
 {
     my $code = $Foo->get_method('foo');
     ok(defined $code, '... got the &foo method');
-    is($code->(), 'Foo::foo', '... got the expected behavior from the &foo method');
+    is($code->body->(), 'Foo::foo', '... got the expected behavior from the &foo method');
 
     my @methods = $Foo->methods;
     is(scalar @methods, 1, '... got the amount of method we expected');
-    is($methods[0], $code, '... got the methods we expected in the set');
+    is($methods[0]->body, $code->body, '... got the methods we expected in the set');
 }
 
 {
@@ -73,7 +81,7 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
     ok(!$foo->can('name'), '... we are not our meta-object');
     ok($foo->can('foo'), '... we are our own object');
 
-    is(mop::meta($foo), $Foo, '... the metaclass is as expected');
+    isnt(mop::meta($foo), $Foo, '... the metaclass is as expected');
 }
 
 {

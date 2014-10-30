@@ -31,6 +31,14 @@ package Baz { our @ISA = ('Bar') }
 my $Foo = mop::class->new( name => 'Foo' );
 isa_ok($Foo, 'mop::class');
 
+isnt($Foo, mop::class->new( name => 'Foo' ), '... they are not always the same instances');
+
+{
+    my $FooRole = mop::role->new( name => 'Foo' );
+    isa_ok($FooRole, 'mop::role');
+    isa_ok($Foo, 'mop::class');
+}
+
 # also contruct the meta this way ...
 my $Bar = mop::meta( 'Bar' );
 isa_ok($Bar, 'mop::class');
@@ -49,11 +57,11 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
 {
     my $code = $Foo->get_method('foo');
     ok(defined $code, '... got the &foo method');
-    is($code->(), 'Foo::foo', '... got the expected behavior from the &foo method');
+    is($code->body->(), 'Foo::foo', '... got the expected behavior from the &foo method');
 
     my @methods = $Foo->methods;
     is(scalar @methods, 1, '... got the amount of method we expected');
-    is($methods[0], $code, '... got the methods we expected in the set');
+    is($methods[0]->body, $code->body, '... got the methods we expected in the set');
 }
 
 {
@@ -63,13 +71,13 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
     ok(!$foo->can('name'), '... we are not our meta-object');
     ok($foo->can('foo'), '... we are our own object');
 
-    is(mop::meta($foo), $Foo, '... the metaclass is as expected');
+    isnt(mop::meta($foo), $Foo, '... the metaclass is as expected');
 }
 
 {
     my $code = $Foo->delete_method('foo');
     ok(defined $code, '... got the deleted &foo method');
-    is($code->(), 'Foo::foo', '... got the expected behavior from the deleted &foo method');
+    is($code->body->(), 'Foo::foo', '... got the expected behavior from the deleted &foo method');
     ok(!$Foo->has_method('foo'), '... we no longer have a &foo method');
 
     my @methods = $Foo->methods;
@@ -93,11 +101,11 @@ ok(!$Bar->has_method('blessed'), '... we do not have the imported &blessed funct
     my $code = sub { 'Bar::bar' };
     $Bar->add_method( bar => $code );
     ok($Bar->has_method('bar'), '... we now have a &bar method');
-    is($Bar->get_method('bar'), $code, '... got the same &bar method back');
+    is($Bar->get_method('bar')->body, $code, '... got the same &bar method back');
 
     my @methods = $Bar->methods;
     is(scalar @methods, 1, '... got the amount of method we expected');
-    is($methods[0], $code, '... got the methods we expected in the set');
+    is($methods[0]->body, $code, '... got the methods we expected in the set');
 }
 
 is($Baz->name,       'Baz', '... got the name we expected');

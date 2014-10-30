@@ -22,7 +22,7 @@ sub construct_instance ($self, $candidate) {
 # inheritance 
 
 sub superclasses ($self) {
-    my $ISA = $self->{'ISA'};
+    my $ISA = $self->$*->{'ISA'};
     return () unless $ISA;
     return $ISA->*{'ARRAY'}->@*;
 }
