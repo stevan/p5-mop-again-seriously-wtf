@@ -11,8 +11,8 @@ use mop::internal::finalize;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-our @ISA  = ('mop::role');
-our @DOES = ('mop::role');
+our @ISA;  BEGIN { @ISA  = ('mop::object') }
+our @DOES; BEGIN { @DOES = ('mop::role')   }
 
 # instance construction 
 

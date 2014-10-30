@@ -15,7 +15,7 @@ use mop::internal::finalize;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-our @ISA = ('mop::object');
+our @ISA; BEGIN { @ISA = ('mop::object') }
 
 sub new ($class, %args) {
     my $name = $args{'name'} || die 'The role `name` is required';
