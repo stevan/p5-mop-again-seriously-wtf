@@ -39,6 +39,12 @@ sub import_into {
         }
         else {
 
+            # NOTE:
+            # Always make the $pkg into a mop::role instance
+            # here, that is because all the things we need to 
+            # actually do to $pkg are part of the mop::role 
+            # interface. This works because Class does Role.
+            # - SL
             my $meta = mop::role->new( name => $pkg );
             
             if ( my @roles = $meta->roles ) {
