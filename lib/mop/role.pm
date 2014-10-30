@@ -5,12 +5,12 @@ use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use B                 ();
-use Sub::Name         ();
-use Scalar::Util      ();
-use Package::Finalize ('DEMOLISH', 'BUILD');
+use Symbol       ();
+use Sub::Name    ();
+use Scalar::Util ();
 
 use mop::internal::util;
+use mop::internal::finalize;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
