@@ -131,6 +131,11 @@ sub add_method ($self, $name, $code) {
     }
 }
 
+sub alias_method ($self, $name, $code) {
+    no strict 'refs';
+    *{ $self->name . '::' . $name } = $code;
+}
+
 1;
 
 __END__
