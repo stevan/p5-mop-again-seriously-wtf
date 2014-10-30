@@ -25,26 +25,20 @@ sub new ($class, %args) {
     $self;
 }
 
-# the BUILDALL method calls all the BUILD
-# methods in the entire inheritance 
-# hierarchy in the correct order
 sub BUILDALL ($self, $args) {
     # ... TODO 
 
     return $self;
 }
 
-# the DEMOLISHALL method calls all the DEMOLISH
-# methods in the entire inheritance 
-# hierarchy in the correct order
 sub DEMOLISHALL ($self, $args) {
     # ... TODO
 
     return $self;
 }
 
-sub DESTROY {
-    # ... TODO 
+sub DESTROY ($self) {
+    $self->can('DEMOLISH') && $self->DEMOLISHALL
 }
 
 1;
