@@ -61,7 +61,7 @@ sub authority ($self) {
 sub roles ($self) {
     my $DOES = $self->{'DOES'};
     return () unless $DOES;
-    return @{ *{ $DOES }{'ARRAY'} };
+    return $DOES->*{'ARRAY'}->@*;
 }
 
 # methods 
