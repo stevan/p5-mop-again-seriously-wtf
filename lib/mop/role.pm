@@ -16,6 +16,7 @@ our @ISA; BEGIN { @ISA = ('mop::object') }
 
 sub new ($class, %args) {
     my $name = $args{'name'} or die 'The role `name` is required';
+
     my $stash;
     {
         no strict 'refs';

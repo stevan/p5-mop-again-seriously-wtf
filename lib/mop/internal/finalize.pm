@@ -44,8 +44,9 @@ sub import_into {
         }
         else {
             my $meta = mop::class->new( name => $pkg );
+            
             if ( my @roles = $meta->roles ) {
-                
+
                 my (%methods, %required);
                 foreach my $r ( map { mop::role->new( name => $_ ) } @roles ) {
                     foreach my $m ( $r->methods ) {
