@@ -10,8 +10,8 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 sub new ($class, %args) {
-    my $self = mop::meta( __PACKAGE__ )->construct_instance( {}, \%args );
     $self->BUILDALL( \%args );
+    my $self = mop::meta( $class )->construct_instance( \%args );
     $self;
 }
 

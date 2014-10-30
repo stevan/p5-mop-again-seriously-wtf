@@ -14,8 +14,7 @@ BEGIN {
     my $o = mop::object->new( test => 1 );
     isa_ok($o, 'mop::object');
 
-    is_deeply({ %$o }, {}, '... got nothing in the instance itself');
-    is_deeply(mop::internal::util::get_slots($o), { test => 1 }, '... got the expected slots');
+    is_deeply({ %$o }, { test => 1 }, '... got nothing in the instance itself');
 }
 
 done_testing();

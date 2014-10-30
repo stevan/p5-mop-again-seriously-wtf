@@ -16,31 +16,7 @@ our @DOES; BEGIN { @DOES = ('mop::role')   }
 
 # instance construction 
 
-sub construct_instance ($self, $candidate, $args) {
-
-    my $wiz  = mop::internal::util::get_wiz();
-    my $data = {
-        id    => mop::internal::util::next_oid(),
-        slots => { $args->%* }
-    };
-
-    my $repr_type = ref $candidate;
-    if ( $repr_type eq 'HASH' ) {
-        Variable::Magic::cast( $candidate->%*, $wiz, $data );
-    } 
-    elsif ( $repr_type eq 'ARRAY' ) {
-        Variable::Magic::cast( $candidate->@*, $wiz, $data );
-    } 
-    elsif ( $repr_type eq 'SCALAR' ) {
-        Variable::Magic::cast( $candidate->$*, $wiz, $data );
-    } 
-    elsif ( $repr_type eq 'CODE' ) {
-        Variable::Magic::cast( $candidate, $wiz, $data );
-    } 
-    else {
-        die "Unsupported candiate type: $repr_type";
-    }
-
+sub construct_instance ($self, $candidate) {
     return bless $candidate => $self->name;
 }
 

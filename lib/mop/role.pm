@@ -18,26 +18,17 @@ our $AUTHORITY = 'cpan:STEVAN';
 our @ISA; BEGIN { @ISA = ('mop::object') }
 
 sub new ($class, %args) {
-    my $name = $args{'name'} || die 'The role `name` is required';
+    my $name = $args{'name'} or die 'The role `name` is required';
+    my $stash;
     {
-        # NOTE:
-        # we are doing what mop::object::new might do
-        # expect that we are not actually calling that
-        # method (it will infinitely recurse), this is 
-        # intentional, we can bootstrap later if we 
-        # actually need to.
-        # - SL
         no strict 'refs';
-        Variable::Magic::cast( 
-            %{ $name . '::' }, 
-            mop::internal::util::get_wiz(),
-            {
-                id    => mop::internal::util::next_oid(),
-                slots => {}
-            } 
-        );
-        return bless \%{ $name . '::' } => $class;
+        $stash = \%{ $name . '::' };
     }
+
+    # no need to rebless anything
+    return $stash if Scalar::Util::blessed( $stash );
+
+    return bless $stash => $class;
 }
 
 # meta-info 
