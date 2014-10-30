@@ -14,18 +14,18 @@ our $AUTHORITY = 'cpan:STEVAN';
 our @ISA; BEGIN { @ISA  = ('mop::object') }
 
 sub new ($class, %args) {
-    my $name = $args{'body'} || die 'The method `body` is required';
-    return $args{'body'} 
-        if Scalar::Util::blessed( $args{'body'} )
-        && $args{'body'}->isa(__PACKAGE__);
-    return bless $args{'body'} => 'mop::method';
+    my $body = $args{'body'} or die 'The method `body` is required';
+
+    # no need to rebless things ...
+    return $body if Scalar::Util::blessed( $body );
+
+    return bless $body => 'mop::method';
 }
 
-sub name       { B::svref_2object( shift )->GV->NAME        }
-sub stash_name { B::svref_2object( shift )->GV->STASH->NAME }
+sub name       ($self) { B::svref_2object( $self )->GV->NAME        }
+sub stash_name ($self) { B::svref_2object( $self )->GV->STASH->NAME }
 
-sub was_aliased_from {
-    my ($self, @packages) = @_;
+sub was_aliased_from ($self, @packages) {
     my $stash_name = $self->stash_name;
     foreach my $p (@packages) {
         return 1 if $p eq $stash_name;
