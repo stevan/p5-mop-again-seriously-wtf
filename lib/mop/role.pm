@@ -70,7 +70,8 @@ sub methods ($self) {
     my @methods;
     foreach my $candidate ( keys %$self ) {
         if ( my $code = $self->{ $candidate }->*{'CODE'} ) {
-            if ( B::svref_2object( $code )->GV->STASH->NAME eq $self->name ) {
+            $code = mop::method->new( body => $code );
+            if ( $code->stash_name eq $self->name || $code->was_aliased_from( $self->roles ) ) {
                 push @methods => $code;
             }
         }
@@ -81,7 +82,8 @@ sub methods ($self) {
 sub has_method ($self, $name) {
     return 0 unless exists $self->{ $name };
     if ( my $code = $self->{ $name }->*{'CODE'} ) {
-        return 0 unless B::svref_2object( $code )->GV->STASH->NAME eq $self->name;
+        $code = mop::method->new( body => $code );
+        return 0 unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
         return 1;
     }
     return 0;
@@ -90,8 +92,9 @@ sub has_method ($self, $name) {
 sub get_method ($self, $name) {
     return unless exists $self->{ $name };
     if ( my $code = $self->{ $name }->*{'CODE'} ) {
-        return unless B::svref_2object( $code )->GV->STASH->NAME eq $self->name;
-        return $code;
+        $code = mop::method->new( body => $code );
+        return unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
+        return mop::method->new( body => $code );
     }
     return;
 }
@@ -100,13 +103,14 @@ sub delete_method ($self, $name) {
     return unless exists $self->{ $name };
     if ( my $code = $self->{ $name }->*{'CODE'} ) {
         return unless B::svref_2object( $code )->GV->STASH->NAME eq $self->name;
-        my $glob = delete $self->{ $name };
+        my $glob = $self->{ $name };      
         my %to_save;
         foreach my $type (qw[ SCALAR ARRAY HASH IO ]) {
             if ( my $val = $glob->*{ $type } ) {
                 $to_save{ $type } = $val;
             }
         }
+        $self->{ $name } = Symbol::gensym();
         {
             no strict 'refs';
             foreach my $type ( keys %to_save ) {
