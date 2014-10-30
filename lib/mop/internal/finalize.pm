@@ -10,13 +10,13 @@ sub import {
     my $pkg = caller;
     Package::Finalize->import_into( $pkg, ( 'DEMOLISH', 'BUILD' ) );
     Package::Finalize->add_finalizer_for( $pkg, sub {
-        # NOTE:
-        # mop::role is composed into mop::class 
-        # during the boostrap process, which 
-        # means we don't have a fully formed 
-        # mop::class yet that we can use to 
-        # introspect the mop::class object itself
         if ( $pkg eq 'mop::class' ) {
+            # NOTE:
+            # mop::role is composed into mop::class 
+            # during the boostrap process, which 
+            # means we don't have a fully formed 
+            # mop::class yet that we can use to 
+            # introspect the mop::class object itself
 
             my (%methods, %required);
             foreach my $r ( map { mop::role->new( name => $_ ) } @mop::class::DOES ) {
@@ -32,7 +32,7 @@ sub import {
                 }
             }
             
-            die "Odd, there should be no required methods for mop::class role composition"
+            die "[PANIC] Odd, there should be no required methods for mop::class role composition"
                 if scalar keys %required;
 
             {
