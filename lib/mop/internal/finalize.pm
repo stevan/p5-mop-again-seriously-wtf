@@ -6,8 +6,10 @@ use experimental 'signatures', 'postderef';
 
 use Package::Finalize ();
 
-sub import {
-    my $pkg = caller;
+sub import { (shift)->import_into(caller) }
+
+sub import_into {
+    my (undef, $pkg) = @_;
     Package::Finalize->import_into( $pkg, ( 'DEMOLISH', 'BUILD' ) );
     Package::Finalize->add_finalizer_for( $pkg, sub {
         if ( $pkg eq 'mop::class' ) {
