@@ -5,6 +5,7 @@ use warnings;
 use experimental 'signatures', 'postderef';
 
 use mop::object;
+use mop::method;
 use mop::role;
 use mop::class;
 
