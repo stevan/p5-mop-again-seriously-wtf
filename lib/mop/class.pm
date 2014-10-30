@@ -22,18 +22,21 @@ sub construct_instance ($self, $candidate, $args) {
     my $wiz  = mop::internal::util::get_wiz();
     my $data = {
         id    => mop::internal::util::next_oid(),
-        slots => { %$args }
+        slots => { $args->%* }
     };
 
     my $repr_type = ref $candidate;
     if ( $repr_type eq 'HASH' ) {
-        Variable::Magic::cast( %$candidate, $wiz, $data );
+        Variable::Magic::cast( $candidate->%*, $wiz, $data );
     } 
     elsif ( $repr_type eq 'ARRAY' ) {
-        Variable::Magic::cast( @$candidate, $wiz, $data );
+        Variable::Magic::cast( $candidate->@*, $wiz, $data );
     } 
     elsif ( $repr_type eq 'SCALAR' ) {
-        Variable::Magic::cast( $$candidate, $wiz, $data );
+        Variable::Magic::cast( $candidate->$*, $wiz, $data );
+    } 
+    elsif ( $repr_type eq 'CODE' ) {
+        Variable::Magic::cast( $candidate, $wiz, $data );
     } 
     else {
         die "Unsupported candiate type: $repr_type";
@@ -47,11 +50,11 @@ sub construct_instance ($self, $candidate, $args) {
 sub superclasses ($self) {
     my $ISA = $self->{'ISA'};
     return () unless $ISA;
-    return @{ *{ $ISA }{'ARRAY'} };
+    return $ISA->*{'ARRAY'}->@*;
 }
 
 sub mro ($self, $type = mro::get_mro( $self->name )) { 
-    return @{ mro::get_linear_isa( $self->name, $type ) };
+    return mro::get_linear_isa( $self->name, $type )->@*;
 }
 
 1;
