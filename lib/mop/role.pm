@@ -102,7 +102,8 @@ sub get_method ($self, $name) {
 sub delete_method ($self, $name) {
     return unless exists $self->{ $name };
     if ( my $code = $self->{ $name }->*{'CODE'} ) {
-        return unless B::svref_2object( $code )->GV->STASH->NAME eq $self->name;
+        $code = mop::method->new( body => $code );
+        return unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
         my $glob = $self->{ $name };      
         my %to_save;
         foreach my $type (qw[ SCALAR ARRAY HASH IO ]) {
