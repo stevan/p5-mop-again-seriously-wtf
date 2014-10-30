@@ -10,6 +10,13 @@ use mop::class;
 
 use Scalar::Util ();
 
+our $BOOTSTRAPPED = 0;
+
+sub import {
+    # mark us as boostrapped 
+    $BOOTSTRAPPED = 1;
+}
+
 sub meta ($instance) {
     mop::class->new( name => Scalar::Util::blessed( $instance ) || $instance );
 }
