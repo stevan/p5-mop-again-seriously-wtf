@@ -5,30 +5,19 @@ use warnings;
 use experimental 'signatures', 'postderef';
 
 use mop::internal::finalize;
+use mop::internal::util;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 sub new ($class, %args) {
-    $self->BUILDALL( \%args );
     my $self = mop::meta( $class )->construct_instance( \%args );
+    $self->can('BUILDALL') && mop::internal::util::BUILDALL( $self, \%args );
     $self;
 }
 
-sub BUILDALL ($self, $args) {
-    # ... TODO 
-
-    return $self;
-}
-
-sub DEMOLISHALL ($self, $args) {
-    # ... TODO
-
-    return $self;
-}
-
 sub DESTROY ($self) {
-    $self->can('DEMOLISH') && $self->DEMOLISHALL
+    $self->can('DEMOLISH') && mop::internal::util::DEMOLISHALL( $self )
 }
 
 1;
