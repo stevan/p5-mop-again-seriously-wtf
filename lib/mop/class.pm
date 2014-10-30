@@ -96,7 +96,7 @@ sub delete_method ($self, $name) {
         {
             no strict 'refs';
             foreach my $type ( keys %to_save ) {
-                *{ $self->name . '::' . $name } = \$to_save{ $type };
+                *{ $self->name . '::' . $name } = $to_save{ $type };
             }
         }
         return $code;
