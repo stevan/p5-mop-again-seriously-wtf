@@ -4,7 +4,6 @@ use v5.20;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use mop::internal::finalize;
 use mop::internal::util;
 
 our $VERSION   = '0.01';
