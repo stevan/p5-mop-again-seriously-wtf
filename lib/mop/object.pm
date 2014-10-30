@@ -4,6 +4,8 @@ use v5.20;
 use warnings;
 use experimental 'signatures', 'postderef';
 
+use Package::Finalize ('DEMOLISH', 'BUILD');
+
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 

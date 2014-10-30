@@ -5,6 +5,7 @@ use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
+use Package::Finalize ('DEMOLISH', 'BUILD');
 
 use mop::internal::util;
 
