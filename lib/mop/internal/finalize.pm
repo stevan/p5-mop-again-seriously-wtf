@@ -19,17 +19,15 @@ sub import_into {
             # means we don't have a fully formed 
             # mop::class yet that we can use to 
             # introspect the mop::class object itself
-
             my (%methods, %required);
             foreach my $r ( map { mop::role->new( name => $_ ) } @mop::class::DOES ) {
                 foreach my $m ( $r->methods ) {
-                    my $m_name = B::svref_2object( $m )->GV->NAME;
-                    if ( exists $methods{ $m_name } ) {
-                        $required{ $m_name } = undef;
+                    if ( exists $methods{ $m->name } ) {
+                        $required{ $m->name } = undef;
                     }
                     else {
-                        $methods{ $m_name } = $m;
-                        delete $required{ $m_name } if exists $required{ $m_name };
+                        $methods{ $m->name } = $m;
+                        delete $required{ $m->name } if exists $required{ $m->name };
                     }
                 }
             }
@@ -45,7 +43,29 @@ sub import_into {
             }
         }
         else {
-            
+            my $meta = mop::class->new( name => $pkg );
+            if ( my @roles = $meta->roles ) {
+                
+                my (%methods, %required);
+                foreach my $r ( map { mop::role->new( name => $_ ) } @roles ) {
+                    foreach my $m ( $r->methods ) {
+                        if ( exists $methods{ $m->name } ) {
+                            $required{ $m->name } = undef;
+                        }
+                        else {
+                            $methods{ $m->name } = $m;
+                            delete $required{ $m->name } if exists $required{ $m->name };
+                        }
+                    }
+                }
+
+                die "[PANIC] Odd, there should be no required methods for role composition in $pkg"
+                    if scalar keys %required;
+
+                foreach my $name ( keys %methods ) {
+                    $meta->alias_method( $name => $methods{ $name } );
+                }
+            }
         }
     });
 }
