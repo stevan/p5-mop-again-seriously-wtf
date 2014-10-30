@@ -57,7 +57,7 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
 }
 
 {
-    my $foo = $Foo->construct_instance({});
+    my $foo = $Foo->construct_instance({}, {});
     isa_ok($foo, 'Foo');
 
     ok(!$foo->can('name'), '... we are not our meta-object');

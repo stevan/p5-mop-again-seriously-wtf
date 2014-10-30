@@ -5,13 +5,36 @@ use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use B         ();
-use Sub::Name ();
+use B            ();
+use Sub::Name    ();
+use Scalar::Util ();
+
+use mop::internal::util;
+
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
+our @ISA = ('mop::object');
 
 sub new ($class, %args) {
     my $name = $args{'name'} || die 'The class `name` is required';
     {
+        # NOTE:
+        # we are doing what mop::object::new might do
+        # expect that we are not actually calling that
+        # method (it will infinitely recurse), this is 
+        # intentional, we can bootstrap later if we 
+        # actually need to.
+        # - SL
         no strict 'refs';
+        Variable::Magic::cast( 
+            %{ $name . '::' }, 
+            mop::internal::util::get_wiz(),
+            {
+                id    => mop::internal::util::next_oid(),
+                slots => {}
+            } 
+        );
         return bless \%{ $name . '::' } => $class;
     }
 }
@@ -32,6 +55,33 @@ sub authority ($self) {
     return $self->{'AUTHORITY'}->*{'SCALAR'}->$*;
 }
 
+# instance construction 
+
+sub construct_instance ($self, $candidate, $args) {
+
+    my $wiz  = mop::internal::util::get_wiz();
+    my $data = {
+        id    => mop::internal::util::next_oid(),
+        slots => { %$args }
+    };
+
+    my $repr_type = ref $candidate;
+    if ( $repr_type eq 'HASH' ) {
+        Variable::Magic::cast( %$candidate, $wiz, $data );
+    } 
+    elsif ( $repr_type eq 'ARRAY' ) {
+        Variable::Magic::cast( @$candidate, $wiz, $data );
+    } 
+    elsif ( $repr_type eq 'SCALAR' ) {
+        Variable::Magic::cast( $$candidate, $wiz, $data );
+    } 
+    else {
+        die "Unsupported candiate type: $repr_type";
+    }
+
+    return bless $candidate => $self->name;
+}
+
 # inheritance 
 
 sub superclasses ($self) {
@@ -42,12 +92,6 @@ sub superclasses ($self) {
 
 sub mro ($self, $type = mro::get_mro( $self->name )) { 
     return @{ mro::get_linear_isa( $self->name, $type ) };
-}
-
-# instance management
-
-sub construct_instance ($self, $repr) {
-    return bless $repr => $self->name;
 }
 
 # methods 

@@ -4,23 +4,11 @@ use v5.20;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use mop::internal::util;
-
-use Variable::Magic ();
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
 
 sub new ($class, %args) {
-    my %repr;
-
-    Variable::Magic::cast( 
-        %repr, 
-        mop::internal::util::get_wiz(), 
-        {
-            id    => mop::internal::util::next_oid(),
-            slots => { %args }
-        }
-    ); 
-
-    my $self = bless \%repr => $class;
+    my $self = mop::meta( __PACKAGE__ )->construct_instance( {}, \%args );
     $self->BUILDALL( \%args );
     $self;
 }
