@@ -55,6 +55,14 @@ sub roles ($self) {
     return $DOES->*{'ARRAY'}->@*;
 }
 
+sub does_role ($self, $role_to_test) {
+    # try the simple way first ...
+    return 1 if scalar grep { $_ eq $role_to_test } $self->roles;
+    # then try the harder way next ...
+    return 1 if scalar grep { mop::role->new( name => $_ )->does_role( $role_to_test ) } $self->roles;
+    return 0;
+}
+
 # methods 
 
 sub methods ($self) {

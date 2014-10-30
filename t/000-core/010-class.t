@@ -15,6 +15,8 @@ my $Class = mop::class->new( name => 'mop::class' );
 isa_ok($Class, 'mop::class');
 isa_ok($Class, 'mop::object');
 
+ok($Class->does_role('mop::role'), '... mop::class does mop::role');
+
 is($Class, mop::meta($Class), '... Class is an instance of Class');
 is($Class, mop::meta(mop::meta($Class)), '... Class is an instance of Class (really)');
 is($Class, mop::meta(mop::meta(mop::meta($Class))), '... Class is an instance of Class (no, really)');
@@ -32,6 +34,7 @@ my @METHODS = qw[
     authority
 
     roles
+    does_role
 
     superclasses
     mro

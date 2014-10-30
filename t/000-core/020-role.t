@@ -16,8 +16,6 @@ my $Class = mop::class->new( name => 'mop::class' );
 my $Role = mop::role->new( name => 'mop::role' );
 isa_ok($Role, 'mop::object');
 
-#is($Class, mop::meta($Role), '... Role is an instance of Class');
-
 my @METHODS = qw[
     new 
 
@@ -26,6 +24,7 @@ my @METHODS = qw[
     authority
 
     roles
+    does_role
 
     methods
     has_method
