@@ -8,7 +8,7 @@ use experimental 'signatures', 'postderef';
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-## ...
+## Instance construction and destruction 
 
 sub BUILDALL ($instance, $args) {
     foreach my $c ( mro::get_linear_isa( ref $instance )->@* ) {
@@ -28,7 +28,7 @@ sub DEMOLISHALL ($instance)  {
     return;
 }
 
-## ...
+## Role application and composition
 
 sub APPLY_ROLES ($meta, @roles) {
     my (
@@ -39,13 +39,15 @@ sub APPLY_ROLES ($meta, @roles) {
         map { mop::role->new( name => $_ ) } @roles 
     );
 
-    die "[PANIC] There should be no conflicting methods for " . $meta->name . " role composition"
+    die "[PANIC] There should be no conflicting methods when composing (" . (join ', ' => @roles) . ") into (" . $meta->name . ")"
         if scalar keys %$conflicts;
 
-    die "[PANIC] There should be no required methods for " . $meta->name . " role composition"
+    die "[PANIC] There should be no required methods when composing (" . (join ', ' => @roles) . ") into (" . $meta->name . ")"
         if scalar keys %$required;
 
     foreach my $name ( keys %$methods ) {
+        die "[PANIC] Cannot compose method ($name) into (" . $meta->name . ") because ($name) already exists"
+            if $meta->has_method( $name );
         $meta->alias_method( $name, $methods->{ $name } );
     }
 }
