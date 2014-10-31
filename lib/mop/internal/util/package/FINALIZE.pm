@@ -11,7 +11,7 @@ use Devel::BeginLift ();
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-our %FINALIZERS;;
+our %FINALIZERS;
 
 sub import ($class, @) { 
     $class->import_into( scalar caller );

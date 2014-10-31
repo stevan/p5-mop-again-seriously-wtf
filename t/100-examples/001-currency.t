@@ -56,7 +56,6 @@ BEGIN {
         }
 
         FINALIZE {
-            warn "RUNNING UNITCHECK FOR " . __PACKAGE__;
             mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), \@DOES, to => 'role' );
         };
     }
@@ -80,7 +79,8 @@ BEGIN {
         our @DOES = ('Comparable', 'Printable');
 
         sub new ($class, %args) {
-            $class->SUPER::new( amount => 0, %args );
+            $args{amount} //= 0;
+            $class->SUPER::new( %args );
         }
 
         sub compare ($self, $other) {
@@ -92,7 +92,6 @@ BEGIN {
         }
 
         FINALIZE {
-            warn "RUNNING UNITCHECK FOR " . __PACKAGE__;
             mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), \@DOES, to => 'class' );
         };
     }
@@ -141,3 +140,5 @@ ok(!US::Currency->new( amount => 10 )->greater_than( $dollar ), '... 10 is not g
 ok(US::Currency->new( amount => 10 )->greater_than_or_equal_to( $dollar ), '... 10 is greater than or equal to 10');
 
 done_testing;
+
+

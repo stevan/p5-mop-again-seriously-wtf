@@ -115,7 +115,11 @@ sub COMPOSE_ALL_ROLES (@roles) {
                     && not exists $conflicts{ $name };
             }
         }
-    }    
+    }  
+
+    #use Data::Dumper;
+    #warn Dumper [ [ map { $_->name } @roles ], \%methods, \%conflicts, \%required ];
+
     return \%methods, \%conflicts, \%required;
 }
 
