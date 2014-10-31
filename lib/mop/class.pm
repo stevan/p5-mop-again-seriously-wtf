@@ -16,6 +16,8 @@ our @DOES; BEGIN { @DOES = ('mop::role')   }
 # instance construction 
 
 sub construct_instance ($self, $candidate) {
+    die "[mop::PANIC] Cannot construct instance, the class (" . $self->name . ") is abstract"
+        if $self->is_abstract;
     return bless $candidate => $self->name;
 }
 

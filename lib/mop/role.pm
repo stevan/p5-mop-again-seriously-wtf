@@ -56,6 +56,23 @@ sub is_closed ($self) {
     return $self->$*->{'CLOSED'}->*{'SCALAR'}->$* ? 1 : 0;
 }
 
+sub is_abstract ($self) {
+    # if you have required methods, you are abstract
+    # that is a hard enforced rule here ...
+    my $default = scalar $self->required_methods ? 1 : 0;
+    # if there is no $ABSTRACT variable, return the 
+    # calculated default ...
+    return $default unless exists $self->$*->{'ABSTRACT'};
+    # if there is an $ABSTRACT variable, only allow a 
+    # true value to override the calculated default
+    return $self->$*->{'ABSTRACT'}->*{'SCALAR'}->$* ? 1 : $default;
+    # this approach should allow someone to create 
+    # an abstract class even if they do not have any
+    # required methods, but also keep the strict 
+    # checking of required methods as a indicator 
+    # of abstract-ness
+}
+
 # roles 
 
 sub roles ($self) {
@@ -141,7 +158,7 @@ sub get_method ($self, $name) {
 }
 
 sub delete_method ($self, $name) {
-    die "[PANIC] Cannot delete method ($name) from (" . $self->name . ") because it has been closed"
+    die "[mop::PANIC] Cannot delete method ($name) from (" . $self->name . ") because it has been closed"
         if $self->is_closed;
 
     return unless exists $self->$*->{ $name };
@@ -168,7 +185,7 @@ sub delete_method ($self, $name) {
 }
 
 sub add_method ($self, $name, $code) {
-    die "[PANIC] Cannot add method ($name) to (" . $self->name . ") because it has been closed"
+    die "[mop::PANIC] Cannot add method ($name) to (" . $self->name . ") because it has been closed"
         if $self->is_closed;
 
     no strict 'refs';
@@ -180,7 +197,7 @@ sub add_method ($self, $name, $code) {
 }
 
 sub alias_method ($self, $name, $code) {
-    die "[PANIC] Cannot alias method ($name) to (" . $self->name . ") because it has been closed"
+    die "[mop::PANIC] Cannot alias method ($name) to (" . $self->name . ") because it has been closed"
         if $self->is_closed;
 
     no strict 'refs';

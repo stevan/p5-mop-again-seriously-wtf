@@ -24,6 +24,7 @@ my @METHODS = qw[
     authority
 
     is_closed
+    is_abstract
 
     roles
     does_role
