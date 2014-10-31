@@ -5,8 +5,16 @@ use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
+use mop::internal::util::package::FINALIZE;
+
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
+
+sub import ($pkg, @args) {
+    if ( @args && $args[0] eq ':FINALIZE' ) {
+        mop::internal::util::package::FINALIZE->import_into( scalar caller )
+    }
+}
 
 ## Instance construction and destruction 
 

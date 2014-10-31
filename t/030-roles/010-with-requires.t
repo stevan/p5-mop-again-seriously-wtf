@@ -26,7 +26,7 @@ BEGIN {
     # set up a test class ...
 
     package Foo {
-        use mop::internal::util::package::FINALIZE;
+        use mop::internal::util qw[ :FINALIZE ];
 
         our @DOES = ('Bar::Role', 'Baz::Role');
 

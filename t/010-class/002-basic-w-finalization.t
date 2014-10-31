@@ -14,7 +14,7 @@ BEGIN {
 # set up some test packages ...
 
 package Foo 0.01 {
-    use mop::internal::util::package::FINALIZE;
+    use mop::internal::util qw[ :FINALIZE ];
 
     sub foo { 'Foo::foo' }
 
@@ -22,7 +22,7 @@ package Foo 0.01 {
 } 
 
 package Bar {
-    use mop::internal::util::package::FINALIZE;
+    use mop::internal::util qw[ :FINALIZE ];
     
     use Scalar::Util qw[ blessed ];
 
@@ -35,7 +35,7 @@ package Bar {
 } 
 
 package Baz { 
-    use mop::internal::util::package::FINALIZE;
+    use mop::internal::util qw[ :FINALIZE ];
 
     our @ISA = ('Bar');
 

@@ -5,8 +5,7 @@ use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use mop::internal::util;
-use mop::internal::util::package::FINALIZE;
+use mop::internal::util qw[ :FINALIZE ];
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
