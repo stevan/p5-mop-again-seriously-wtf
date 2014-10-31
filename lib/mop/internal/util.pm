@@ -30,19 +30,19 @@ sub DEMOLISHALL ($instance)  {
 
 ## Role application and composition
 
-sub APPLY_ROLES ($meta, @roles) {
+sub APPLY_ROLES ($meta, $roles) {
     my (
         $methods, 
         $conflicts,
         $required
     ) = COMPOSE_ALL_ROLES( 
-        map { mop::role->new( name => $_ ) } @roles 
+        map { mop::role->new( name => $_ ) } @$roles 
     );
 
-    die "[PANIC] There should be no conflicting methods when composing (" . (join ', ' => @roles) . ") into (" . $meta->name . ")"
+    die "[PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
         if scalar keys %$conflicts;
 
-    die "[PANIC] There should be no required methods when composing (" . (join ', ' => @roles) . ") into (" . $meta->name . ")"
+    die "[PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
         if scalar keys %$required;
 
     foreach my $name ( keys %$methods ) {
