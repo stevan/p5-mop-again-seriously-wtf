@@ -30,7 +30,10 @@ sub DEMOLISHALL ($instance)  {
 
 ## Role application and composition
 
-sub APPLY_ROLES ($meta, $roles) {
+sub APPLY_ROLES ($meta, $roles, %opts) {
+    die "[PANIC] You must specify what type of object you want roles applied `to`" 
+        unless exists $opts{to};
+
     my (
         $methods, 
         $conflicts,
@@ -42,23 +45,48 @@ sub APPLY_ROLES ($meta, $roles) {
     die "[PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
         if scalar keys %$conflicts;
 
-    die "[PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
-        if scalar keys %$required;
+    # check the required method set and 
+    # see if what we are composing into 
+    # happens to fulfill them 
+    foreach my $name ( keys $required->%* ) {
+        delete $required->{ $name } 
+            if $meta->has_method( $name )
+    }
 
-    foreach my $name ( keys %$methods ) {
-        die "[PANIC] Cannot compose method ($name) into (" . $meta->name . ") because ($name) already exists"
-            if $meta->has_method( $name );
+    die "[PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
+        if $opts{to} eq 'class' 
+        && scalar keys %$required;
+
+    foreach my $name ( keys $methods->%* ) {
+        # if we have a method already by that name ...
+        if ( $meta->has_method( $name ) ) {
+            # if we are a class, the class wins
+            next if $opts{to} eq 'class';
+            # if we are not a class, (we are a role) and we die with a conflict ...
+            die "[PANIC] Role Conflict, cannot compose method ($name) into (" . $meta->name . ") because ($name) already exists"
+                if $meta->has_method( $name );
+        }
         $meta->alias_method( $name, $methods->{ $name } );
     }
+
+    # if we still have keys in $required, it is 
+    # because we are a role (class would have 
+    # died above), so we can just stuff in the 
+    # required methods ...
+    $meta->add_required_method( $_ ) for keys $required->%*;
+
+    return;
 }
 
 sub COMPOSE_ALL_ROLES (@roles) {
     my (%methods, %conflicts, %required);
 
-    # TODO:
-    # collect all the required methods in 
-    # the roles as well.
-    # - SL
+    # flatten the set of required methods ...
+    foreach my $r ( @roles ) {
+        foreach my $m ( $r->required_methods ) {
+            $required{ $m } = undef;
+        }
+    }
 
     # for every role ...
     foreach my $r ( @roles ) {

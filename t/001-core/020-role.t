@@ -28,6 +28,11 @@ my @METHODS = qw[
     roles
     does_role
 
+    required_methods
+    requires_method
+    add_required_method
+    delete_required_method
+
     methods
     has_method
     get_method

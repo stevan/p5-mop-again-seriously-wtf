@@ -14,6 +14,8 @@ BEGIN {
     # set up some test roles ...
 
     package Bar::Role {
+        our @REQUIRES = ('foo');
+
         sub bar { 'Bar::Role::bar' } 
     }
 
@@ -34,11 +36,36 @@ BEGIN {
     } 
 }
 
+BEGIN {
+    my $BarRole = mop::role->new( name => 'Bar::Role' );
+    isa_ok($BarRole, 'mop::role');
+
+    ok($BarRole->requires_method('foo'), '... we require the &foo method');
+    ok(!$BarRole->requires_method('gorch'), '... we do not require the &gorch method');
+
+    is_deeply([ $BarRole->required_methods ], ['foo'], '... got the expected result from ->required_methods');
+
+    # NOTE:
+    # if this is not added witin the BEGIN 
+    # block, then the required_methods in 
+    # Foo will only be what Bar::Role had 
+    # at UNITCHECK time, which would be 
+    # missing the gorch method.
+    $BarRole->add_required_method('gorch');
+
+    ok($BarRole->requires_method('gorch'), '... we require the &gorch method');
+    is_deeply([ $BarRole->required_methods ], ['foo', 'gorch'], '... got the expected result from ->required_methods');
+
+}
+
 {
     my $Foo = mop::role->new( name => 'Foo' );
     isa_ok($Foo, 'mop::role');
 
     is_deeply([ $Foo->roles ], [ 'Bar::Role', 'Baz::Role' ], '... got the list of roles we expected');
+
+    ok($Foo->requires_method('gorch'), '... we require the &gorch method');
+    is_deeply([ $Foo->required_methods ], ['gorch'], '... got the expected result from ->required_methods');
 
     ok($Foo->has_method('foo'), '... the foo method is there');
 

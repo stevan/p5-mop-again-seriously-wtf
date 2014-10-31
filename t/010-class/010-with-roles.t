@@ -29,7 +29,7 @@ BEGIN {
         sub foo { 'Foo::foo' }
 
         UNITCHECK {
-            mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), \@DOES );
+            mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), \@DOES, to => 'class' );
         }
     } 
 }

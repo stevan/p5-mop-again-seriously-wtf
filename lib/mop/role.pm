@@ -8,6 +8,7 @@ use experimental 'signatures', 'postderef';
 use Symbol          ();
 use Sub::Name       ();
 use Scalar::Util    ();
+use List::Util      ();
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -69,6 +70,39 @@ sub does_role ($self, $role_to_test) {
     # then try the harder way next ...
     return 1 if scalar grep { mop::role->new( name => $_ )->does_role( $role_to_test ) } $self->roles;
     return 0;
+}
+
+# required methods
+
+sub required_methods ($self) {
+    my $REQUIRES = $self->$*->{'REQUIRES'};
+    return () unless $REQUIRES;
+    return $REQUIRES->*{'ARRAY'}->@*;
+}
+
+sub requires_method ($self, $name) {
+    my $REQUIRES = $self->$*->{'REQUIRES'};
+    return 0 unless $REQUIRES;
+    return List::Util::first { $_ eq $name } $REQUIRES->*{'ARRAY'}->@*;
+}
+
+sub add_required_method ($self, $name) {
+    unless ( $self->$*->{'REQUIRES'} ) {
+        no strict 'refs';
+        *{ $self->name . '::REQUIRES'} = [ $name ];
+    }
+    else {
+        my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};    
+        unless ( List::Util::first { $_ eq $name } $REQUIRES->@* ) {
+            push $REQUIRES->@* => $name;
+        }
+    }
+}
+
+sub delete_required_method ($self, $name) {
+    return unless $self->$*->{'REQUIRES'};
+    my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};
+    $REQUIRES->@* = grep { $_ ne $name } $REQUIRES->@*;
 }
 
 # methods 
