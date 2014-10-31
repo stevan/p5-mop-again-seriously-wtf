@@ -17,6 +17,16 @@ sub import ($class, @) {
     $class->import_into( scalar caller );
 }
 
+# NOTE:
+# This whole package is there simply because we 
+# need the FINALIZE blocks to run in FIFO order
+# and the raw UNITCHECK blocks run in LIFO order
+# which can present issues when more then one 
+# class/role is in a single compiliation unit
+# and the later class/role depends on a former
+# class/role to have been finalized.
+# - SL
+
 sub import_into ($class, $pkg) {
     # set up the finalizers for this package ...
     $FINALIZERS{ $pkg } = [];
@@ -25,6 +35,12 @@ sub import_into ($class, $pkg) {
     # now install the FINALIZE sub ...
     {
         no strict 'refs';
+        # TODO:
+        # make the exports lexical ...
+        # which may not matter much, or even
+        # not work at all, due to our usage 
+        # of BeginLift, but worth checking 
+        # - SL
         *{ $pkg . '::FINALIZE' } = sub :prototype(&) { push @{ $FINALIZERS{ $pkg } } => $_[0]; return };
     }
     # ... and lift it
