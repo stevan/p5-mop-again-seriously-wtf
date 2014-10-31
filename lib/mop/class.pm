@@ -6,7 +6,6 @@ use warnings;
 use experimental 'signatures', 'postderef';
 
 use mop::internal::util;
-use mop::internal::util::package;
 use mop::internal::util::package::FINALIZE;
 
 our $VERSION   = '0.01';
@@ -50,7 +49,7 @@ FINALIZE {
 
     my $meta = mop::role->new( name => __PACKAGE__ );
     mop::internal::util::APPLY_ROLES( $meta, \@DOES, to => 'class' );
-    mop::internal::util::package::CLOSE_PACKAGE( $meta->stash );
+    our $CLOSED = 1;
 };
 
 1;
