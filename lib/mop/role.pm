@@ -108,7 +108,7 @@ sub get_method ($self, $name) {
 
 sub delete_method ($self, $name) {
     die "[PANIC] Cannot delete method ($name) from (" . $self->name . ") because it has been closed"
-        if $self->is_closed;
+        if mop::internal::package::IS_PACKAGE_CLOSED( $self->$* );
 
     return unless exists $self->$*->{ $name };
     if ( my $code = $self->$*->{ $name }->*{'CODE'} ) {
@@ -135,7 +135,7 @@ sub delete_method ($self, $name) {
 
 sub add_method ($self, $name, $code) {
     die "[PANIC] Cannot add method ($name) to (" . $self->name . ") because it has been closed"
-        if $self->is_closed;
+        if mop::internal::package::IS_PACKAGE_CLOSED( $self->$* );
 
     no strict 'refs';
     my $full_name = $self->name . '::' . $name;
@@ -147,7 +147,7 @@ sub add_method ($self, $name, $code) {
 
 sub alias_method ($self, $name, $code) {
     die "[PANIC] Cannot alias method ($name) to (" . $self->name . ") because it has been closed"
-        if $self->is_closed;
+        if mop::internal::package::IS_PACKAGE_CLOSED( $self->$* );
 
     no strict 'refs';
     *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) ? $code->body : $code;
