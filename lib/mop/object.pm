@@ -15,6 +15,10 @@ sub new ($class, %args) {
     $self;
 }
 
+sub does ($self, $role) {
+    mop::class->new( name => ref $self || $self )->does_role( $role )
+}
+
 sub DESTROY ($self) {
     $self->can('DEMOLISH') && mop::internal::util::DEMOLISHALL( $self )
 }
