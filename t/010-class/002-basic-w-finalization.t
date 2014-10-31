@@ -14,13 +14,13 @@ BEGIN {
 # set up some test packages ...
 
 package Foo 0.01 {
-    use mop::internal::finalize;
 
     sub foo { 'Foo::foo' }
+
+    UNITCHECK { mop::class->new( name => __PACKAGE__ )->close }
 } 
 
 package Bar {
-    use mop::internal::finalize;
 
     use Scalar::Util qw[ blessed ];
 
@@ -28,12 +28,14 @@ package Bar {
     our $AUTHORITY = 'cpan:STEVAN';
 
     use base 'Foo';
+
+    UNITCHECK { mop::class->new( name => __PACKAGE__ )->close }
 } 
 
 package Baz { 
-    use mop::internal::finalize;
+    our @ISA = ('Bar');
 
-    our @ISA = ('Bar') 
+    UNITCHECK { mop::class->new( name => __PACKAGE__ )->close }
 }
 
 # test them ...
@@ -87,7 +89,7 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
 {
     like(
         exception { $Foo->delete_method('foo') },
-        qr/^Modification of a read-only value attempted/,
+        qr/^\[PANIC\] Cannot delete method \(foo\) from \(Foo\) because it has been closed/,
         '... got the expection we expected (for method deletion)'
     );
 
@@ -113,7 +115,7 @@ ok(!$Bar->has_method('blessed'), '... we do not have the imported &blessed funct
 {
     like(
         exception { $Bar->add_method( bar => sub { 'Bar::bar' } ) },
-        qr/^\[PACKAGE FINALIZED\] The package \(Bar\) has been finalized, attempt to store into key \(bar\) is not allowed/,
+        qr/^\[PANIC\] Cannot add method \(bar\) to \(Bar\) because it has been closed/,
         '... got the exception we expected (for trying to add a method)'
     );
     ok(!$Bar->has_method('bar'), '... we do not have a &bar method');

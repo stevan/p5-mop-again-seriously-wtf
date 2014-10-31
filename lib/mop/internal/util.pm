@@ -1,13 +1,17 @@
 package mop::internal::util;
 
 use v5.20;
+use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use Scalar::Util ();
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
+## ...
 
 sub BUILDALL ($instance, $args) {
-    foreach my $c ( mro::get_linear_isa( Scalar::Util::blessed( $instance ) )->@* ) {
+    foreach my $c ( mro::get_linear_isa( ref $instance )->@* ) {
         if ( my $build = $c->can('BUILD') ) {
             $instance->$build( $args );
         }
@@ -16,12 +20,34 @@ sub BUILDALL ($instance, $args) {
 }
 
 sub DEMOLISHALL ($instance)  {
-    foreach my $c ( mro::get_linear_isa( Scalar::Util::blessed( $instance ) )->@* ) {
+    foreach my $c ( mro::get_linear_isa( ref $instance )->@* ) {
         if ( my $demolish = $c->can('DEMOLISH') ) {
             $instance->$demolish();
         }
     }
     return;
+}
+
+## ...
+
+sub APPLY_ROLES ($meta, @roles) {
+    my (
+        $methods, 
+        $conflicts,
+        $required
+    ) = COMPOSE_ALL_ROLES( 
+        map { mop::role->new( name => $_ ) } @roles 
+    );
+
+    die "[PANIC] There should be no conflicting methods for " . $meta->name . " role composition"
+        if scalar keys %$conflicts;
+
+    die "[PANIC] There should be no required methods for " . $meta->name . " role composition"
+        if scalar keys %$required;
+
+    foreach my $name ( keys %$methods ) {
+        $meta->alias_method( $name, $methods->{ $name } );
+    }
 }
 
 sub COMPOSE_ALL_ROLES (@roles) {

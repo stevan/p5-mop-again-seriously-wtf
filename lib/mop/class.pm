@@ -31,6 +31,26 @@ sub mro ($self, $type = mro::get_mro( $self->name )) {
     return mro::get_linear_isa( $self->name, $type )->@*;
 }
 
+# finalizer
+
+UNITCHECK {
+
+    # NOTE:
+    # We need to finalize mop::class itself so 
+    # that the bootstrap is complete, which is 
+    # why we are using mop::role below and not 
+    # mop::class. The mop::role class is complete
+    # and contains all the functionality we require
+    # to make mop::class complete. Since roles
+    # are just classes which do not create 
+    # instances, this just works. 
+    # - SL
+
+    my $meta = mop::role->new( name => __PACKAGE__ );
+    mop::internal::util::APPLY_ROLES( $meta, @DOES );
+    $meta->close;
+};
+
 1;
 
 __END__

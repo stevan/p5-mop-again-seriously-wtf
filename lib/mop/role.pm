@@ -5,23 +5,34 @@ use mro;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use Symbol       ();
-use Sub::Name    ();
-use Scalar::Util ();
+use Symbol          ();
+use Sub::Name       ();
+use Scalar::Util    ();
+use Variable::Magic ();
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 our @ISA; BEGIN { @ISA = ('mop::object') }
 
+my $WIZARD; 
+BEGIN { $WIZARD = Variable::Magic::wizard( data => sub { $_[1] } ) };
+
 sub new ($class, %args) {
     my $name = $args{'name'} or die 'The role `name` is required';
-
+    
     my $stash;
     {
         no strict 'refs';
         $stash = \%{ $name . '::' };
     }
+
+    Variable::Magic::cast( 
+        $stash->%*, $WIZARD, {
+            is_closed   => $args{is_closed}   || 0, # packages are not closed ...
+            is_abstract => $args{is_abstract} || 1, # roles however, are abstract ...
+        }
+    );
 
     return bless \$stash => $class;
 }
@@ -40,6 +51,52 @@ sub version ($self) {
 sub authority ($self) { 
     return unless exists $self->$*->{'AUTHORITY'};
     return $self->$*->{'AUTHORITY'}->*{'SCALAR'}->$*;
+}
+
+# closing/opening package
+
+sub is_closed ($self) { 
+    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
+    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
+        unless $slots;
+    return $slots->{is_closed};
+}
+
+sub open ($self) {
+    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
+    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
+        unless $slots;
+    $slots->{is_closed} = 0;
+}
+
+sub close ($self) {
+    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
+    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
+        unless $slots;    
+    $slots->{is_closed} = 1;
+}
+
+# abstraction 
+
+sub is_abstract ($self) { 
+    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
+    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
+        unless $slots;
+    return $slots->{is_abstract};
+}
+
+sub make_not_abstract ($self) {
+    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
+    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
+        unless $slots;
+    $slots->{is_abstract} = 0;
+}
+
+sub make_abstract ($self) {
+    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
+    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
+        unless $slots;    
+    $slots->{is_abstract} = 1;
 }
 
 # roles 
@@ -94,6 +151,9 @@ sub get_method ($self, $name) {
 }
 
 sub delete_method ($self, $name) {
+    die "[PANIC] Cannot delete method ($name) from (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     return unless exists $self->$*->{ $name };
     if ( my $code = $self->$*->{ $name }->*{'CODE'} ) {
         $code = mop::method->new( body => $code );
@@ -118,23 +178,30 @@ sub delete_method ($self, $name) {
 }
 
 sub add_method ($self, $name, $code) {
+    die "[PANIC] Cannot add method ($name) to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
+    no strict 'refs';
     my $full_name = $self->name . '::' . $name;
-    {
-        no strict 'refs';
-        *{$full_name} = Sub::Name::subname( 
-            $full_name, 
-            Scalar::Util::blessed($code) 
-                ? $code->body
-                : $code
-        );
-    }
+    *{$full_name} = Sub::Name::subname( 
+        $full_name, 
+        Scalar::Util::blessed($code) ? $code->body : $code
+    );
 }
 
 sub alias_method ($self, $name, $code) {
+    die "[PANIC] Cannot alias method ($name) to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     no strict 'refs';
-    *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) 
-        ? $code->body
-        : $code;
+    *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) ? $code->body : $code;
+}
+
+# Finalizer 
+
+UNITCHECK {
+    my $meta = __PACKAGE__->new( name => __PACKAGE__ );
+    $meta->close;
 }
 
 1;

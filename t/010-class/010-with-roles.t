@@ -24,11 +24,13 @@ BEGIN {
     # set up a test class ...
 
     package Foo {
-        use mop::internal::finalize;
-
         our @DOES = ('Bar::Role', 'Baz::Role');
 
         sub foo { 'Foo::foo' }
+
+        UNITCHECK {
+            mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), @DOES );
+        }
     } 
 }
 
