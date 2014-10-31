@@ -16,7 +16,7 @@ our $BOOTSTRAPPED = 0;
 sub import {
     return if $BOOTSTRAPPED;
     # mark us as boostrapped 
-    $BOOTSTRAPPED = 1;
+    $BOOTSTRAPPED = mop::class->new( name => 'mop::class' )->is_closed;
 }
 
 sub meta ($instance) {
