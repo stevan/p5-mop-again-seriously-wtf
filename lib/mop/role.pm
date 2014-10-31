@@ -23,7 +23,7 @@ sub new ($class, %args) {
         $stash = \%{ $name . '::' };
     }
 
-    mop::internal::package::UPGRADE_PACKAGE( $stash, %args ) 
+    mop::internal::package::UPGRADE_PACKAGE( $stash ) 
         unless mop::internal::package::IS_PACKAGE_UPGRADED( $stash );
 
     return bless \$stash => $class;

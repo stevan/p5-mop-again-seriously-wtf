@@ -16,14 +16,16 @@ our $AUTHORITY = 'cpan:STEVAN';
 my $WIZARD; 
 BEGIN { $WIZARD = Variable::Magic::wizard( data => sub { $_[1] } ) }
 
-sub UPGRADE_PACKAGE ($stash, %args) {
+sub UPGRADE_PACKAGE ($stash) {
     # Apply magic to the stash, this 
     # should only be done once because 
     # we are setting state here.
     Carp::confess("[PANIC] The package already has magic applied to it.") 
         if Variable::Magic::getdata( $stash->%*, $WIZARD );
     Variable::Magic::cast( 
-        $stash->%*, $WIZARD, { is_closed => $args{is_closed} || 0 }
+        $stash->%*, $WIZARD, { 
+            is_closed => 0,
+        }
     );
 }
 
