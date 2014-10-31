@@ -12,14 +12,6 @@ use mop::method;
 use mop::role;
 use mop::class;
 
-our $BOOTSTRAPPED = 0;
-
-sub import {
-    return if $BOOTSTRAPPED;
-    # mark us as boostrapped 
-    $BOOTSTRAPPED = mop::class->new( name => 'mop::class' )->is_closed;
-}
-
 1;
 
 __END__
