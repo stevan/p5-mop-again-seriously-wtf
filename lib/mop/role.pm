@@ -23,8 +23,8 @@ sub new ($class, %args) {
         $stash = \%{ $name . '::' };
     }
 
-    mop::internal::package::UPGRADE_PACKAGE( $stash ) 
-        unless mop::internal::package::IS_PACKAGE_UPGRADED( $stash );
+    mop::internal::util::package::UPGRADE_PACKAGE( $stash ) 
+        unless mop::internal::util::package::IS_PACKAGE_UPGRADED( $stash );
 
     return bless \$stash => $class;
 }
@@ -52,7 +52,7 @@ sub authority ($self) {
 # access additional package data 
 
 sub is_closed ($self) { 
-    mop::internal::package::IS_PACKAGE_CLOSED( $self->$* )
+    mop::internal::util::package::IS_PACKAGE_CLOSED( $self->$* )
 }
 
 # roles 
@@ -108,7 +108,7 @@ sub get_method ($self, $name) {
 
 sub delete_method ($self, $name) {
     die "[PANIC] Cannot delete method ($name) from (" . $self->name . ") because it has been closed"
-        if mop::internal::package::IS_PACKAGE_CLOSED( $self->$* );
+        if mop::internal::util::package::IS_PACKAGE_CLOSED( $self->$* );
 
     return unless exists $self->$*->{ $name };
     if ( my $code = $self->$*->{ $name }->*{'CODE'} ) {
@@ -135,7 +135,7 @@ sub delete_method ($self, $name) {
 
 sub add_method ($self, $name, $code) {
     die "[PANIC] Cannot add method ($name) to (" . $self->name . ") because it has been closed"
-        if mop::internal::package::IS_PACKAGE_CLOSED( $self->$* );
+        if mop::internal::util::package::IS_PACKAGE_CLOSED( $self->$* );
 
     no strict 'refs';
     my $full_name = $self->name . '::' . $name;
@@ -147,7 +147,7 @@ sub add_method ($self, $name, $code) {
 
 sub alias_method ($self, $name, $code) {
     die "[PANIC] Cannot alias method ($name) to (" . $self->name . ") because it has been closed"
-        if mop::internal::package::IS_PACKAGE_CLOSED( $self->$* );
+        if mop::internal::util::package::IS_PACKAGE_CLOSED( $self->$* );
 
     no strict 'refs';
     *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) ? $code->body : $code;
@@ -159,7 +159,7 @@ UNITCHECK {
     # NOTE:
     # We need to close mop::role here as well.
     my $meta = __PACKAGE__->new( name => __PACKAGE__ ); 
-    mop::internal::package::CLOSE_PACKAGE( $meta->stash );
+    mop::internal::util::package::CLOSE_PACKAGE( $meta->stash );
 }
 
 1;

@@ -64,7 +64,7 @@ can_ok($Role, 'name');
 is($Role->name, 'mop::role', '... got the expected value from ->name');
 
 {
-    mop::internal::package::OPEN_PACKAGE( $Role->stash );
+    mop::internal::util::package::OPEN_PACKAGE( $Role->stash );
 
     is(
         exception { $Role->add_method('foo' => sub { 'FOO' }) },
@@ -83,7 +83,7 @@ is($Role->name, 'mop::role', '... got the expected value from ->name');
 
     ok(!$Role->can('foo'), '... removed the ->foo method');
 
-    mop::internal::package::CLOSE_PACKAGE( $Role->stash );
+    mop::internal::util::package::CLOSE_PACKAGE( $Role->stash );
 }
 
 like(
