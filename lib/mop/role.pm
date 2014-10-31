@@ -10,7 +10,7 @@ use Sub::Name       ();
 use Scalar::Util    ();
 use List::Util      ();
 
-use mop::internal::util qw[ :FINALIZE ];
+use mop::internal::util 'FINALIZE';
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';

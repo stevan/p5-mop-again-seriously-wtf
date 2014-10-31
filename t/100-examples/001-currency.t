@@ -29,7 +29,7 @@ BEGIN {
         use warnings;
         use experimental 'signatures', 'postderef';
 
-        use mop::internal::util qw[ :FINALIZE ];
+        use mop::internal::util 'FINALIZE';
 
         our @DOES = ('Eq');
 
@@ -73,7 +73,7 @@ BEGIN {
         use warnings;
         use experimental 'signatures', 'postderef';
 
-        use mop::internal::util qw[ :FINALIZE ];        
+        use mop::internal::util 'FINALIZE';        
 
         our @ISA  = ('mop::object');
         our @DOES = ('Comparable', 'Printable');

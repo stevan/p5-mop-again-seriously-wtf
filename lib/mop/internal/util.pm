@@ -11,7 +11,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 sub import ($pkg, @args) {
-    if ( @args && $args[0] eq ':FINALIZE' ) {
+    if ( @args && $args[0] eq 'FINALIZE' ) {
         mop::internal::util::package::FINALIZE->import_into( scalar caller )
     }
 }
