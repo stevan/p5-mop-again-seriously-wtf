@@ -10,7 +10,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 sub new ($class, %args) {
-    my $self = mop::meta( $class )->construct_instance( \%args );
+    my $self = mop::class->new( name => $class )->construct_instance( \%args );
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self;
 }

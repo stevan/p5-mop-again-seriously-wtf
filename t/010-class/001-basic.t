@@ -39,8 +39,7 @@ isnt($Foo, mop::class->new( name => 'Foo' ), '... they are not always the same i
     isa_ok($Foo, 'mop::class');
 }
 
-# also contruct the meta this way ...
-my $Bar = mop::meta( 'Bar' );
+my $Bar = mop::class->new( name => 'Bar' );
 isa_ok($Bar, 'mop::class');
 
 my $Baz = mop::class->new( name => 'Baz' );
@@ -70,8 +69,6 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
 
     ok(!$foo->can('name'), '... we are not our meta-object');
     ok($foo->can('foo'), '... we are our own object');
-
-    isnt(mop::meta($foo), $Foo, '... the metaclass is as expected');
 }
 
 {
