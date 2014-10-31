@@ -10,6 +10,8 @@ use Sub::Name       ();
 use Scalar::Util    ();
 use List::Util      ();
 
+use mop::internal::util::package::FINALIZE;
+
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -189,12 +191,12 @@ sub alias_method ($self, $name, $code) {
 
 # Finalizer 
 
-UNITCHECK { 
+FINALIZE { 
     # NOTE:
     # We need to close mop::role here as well.
     my $meta = __PACKAGE__->new( name => __PACKAGE__ ); 
     mop::internal::util::package::CLOSE_PACKAGE( $meta->stash );
-}
+};
 
 1;
 

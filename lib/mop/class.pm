@@ -6,6 +6,7 @@ use warnings;
 use experimental 'signatures', 'postderef';
 
 use mop::internal::util;
+use mop::internal::util::package::FINALIZE;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -33,7 +34,7 @@ sub mro ($self, $type = mro::get_mro( $self->name )) {
 
 # finalizer
 
-UNITCHECK {
+FINALIZE {
 
     # NOTE:
     # We need to finalize mop::class itself so 

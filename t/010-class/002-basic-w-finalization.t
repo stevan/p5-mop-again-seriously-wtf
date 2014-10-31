@@ -14,14 +14,16 @@ BEGIN {
 # set up some test packages ...
 
 package Foo 0.01 {
+    use mop::internal::util::package::FINALIZE;
 
     sub foo { 'Foo::foo' }
 
-    UNITCHECK { mop::internal::util::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) }
+    FINALIZE { mop::internal::util::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) };
 } 
 
 package Bar {
-
+    use mop::internal::util::package::FINALIZE;
+    
     use Scalar::Util qw[ blessed ];
 
     our $VERSION   = '0.01';
@@ -29,13 +31,15 @@ package Bar {
 
     use base 'Foo';
 
-    UNITCHECK { mop::internal::util::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) }
+    FINALIZE { mop::internal::util::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) };
 } 
 
 package Baz { 
+    use mop::internal::util::package::FINALIZE;
+
     our @ISA = ('Bar');
 
-    UNITCHECK { mop::internal::util::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) }
+    FINALIZE { mop::internal::util::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) };
 }
 
 # test them ...
