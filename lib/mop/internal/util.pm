@@ -39,7 +39,7 @@ sub DEMOLISHALL ($instance)  {
 ## Role application and composition
 
 sub APPLY_ROLES ($meta, $roles, %opts) {
-    die "[PANIC] You must specify what type of object you want roles applied `to`" 
+    die "[mop::PANIC] You must specify what type of object you want roles applied `to`" 
         unless exists $opts{to};
 
     my (
@@ -50,7 +50,7 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
         map { mop::role->new( name => $_ ) } @$roles 
     );
 
-    die "[PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
+    die "[mop::PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
         if scalar keys %$conflicts;
 
     # check the required method set and 
@@ -61,7 +61,7 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
             if $meta->has_method( $name )
     }
 
-    die "[PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
+    die "[mop::PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
         if $opts{to} eq 'class' 
         && scalar keys %$required;
 
@@ -71,7 +71,7 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
             # if we are a class, the class wins
             next if $opts{to} eq 'class';
             # if we are not a class, (we are a role) and we die with a conflict ...
-            die "[PANIC] Role Conflict, cannot compose method ($name) into (" . $meta->name . ") because ($name) already exists"
+            die "[mop::PANIC] Role Conflict, cannot compose method ($name) into (" . $meta->name . ") because ($name) already exists"
                 if $meta->has_method( $name );
         }
         $meta->alias_method( $name, $methods->{ $name } );

@@ -91,7 +91,7 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
 {
     like(
         exception { $Foo->delete_method('foo') },
-        qr/^\[PANIC\] Cannot delete method \(foo\) from \(Foo\) because it has been closed/,
+        qr/^\[mop\:\:PANIC\] Cannot delete method \(foo\) from \(Foo\) because it has been closed/,
         '... got the expection we expected (for method deletion)'
     );
 
@@ -117,7 +117,7 @@ ok(!$Bar->has_method('blessed'), '... we do not have the imported &blessed funct
 {
     like(
         exception { $Bar->add_method( bar => sub { 'Bar::bar' } ) },
-        qr/^\[PANIC\] Cannot add method \(bar\) to \(Bar\) because it has been closed/,
+        qr/^\[mop\:\:PANIC\] Cannot add method \(bar\) to \(Bar\) because it has been closed/,
         '... got the exception we expected (for trying to add a method)'
     );
     ok(!$Bar->has_method('bar'), '... we do not have a &bar method');

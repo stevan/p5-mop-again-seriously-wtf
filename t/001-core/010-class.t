@@ -69,13 +69,13 @@ is($Class->get_method('superclasses')->body, \&mop::class::superclasses, '... go
 
 like(
     exception { $Class->add_method('foo' => sub {}) },
-    qr/^\[PANIC\] Cannot add method \(foo\) to \(mop\:\:class\) because it has been closed/,
+    qr/^\[mop\:\:PANIC\] Cannot add method \(foo\) to \(mop\:\:class\) because it has been closed/,
     '... got the expected exception from ->add_method'
 );
 
 like(
     exception { $Class->delete_method('superclasses') },
-    qr/^\[PANIC\] Cannot delete method \(superclasses\) from \(mop\:\:class\) because it has been closed/,
+    qr/^\[mop\:\:PANIC\] Cannot delete method \(superclasses\) from \(mop\:\:class\) because it has been closed/,
     '... got the expected exception from ->delete_method'
 );
 
