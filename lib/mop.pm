@@ -19,10 +19,6 @@ sub import {
     $BOOTSTRAPPED = mop::class->new( name => 'mop::class' )->is_closed;
 }
 
-sub meta ($instance) {
-    mop::class->new( name => ref( $instance ) || $instance );
-}
-
 1;
 
 __END__
