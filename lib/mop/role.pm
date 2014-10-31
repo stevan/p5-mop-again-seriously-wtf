@@ -8,15 +8,11 @@ use experimental 'signatures', 'postderef';
 use Symbol          ();
 use Sub::Name       ();
 use Scalar::Util    ();
-use Variable::Magic ();
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 our @ISA; BEGIN { @ISA = ('mop::object') }
-
-my $WIZARD; 
-BEGIN { $WIZARD = Variable::Magic::wizard( data => sub { $_[1] } ) };
 
 sub new ($class, %args) {
     my $name = $args{'name'} or die 'The role `name` is required';
@@ -27,41 +23,15 @@ sub new ($class, %args) {
         $stash = \%{ $name . '::' };
     }
 
-    # Apply magic to the stash if we have 
-    # not done so already, this should only
-    # be done once. While this is not the ideal
-    # place for it, it makes sense because
-    # the only place we might use this is via
-    # the methods below, which should not be 
-    # called except by the instance which 
-    # this constructor is creating.  
-    unless ( Variable::Magic::getdata( $stash->%*, $WIZARD ) ) {
-        Variable::Magic::cast( 
-            $stash->%*, $WIZARD, {
-                # NOTE:
-                # By default a role/class is not closed
-                # this must be done manually in the 
-                # UNITCHEK block if that is desired
-                #
-                # By default a role *is* abstract, but a
-                # class (which also uses this constructor)
-                # is *not* abstract.
-                #
-                # This is kind of ugly, but honestly 
-                # I don't really care, it works. This 
-                # data is not even really instance data
-                # but instead is data attached to the 
-                # underlying stash, which is part of why
-                # this feels like the wrong place to do 
-                # this (see above), but ... meh
-                is_closed   => $args{is_closed}   || 0, 
-                is_abstract => $args{is_abstract} || $class eq __PACKAGE__ ? 1 : 0, 
-            }
-        );
-    }
+    mop::internal::package::UPGRADE_PACKAGE( $stash, %args ) 
+        unless mop::internal::package::IS_PACKAGE_UPGRADED( $stash );
 
     return bless \$stash => $class;
 }
+
+# access to the package itself
+
+sub stash ( $self ) { return $self->$* }
 
 # meta-info 
 
@@ -79,50 +49,10 @@ sub authority ($self) {
     return $self->$*->{'AUTHORITY'}->*{'SCALAR'}->$*;
 }
 
-# closing/opening package
+# access additional package data 
 
 sub is_closed ($self) { 
-    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
-    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
-        unless $slots;
-    return $slots->{is_closed};
-}
-
-sub open ($self) {
-    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
-    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
-        unless $slots;
-    $slots->{is_closed} = 0;
-}
-
-sub close ($self) {
-    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
-    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
-        unless $slots;    
-    $slots->{is_closed} = 1;
-}
-
-# abstraction 
-
-sub is_abstract ($self) { 
-    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
-    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
-        unless $slots;
-    return $slots->{is_abstract};
-}
-
-sub make_not_abstract ($self) {
-    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
-    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
-        unless $slots;
-    $slots->{is_abstract} = 0;
-}
-
-sub make_abstract ($self) {
-    my $slots = Variable::Magic::getdata( $self->$*->%*, $WIZARD );
-    die "[PANIC] The package this metaobject is associated with does not have the correct magic applied."
-        unless $slots;    
-    $slots->{is_abstract} = 1;
+    mop::internal::package::IS_PACKAGE_CLOSED( $self->$* )
 }
 
 # roles 
@@ -225,7 +155,12 @@ sub alias_method ($self, $name, $code) {
 
 # Finalizer 
 
-UNITCHECK { __PACKAGE__->new( name => __PACKAGE__ )->close }
+UNITCHECK { 
+    # NOTE:
+    # We need to close mop::role here as well.
+    my $meta = __PACKAGE__->new( name => __PACKAGE__ ); 
+    mop::internal::package::CLOSE_PACKAGE( $meta->stash );
+}
 
 1;
 

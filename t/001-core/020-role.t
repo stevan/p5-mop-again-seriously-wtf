@@ -17,17 +17,13 @@ isa_ok($Role, 'mop::object');
 my @METHODS = qw[
     new 
 
+    stash
+
     name
     version
     authority
 
     is_closed
-    open
-    close  
-
-    is_abstract
-    make_not_abstract
-    make_abstract
 
     roles
     does_role
@@ -45,6 +41,8 @@ can_ok($Role, $_) for @METHODS;
 is($Role->name,      'mop::role', '... got the expected value from ->name');
 is($Role->version,   '0.01', '... got the expected value from ->version');
 is($Role->authority, 'cpan:STEVAN', '... got the expected value ->authority');
+
+ok($Role->is_closed,    '... the role has been closed');
 
 is_deeply([ sort map { $_->name } $Role->methods ], [ sort @METHODS ], '... got the expected value from ->methods');
 
@@ -66,7 +64,7 @@ can_ok($Role, 'name');
 is($Role->name, 'mop::role', '... got the expected value from ->name');
 
 {
-    $Role->open;
+    mop::internal::package::OPEN_PACKAGE( $Role->stash );
 
     is(
         exception { $Role->add_method('foo' => sub { 'FOO' }) },
@@ -85,8 +83,23 @@ is($Role->name, 'mop::role', '... got the expected value from ->name');
 
     ok(!$Role->can('foo'), '... removed the ->foo method');
 
-    $Role->close;
+    mop::internal::package::CLOSE_PACKAGE( $Role->stash );
 }
+
+like(
+    exception { $Role->add_method('foo' => sub {}) },
+    qr/^\[PANIC\] Cannot add method \(foo\) to \(mop\:\:role\) because it has been closed/,
+    '... got the expected exception from ->add_method'
+);
+
+like(
+    exception { $Role->delete_method('name') },
+    qr/^\[PANIC\] Cannot delete method \(name\) from \(mop\:\:role\) because it has been closed/,
+    '... got the expected exception from ->delete_method'
+);
+
+can_ok($Role, 'name');
+is($Role->name, 'mop::role', '... got the expected value from ->name');
 
 done_testing;
 

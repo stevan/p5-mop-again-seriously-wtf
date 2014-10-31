@@ -4,12 +4,13 @@ use v5.20;
 use warnings;
 use experimental 'signatures', 'postderef';
 
+use mop::internal::util;
+use mop::internal::package;
+
 use mop::object;
 use mop::method;
 use mop::role;
 use mop::class;
-
-use mop::internal::util;
 
 our $BOOTSTRAPPED = 0;
 

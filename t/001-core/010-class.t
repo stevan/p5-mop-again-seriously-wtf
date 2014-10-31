@@ -20,17 +20,13 @@ ok($Class->does_role('mop::role'), '... mop::class does mop::role');
 my @METHODS = qw[
     new 
 
+    stash
+
     name
     version
     authority
 
     is_closed
-    open
-    close
-
-    is_abstract
-    make_not_abstract
-    make_abstract
 
     roles
     does_role
@@ -53,6 +49,8 @@ can_ok($Class, $_) for @METHODS;
 is($Class->name,      'mop::class', '... got the expected value from ->name');
 is($Class->version,   '0.01', '... got the expected value from ->version');
 is($Class->authority, 'cpan:STEVAN', '... got the expected value ->authority');
+
+ok($Class->is_closed,    '... the class has been closed');
 
 is_deeply([ $Class->superclasses ], [ 'mop::object' ], '... got the expected value from ->superclasses');
 is_deeply([ $Class->mro ], [ 'mop::class', 'mop::object' ], '... got the expected value from ->mro');

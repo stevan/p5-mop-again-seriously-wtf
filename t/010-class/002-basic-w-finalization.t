@@ -17,7 +17,7 @@ package Foo 0.01 {
 
     sub foo { 'Foo::foo' }
 
-    UNITCHECK { mop::class->new( name => __PACKAGE__ )->close }
+    UNITCHECK { mop::internal::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) }
 } 
 
 package Bar {
@@ -29,13 +29,13 @@ package Bar {
 
     use base 'Foo';
 
-    UNITCHECK { mop::class->new( name => __PACKAGE__ )->close }
+    UNITCHECK { mop::internal::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) }
 } 
 
 package Baz { 
     our @ISA = ('Bar');
 
-    UNITCHECK { mop::class->new( name => __PACKAGE__ )->close }
+    UNITCHECK { mop::internal::package::CLOSE_PACKAGE( mop::class->new( name => __PACKAGE__ )->stash ) }
 }
 
 # test them ...

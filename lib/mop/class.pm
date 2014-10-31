@@ -48,7 +48,7 @@ UNITCHECK {
 
     my $meta = mop::role->new( name => __PACKAGE__ );
     mop::internal::util::APPLY_ROLES( $meta, @DOES );
-    $meta->close;
+    mop::internal::package::CLOSE_PACKAGE( $meta->stash );
 };
 
 1;
