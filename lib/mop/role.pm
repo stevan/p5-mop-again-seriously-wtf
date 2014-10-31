@@ -27,12 +27,38 @@ sub new ($class, %args) {
         $stash = \%{ $name . '::' };
     }
 
-    Variable::Magic::cast( 
-        $stash->%*, $WIZARD, {
-            is_closed   => $args{is_closed}   || 0, # packages are not closed ...
-            is_abstract => $args{is_abstract} || 1, # roles however, are abstract ...
-        }
-    );
+    # Apply magic to the stash if we have 
+    # not done so already, this should only
+    # be done once. While this is not the ideal
+    # place for it, it makes sense because
+    # the only place we might use this is via
+    # the methods below, which should not be 
+    # called except by the instance which 
+    # this constructor is creating.  
+    unless ( Variable::Magic::getdata( $stash->%*, $WIZARD ) ) {
+        Variable::Magic::cast( 
+            $stash->%*, $WIZARD, {
+                # NOTE:
+                # By default a role/class is not closed
+                # this must be done manually in the 
+                # UNITCHEK block if that is desired
+                #
+                # By default a role *is* abstract, but a
+                # class (which also uses this constructor)
+                # is *not* abstract.
+                #
+                # This is kind of ugly, but honestly 
+                # I don't really care, it works. This 
+                # data is not even really instance data
+                # but instead is data attached to the 
+                # underlying stash, which is part of why
+                # this feels like the wrong place to do 
+                # this (see above), but ... meh
+                is_closed   => $args{is_closed}   || 0, 
+                is_abstract => $args{is_abstract} || $class eq __PACKAGE__ ? 1 : 0, 
+            }
+        );
+    }
 
     return bless \$stash => $class;
 }
@@ -199,10 +225,7 @@ sub alias_method ($self, $name, $code) {
 
 # Finalizer 
 
-UNITCHECK {
-    my $meta = __PACKAGE__->new( name => __PACKAGE__ );
-    $meta->close;
-}
+UNITCHECK { __PACKAGE__->new( name => __PACKAGE__ )->close }
 
 1;
 
