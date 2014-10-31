@@ -10,6 +10,7 @@ use Sub::Name       ();
 use Scalar::Util    ();
 use List::Util      ();
 
+use mop::internal::util::package;
 use mop::internal::util::package::FINALIZE;
 
 our $VERSION   = '0.01';
