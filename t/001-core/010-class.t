@@ -17,15 +17,6 @@ isa_ok($Class, 'mop::object');
 
 ok($Class->does_role('mop::role'), '... mop::class does mop::role');
 
-# is($Class, mop::meta($Class), '... Class is an instance of Class');
-# is($Class, mop::meta(mop::meta($Class)), '... Class is an instance of Class (really)');
-# is($Class, mop::meta(mop::meta(mop::meta($Class))), '... Class is an instance of Class (no, really)');
-# 
-# is(mop::meta($Class), mop::meta(mop::meta($Class)), '... Class is an instance of Class (you think I am kidding)');
-# is(mop::meta($Class), mop::meta(mop::meta(mop::meta($Class))), '... Class is an instance of Class (really)');
-# 
-# is(mop::meta(mop::meta($Class)), mop::meta(mop::meta(mop::meta($Class))), '... Class is an instance of Class (still the same)');
-
 my @METHODS = qw[
     new 
 
@@ -72,17 +63,17 @@ is_deeply([ sort map { $_->name } $Class->methods ], [ sort @METHODS ], '... got
 
 is($Class->get_method('superclasses')->body, \&mop::class::superclasses, '... got the expected value from ->get_method');
 
-# like(
-#     exception { $Class->add_method('foo' => sub {}) },
-#     qr/^\[PACKAGE FINALIZED\] The package \(mop\:\:class\) has been finalized, attempt to store into key \(foo\) is not allowed/,
-#     '... got the expected exception from ->add_method'
-# );
-# 
-# like(
-#     exception { $Class->delete_method('superclasses') },
-#     qr/^Modification of a read-only value attempted/,
-#     '... got the expected exception from ->delete_method'
-# );
+like(
+    exception { $Class->add_method('foo' => sub {}) },
+    qr/^\[PANIC\] Cannot add method \(foo\) to \(mop\:\:class\) because it has been closed/,
+    '... got the expected exception from ->add_method'
+);
+
+like(
+    exception { $Class->delete_method('superclasses') },
+    qr/^\[PANIC\] Cannot delete method \(superclasses\) from \(mop\:\:class\) because it has been closed/,
+    '... got the expected exception from ->delete_method'
+);
 
 can_ok($Class, 'superclasses');
 is_deeply([ $Class->superclasses ], [ 'mop::object' ], '... got the expected value from ->superclasses (still)');
