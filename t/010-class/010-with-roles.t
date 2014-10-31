@@ -14,16 +14,25 @@ BEGIN {
     # set up some test roles ...
 
     package Bar::Role {
+        use v5.20;
+        use warnings;
+
         sub bar { 'Bar::Role::bar' } 
     }
 
     package Baz::Role {
+        use v5.20;
+        use warnings;
+
         sub baz { 'Baz::Role::baz' } 
     }
 
     # set up a test class ...
 
     package Foo {
+        use v5.20;
+        use warnings;
+
         use mop::internal::util 'FINALIZE';
 
         our @DOES = ('Bar::Role', 'Baz::Role');

@@ -13,9 +13,14 @@ BEGIN {
 # set up some test packages ...
 
 package Foo 0.01 {
+    use v5.20;
+    use warnings;
+
     sub foo { 'Foo::foo' }
 } 
 package Bar {
+    use v5.20;
+    use warnings;
 
     use Scalar::Util qw[ blessed ];
 
@@ -24,7 +29,12 @@ package Bar {
 
     use base 'Foo';
 } 
-package Baz { our @ISA = ('Bar') }
+package Baz { 
+    use v5.20;
+    use warnings;
+    
+    our @ISA = ('Bar') 
+}
 
 # test them ...
 

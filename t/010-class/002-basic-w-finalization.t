@@ -14,6 +14,9 @@ BEGIN {
 # set up some test packages ...
 
 package Foo 0.01 {
+    use v5.20;
+    use warnings;
+
     use mop::internal::util 'FINALIZE';
 
     sub foo { 'Foo::foo' }
@@ -22,6 +25,9 @@ package Foo 0.01 {
 } 
 
 package Bar {
+    use v5.20;
+    use warnings;
+
     use mop::internal::util 'FINALIZE';
     
     use Scalar::Util qw[ blessed ];
@@ -35,6 +41,9 @@ package Bar {
 } 
 
 package Baz { 
+    use v5.20;
+    use warnings;
+    
     use mop::internal::util 'FINALIZE';
 
     our @ISA = ('Bar');
