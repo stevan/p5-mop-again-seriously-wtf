@@ -52,6 +52,12 @@ sub APPLY_ROLES ($meta, @roles) {
 
 sub COMPOSE_ALL_ROLES (@roles) {
     my (%methods, %conflicts, %required);
+
+    # TODO:
+    # collect all the required methods in 
+    # the roles as well.
+    # - SL
+
     # for every role ...
     foreach my $r ( @roles ) {
         # and every method in that role ...
