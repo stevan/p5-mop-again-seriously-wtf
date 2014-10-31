@@ -11,7 +11,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 sub new ($class, %args) {
     my $self = mop::meta( $class )->construct_instance( \%args );
-    $self->can('BUILDALL') && mop::internal::util::BUILDALL( $self, \%args );
+    $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self;
 }
 
