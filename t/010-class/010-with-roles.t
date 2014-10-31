@@ -38,10 +38,17 @@ BEGIN {
     my $Foo = mop::class->new( name => 'Foo' );
     isa_ok($Foo, 'mop::class');
 
+    is_deeply([ $Foo->roles ], [ 'Bar::Role', 'Baz::Role' ], '... got the list of roles we expected');
+
     ok($Foo->has_method('foo'), '... the foo method is there');
+    
+    is($Foo->get_method('foo')->stash_name, 'Foo', '... got the expected stash_name for &foo');
 
     ok($Foo->has_method('bar'), '... the bar method was composed properly');
     ok($Foo->has_method('baz'), '... the baz method was composed properly');
+
+    is($Foo->get_method('bar')->stash_name, 'Bar::Role', '... got the expected stash_name for &bar');
+    is($Foo->get_method('baz')->stash_name, 'Baz::Role', '... got the expected stash_name for &baz');
 
     my $foo = $Foo->construct_instance({});
 
