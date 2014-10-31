@@ -33,6 +33,8 @@ sub IS_PACKAGE_UPGRADED ($stash) {
     !! Variable::Magic::getdata( $stash->%*, $WIZARD );
 }
 
+# functions to access is_closed
+
 sub IS_PACKAGE_CLOSED ($stash) {
     my $slots = Variable::Magic::getdata( $stash->%*, $WIZARD );
     Carp::confess("[PANIC] The package does not have the correct magic applied.") unless $slots;
@@ -50,6 +52,7 @@ sub OPEN_PACKAGE ($stash) {
     Carp::confess("[PANIC] The package does not have the correct magic applied.") unless $slots;
     $slots->{is_closed} = 0;
 }
+
 
 1;
 
