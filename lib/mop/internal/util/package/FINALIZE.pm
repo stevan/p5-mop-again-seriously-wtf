@@ -31,7 +31,16 @@ sub import_into ($class, $pkg) {
     # set up the finalizers for this package ...
     $FINALIZERS{ $pkg } = [];
     # set up the UNITCHECK hook to run them ...
-    Devel::Hook->push_UNITCHECK_hook(sub { $_->() for @{ $FINALIZERS{ $pkg } } });
+    Devel::Hook->push_UNITCHECK_hook(sub { 
+        $_->() for @{ $FINALIZERS{ $pkg } } 
+        # TODO:
+        # Think about using this moment to actually
+        # remove the FINALIZE function that we 
+        # imported into the $pkg. Either that 
+        # or we need to do lexical exports (as 
+        # suggested below).
+        # - SL
+    });
     # now install the FINALIZE sub ...
     {
         no strict 'refs';
