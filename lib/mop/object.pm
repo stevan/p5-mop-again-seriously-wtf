@@ -15,7 +15,7 @@ sub new ($class, %args) {
     $self;
 }
 
-sub does ($self, $role) {
+sub DOES ($self, $role) {
     mop::class->new( name => ref $self || $self )->does_role( $role )
 }
 

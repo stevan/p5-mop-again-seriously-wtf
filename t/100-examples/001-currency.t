@@ -113,9 +113,9 @@ ok(!$Eq->requires_method('not_equal_to'), '... EQ::not_equal_to is NOT a stub me
 
 my $dollar = US::Currency->new( amount => 10 );
 ok($dollar->isa( 'US::Currency' ), '... the dollar is a US::Currency instance');
-ok($dollar->does( 'Eq' ), '... the dollar does the Eq role');
-ok($dollar->does( 'Comparable' ), '... the dollar does the Comparable role');
-ok($dollar->does( 'Printable' ), '... the dollar does the Printable role');
+ok($dollar->DOES( 'Eq' ), '... the dollar does the Eq role');
+ok($dollar->DOES( 'Comparable' ), '... the dollar does the Comparable role');
+ok($dollar->DOES( 'Printable' ), '... the dollar does the Printable role');
 
 can_ok($dollar, 'equal_to');
 can_ok($dollar, 'not_equal_to');
