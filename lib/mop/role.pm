@@ -104,6 +104,9 @@ sub requires_method ($self, $name) {
 }
 
 sub add_required_method ($self, $name) {
+    die "[mop::PANIC] Cannot add a method requirement ($name) to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     unless ( $self->$*->{'REQUIRES'} ) {
         no strict 'refs';
         *{ $self->name . '::REQUIRES'} = [ $name ];
@@ -117,6 +120,9 @@ sub add_required_method ($self, $name) {
 }
 
 sub delete_required_method ($self, $name) {
+    die "[mop::PANIC] Cannot delete method requirement ($name) from (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     return unless $self->$*->{'REQUIRES'};
     my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};
     $REQUIRES->@* = grep { $_ ne $name } $REQUIRES->@*;
