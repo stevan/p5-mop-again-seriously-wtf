@@ -8,7 +8,6 @@ use experimental 'signatures', 'postderef';
 use Symbol          ();
 use Sub::Name       ();
 use Scalar::Util    ();
-use List::Util      ();
 
 use mop::internal::util 'FINALIZE';
 
@@ -130,7 +129,10 @@ sub required_methods ($self) {
 sub requires_method ($self, $name) {
     my $REQUIRES = $self->$*->{'REQUIRES'};
     return 0 unless $REQUIRES;
-    return List::Util::first { $_ eq $name } $REQUIRES->*{'ARRAY'}->@*;
+    foreach ( $REQUIRES->*{'ARRAY'}->@* ) {
+        return 1 if $_ eq $name;
+    }
+    return 0;
 }
 
 sub add_required_method ($self, $name) {
@@ -142,10 +144,11 @@ sub add_required_method ($self, $name) {
         *{ $self->name . '::REQUIRES'} = [ $name ];
     }
     else {
-        my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};    
-        unless ( List::Util::first { $_ eq $name } $REQUIRES->@* ) {
-            push $REQUIRES->@* => $name;
+        my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};   
+        foreach ( $REQUIRES->@* ) {
+            return if $_ eq $name;
         }
+        push $REQUIRES->@* => $name;
     }
 }
 
