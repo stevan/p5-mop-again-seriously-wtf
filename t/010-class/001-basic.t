@@ -22,8 +22,6 @@ package Bar {
     use v5.20;
     use warnings;
 
-    use Scalar::Util qw[ blessed ];
-
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
 

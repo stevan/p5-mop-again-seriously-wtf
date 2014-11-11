@@ -3,7 +3,8 @@ package mop::internal::util;
 use v5.20;
 use mro;
 use warnings;
-use experimental 'signatures', 'postderef';
+use feature 'signatures', 'postderef';
+no warnings 'experimental::signatures', 'experimental::postderef';
 
 use Devel::Hook ();
 

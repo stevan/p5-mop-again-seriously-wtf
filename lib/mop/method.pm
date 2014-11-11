@@ -2,7 +2,8 @@ package mop::method;
 
 use v5.20;
 use warnings;
-use experimental 'signatures', 'postderef';
+use feature 'signatures', 'postderef';
+no warnings 'experimental::signatures', 'experimental::postderef';
 
 use B ();
 

@@ -2,7 +2,6 @@ package mop;
 
 use v5.20;
 use warnings;
-use experimental 'signatures', 'postderef';
 
 use mop::internal::util;
 

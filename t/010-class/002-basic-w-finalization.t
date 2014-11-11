@@ -32,8 +32,6 @@ package Bar {
     use warnings;
 
     use mop::internal::util 'FINALIZE';
-    
-    use Scalar::Util qw[ blessed ];
 
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';

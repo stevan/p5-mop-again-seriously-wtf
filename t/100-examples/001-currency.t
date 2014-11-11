@@ -15,7 +15,8 @@ BEGIN {
     package Eq {
         use v5.20;
         use warnings;
-        use experimental 'signatures', 'postderef';
+        use feature 'signatures', 'postderef';
+        no warnings 'experimental::signatures', 'experimental::postderef';
 
         our @REQUIRES = ('equal_to');
 
@@ -27,7 +28,8 @@ BEGIN {
     package Comparable {
         use v5.20;
         use warnings;
-        use experimental 'signatures', 'postderef';
+        use feature 'signatures', 'postderef';
+        no warnings 'experimental::signatures', 'experimental::postderef';
 
         use mop::internal::util 'FINALIZE';
 
@@ -69,7 +71,8 @@ BEGIN {
     package Printable {
         use v5.20;
         use warnings;
-        use experimental 'signatures', 'postderef';
+        use feature 'signatures', 'postderef';
+        no warnings 'experimental::signatures', 'experimental::postderef';
 
         our @REQUIRES = ('to_string');
     }
@@ -77,7 +80,8 @@ BEGIN {
     package US::Currency {
         use v5.20;
         use warnings;
-        use experimental 'signatures', 'postderef';
+        use feature 'signatures', 'postderef';
+        no warnings 'experimental::signatures', 'experimental::postderef';
 
         use mop::internal::util 'FINALIZE';        
 

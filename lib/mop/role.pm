@@ -3,11 +3,12 @@ package mop::role;
 use v5.20;
 use mro;
 use warnings;
-use experimental 'signatures', 'postderef';
+use feature 'signatures', 'postderef';
+no warnings 'experimental::signatures', 'experimental::postderef';
 
-use Symbol          ();
-use Sub::Name       ();
-use Scalar::Util    ();
+use Symbol       ();
+use Sub::Util    ();
+use Scalar::Util ();
 
 use mop::internal::util 'FINALIZE';
 
@@ -229,7 +230,7 @@ sub add_method ($self, $name, $code) {
 
     no strict 'refs';
     my $full_name = $self->name . '::' . $name;
-    *{$full_name} = Sub::Name::subname( 
+    *{$full_name} = Sub::Util::set_subname( 
         $full_name, 
         Scalar::Util::blessed($code) ? $code->body : $code
     );
