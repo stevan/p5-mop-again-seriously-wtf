@@ -52,20 +52,20 @@ sub authority ($self) {
 # access additional package data 
 
 sub is_closed ($self) { 
-    return 0 unless exists $self->$*->{'CLOSED'};
-    return $self->$*->{'CLOSED'}->*{'SCALAR'}->$* ? 1 : 0;
+    return 0 unless exists $self->$*->{'IS_CLOSED'};
+    return $self->$*->{'IS_CLOSED'}->*{'SCALAR'}->$* ? 1 : 0;
 }
 
 sub is_abstract ($self) {
     # if you have required methods, you are abstract
     # that is a hard enforced rule here ...
     my $default = scalar $self->required_methods ? 1 : 0;
-    # if there is no $ABSTRACT variable, return the 
+    # if there is no $IS_ABSTRACT variable, return the 
     # calculated default ...
-    return $default unless exists $self->$*->{'ABSTRACT'};
-    # if there is an $ABSTRACT variable, only allow a 
+    return $default unless exists $self->$*->{'IS_ABSTRACT'};
+    # if there is an $IS_ABSTRACT variable, only allow a 
     # true value to override the calculated default
-    return $self->$*->{'ABSTRACT'}->*{'SCALAR'}->$* ? 1 : $default;
+    return $self->$*->{'IS_ABSTRACT'}->*{'SCALAR'}->$* ? 1 : $default;
     # this approach should allow someone to create 
     # an abstract class even if they do not have any
     # required methods, but also keep the strict 
@@ -241,8 +241,8 @@ sub alias_method ($self, $name, $code) {
 # Finalization
 
 BEGIN {
-    our $CLOSED;
-    our @FINALIZERS = ( sub { $CLOSED = 1 } );
+    our $IS_CLOSED;
+    our @FINALIZERS = ( sub { $IS_CLOSED = 1 } );
 }
 
 1;

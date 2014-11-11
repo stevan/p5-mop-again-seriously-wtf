@@ -36,7 +36,7 @@ sub mro ($self, $type = mro::get_mro( $self->name )) {
 # finalizer
 
 BEGIN {
-    our $CLOSED;
+    our $IS_CLOSED;
     our @FINALIZERS = ( 
         sub {
             # NOTE:
@@ -54,7 +54,7 @@ BEGIN {
                 \@DOES, 
                 to => 'class' 
             );
-            $CLOSED = 1;
+            $IS_CLOSED = 1;
         }
     )
 }

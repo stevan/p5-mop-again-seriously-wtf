@@ -22,8 +22,8 @@ package Foo 0.01 {
     sub foo { 'Foo::foo' }
 
     BEGIN { 
-        our $CLOSED;
-        our @FINALIZERS = sub { $CLOSED = 1 };
+        our $IS_CLOSED;
+        our @FINALIZERS = sub { $IS_CLOSED = 1 };
     }
 } 
 
@@ -41,8 +41,8 @@ package Bar {
     use base 'Foo';
 
     BEGIN { 
-        our $CLOSED;
-        our @FINALIZERS = sub { $CLOSED = 1 };
+        our $IS_CLOSED;
+        our @FINALIZERS = sub { $IS_CLOSED = 1 };
     }
 } 
 
@@ -55,8 +55,8 @@ package Baz {
     our @ISA = ('Bar');
 
     BEGIN { 
-        our $CLOSED;
-        our @FINALIZERS = sub { $CLOSED = 1 };
+        our $IS_CLOSED;
+        our @FINALIZERS = sub { $IS_CLOSED = 1 };
     }
 }
 
