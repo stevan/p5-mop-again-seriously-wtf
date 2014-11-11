@@ -41,8 +41,7 @@ sub install_finalization_runner_for_package ($class, $pkg) {
         unless ${^GLOBAL_PHASE} eq 'START';
 
     Devel::Hook->push_UNITCHECK_hook(sub { 
-        no strict 'refs';
-        $_->() for @{ $pkg . '::FINALIZERS' } 
+        mop::role->new( name => $pkg )->finalize_class; 
     });
 }
 

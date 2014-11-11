@@ -29,6 +29,11 @@ my @METHODS = qw[
     roles
     does_role
 
+    finalizers
+    has_finalizers
+    add_finalizer 
+    finalize_class   
+
     required_methods
     requires_method
     add_required_method

@@ -73,6 +73,34 @@ sub is_abstract ($self) {
     # of abstract-ness
 }
 
+# finalization 
+
+sub finalizers ($self) {
+    my $FINALIZERS = $self->$*->{'FINALIZERS'};
+    return () unless $FINALIZERS;
+    return $FINALIZERS->*{'ARRAY'}->@*;
+}
+
+sub has_finalizers ($self) {
+    return 0 unless exists $self->$*->{'FINALIZERS'};
+    return (scalar $self->$*->{'FINALIZERS'}->*{'ARRAY'}->@*) ? 1 : 0;
+}
+
+sub add_finalizer ($self, $finalizer) {
+    die "[mop::PANIC] Cannot add finalizer to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
+    unless ( $self->$*->{'FINALIZERS'} ) {
+        no strict 'refs';
+        *{ $self->name . '::FINALIZERS'} = [ $finalizer ];
+    }
+    else {
+        push $self->$*->{'FINALIZERS'}->*{'ARRAY'}->@* => $finalizer;
+    }
+}
+
+sub finalize_class ($self) { $_->() for $self->finalizers }
+
 # roles 
 
 sub roles ($self) {
