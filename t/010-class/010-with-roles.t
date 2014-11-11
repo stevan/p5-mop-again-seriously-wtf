@@ -45,8 +45,8 @@ BEGIN {
                     mop::role->new( name => __PACKAGE__ ), 
                     \@DOES, 
                     to => 'class' 
-                );
-            });
+                )
+            })
         }
     } 
 }
