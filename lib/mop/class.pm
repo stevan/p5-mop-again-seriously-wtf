@@ -35,23 +35,29 @@ sub mro ($self, $type = mro::get_mro( $self->name )) {
 
 # finalizer
 
-FINALIZE {
-
-    # NOTE:
-    # We need to finalize mop::class itself so 
-    # that the bootstrap is complete, which is 
-    # why we are using mop::role below and not 
-    # mop::class. The mop::role class is complete
-    # and contains all the functionality we require
-    # to make mop::class complete. Since roles
-    # are just classes which do not create 
-    # instances, this just works. 
-    # - SL
-
-    my $meta = mop::role->new( name => __PACKAGE__ );
-    mop::internal::util::APPLY_ROLES( $meta, \@DOES, to => 'class' );
-    our $CLOSED = 1;
-};
+BEGIN {
+    our $CLOSED;
+    our @FINALIZERS = ( 
+        sub {
+            # NOTE:
+            # We need to finalize mop::class itself so 
+            # that the bootstrap is complete, which is 
+            # why we are using mop::role below and not 
+            # mop::class. The mop::role class is complete
+            # and contains all the functionality we require
+            # to make mop::class complete. Since roles
+            # are just classes which do not create 
+            # instances, this just works. 
+            # - SL
+            mop::internal::util::APPLY_ROLES(
+                mop::role->new( name => __PACKAGE__ ), 
+                \@DOES, 
+                to => 'class' 
+            );
+            $CLOSED = 1;
+        }
+    );
+}
 
 1;
 

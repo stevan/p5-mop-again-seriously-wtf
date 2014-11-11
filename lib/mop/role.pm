@@ -210,14 +210,12 @@ sub alias_method ($self, $name, $code) {
     *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) ? $code->body : $code;
 }
 
-# Finalizer 
+# Finalization
 
-FINALIZE { 
-    # NOTE:
-    # We need to close mop::role here as well.
-    my $meta = __PACKAGE__->new( name => __PACKAGE__ ); 
-    our $CLOSED = 1;
-};
+BEGIN {
+    our $CLOSED;
+    our @FINALIZERS = ( sub { $CLOSED = 1 } );
+}
 
 1;
 

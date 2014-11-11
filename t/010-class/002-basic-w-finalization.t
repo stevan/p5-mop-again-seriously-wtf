@@ -21,7 +21,10 @@ package Foo 0.01 {
 
     sub foo { 'Foo::foo' }
 
-    FINALIZE { our $CLOSED = 1 };
+    BEGIN { 
+        our $CLOSED;
+        our @FINALIZERS = sub { $CLOSED = 1 };
+    }
 } 
 
 package Bar {
@@ -37,7 +40,10 @@ package Bar {
 
     use base 'Foo';
 
-    FINALIZE { our $CLOSED = 1 };
+    BEGIN { 
+        our $CLOSED;
+        our @FINALIZERS = sub { $CLOSED = 1 };
+    }
 } 
 
 package Baz { 
@@ -48,7 +54,10 @@ package Baz {
 
     our @ISA = ('Bar');
 
-    FINALIZE { our $CLOSED = 1 };
+    BEGIN { 
+        our $CLOSED;
+        our @FINALIZERS = sub { $CLOSED = 1 };
+    }
 }
 
 # test them ...

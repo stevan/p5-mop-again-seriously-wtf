@@ -41,8 +41,14 @@ BEGIN {
 
         sub foo { 'Foo::foo' }
 
-        FINALIZE {
-            mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), \@DOES, to => 'role' );
+        BEGIN { 
+            our @FINALIZERS = (sub {
+                mop::internal::util::APPLY_ROLES( 
+                    mop::role->new( name => __PACKAGE__ ), 
+                    \@DOES, 
+                    to => 'role' 
+                );
+            });
         }
     } 
 }

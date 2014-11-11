@@ -55,9 +55,15 @@ BEGIN {
             $self->less_than($other) || $self->equal_to($other);
         }
 
-        FINALIZE {
-            mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), \@DOES, to => 'role' );
-        };
+        BEGIN { 
+            our @FINALIZERS = (sub {
+                mop::internal::util::APPLY_ROLES( 
+                    mop::role->new( name => __PACKAGE__ ), 
+                    \@DOES, 
+                    to => 'role' 
+                );
+            });
+        }
     }
 
     package Printable {
@@ -91,9 +97,15 @@ BEGIN {
             sprintf '$%0.2f USD' => $self->{amount};
         }
 
-        FINALIZE {
-            mop::internal::util::APPLY_ROLES( mop::role->new( name => __PACKAGE__ ), \@DOES, to => 'class' );
-        };
+        BEGIN { 
+            our @FINALIZERS = (sub {
+                mop::internal::util::APPLY_ROLES( 
+                    mop::role->new( name => __PACKAGE__ ), 
+                    \@DOES, 
+                    to => 'class' 
+                );
+            });
+        }
     }
 
 }
