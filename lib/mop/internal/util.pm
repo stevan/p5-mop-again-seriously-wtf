@@ -37,6 +37,9 @@ sub import ($class, @args) {
 # - SL
 
 sub install_finalization_runner_for_package ($class, $pkg) {
+    die "[mop::PANIC] To late to install finalization runner for <$pkg>, current-phase: (${^GLOBAL_PHASE})" 
+        unless ${^GLOBAL_PHASE} eq 'START';
+
     Devel::Hook->push_UNITCHECK_hook(sub { 
         no strict 'refs';
         $_->() for @{ $pkg . '::FINALIZERS' } 
