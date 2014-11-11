@@ -2,7 +2,8 @@ package mop::method;
 
 use v5.20;
 use warnings;
-use experimental 'signatures', 'postderef';
+use feature 'signatures', 'postderef';
+no warnings 'experimental::signatures', 'experimental::postderef';
 
 use B ();
 
@@ -13,7 +14,9 @@ our @ISA; BEGIN { @ISA  = ('mop::object') }
 
 sub new ($class, %args) {
     my $body = $args{'body'} or die 'The method `body` is required';
-    return bless \$body => 'mop::method';
+    my $self = bless \$body => 'mop::method';
+    $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
+    $self; 
 }
 
 sub body ($self) { $self->$* }

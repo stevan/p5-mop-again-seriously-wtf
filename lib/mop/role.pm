@@ -3,12 +3,12 @@ package mop::role;
 use v5.20;
 use mro;
 use warnings;
-use experimental 'signatures', 'postderef';
+use feature 'signatures', 'postderef';
+no warnings 'experimental::signatures', 'experimental::postderef';
 
-use Symbol          ();
-use Sub::Name       ();
-use Scalar::Util    ();
-use List::Util      ();
+use Symbol       ();
+use Sub::Util    ();
+use Scalar::Util ();
 
 use mop::internal::util 'FINALIZE';
 
@@ -26,7 +26,9 @@ sub new ($class, %args) {
         $stash = \%{ $name . '::' };
     }
 
-    return bless \$stash => $class;
+    my $self = bless \$stash => $class;
+    $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
+    $self;    
 }
 
 # access to the package itself
@@ -52,26 +54,54 @@ sub authority ($self) {
 # access additional package data 
 
 sub is_closed ($self) { 
-    return 0 unless exists $self->$*->{'CLOSED'};
-    return $self->$*->{'CLOSED'}->*{'SCALAR'}->$* ? 1 : 0;
+    return 0 unless exists $self->$*->{'IS_CLOSED'};
+    return $self->$*->{'IS_CLOSED'}->*{'SCALAR'}->$* ? 1 : 0;
 }
 
 sub is_abstract ($self) {
     # if you have required methods, you are abstract
     # that is a hard enforced rule here ...
     my $default = scalar $self->required_methods ? 1 : 0;
-    # if there is no $ABSTRACT variable, return the 
+    # if there is no $IS_ABSTRACT variable, return the 
     # calculated default ...
-    return $default unless exists $self->$*->{'ABSTRACT'};
-    # if there is an $ABSTRACT variable, only allow a 
+    return $default unless exists $self->$*->{'IS_ABSTRACT'};
+    # if there is an $IS_ABSTRACT variable, only allow a 
     # true value to override the calculated default
-    return $self->$*->{'ABSTRACT'}->*{'SCALAR'}->$* ? 1 : $default;
+    return $self->$*->{'IS_ABSTRACT'}->*{'SCALAR'}->$* ? 1 : $default;
     # this approach should allow someone to create 
     # an abstract class even if they do not have any
     # required methods, but also keep the strict 
     # checking of required methods as a indicator 
     # of abstract-ness
 }
+
+# finalization 
+
+sub finalizers ($self) {
+    my $FINALIZERS = $self->$*->{'FINALIZERS'};
+    return () unless $FINALIZERS;
+    return $FINALIZERS->*{'ARRAY'}->@*;
+}
+
+sub has_finalizers ($self) {
+    return 0 unless exists $self->$*->{'FINALIZERS'};
+    return (scalar $self->$*->{'FINALIZERS'}->*{'ARRAY'}->@*) ? 1 : 0;
+}
+
+sub add_finalizer ($self, $finalizer) {
+    die "[mop::PANIC] Cannot add finalizer to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
+    unless ( $self->$*->{'FINALIZERS'} ) {
+        no strict 'refs';
+        *{ $self->name . '::FINALIZERS'} = [ $finalizer ];
+    }
+    else {
+        push $self->$*->{'FINALIZERS'}->*{'ARRAY'}->@* => $finalizer;
+    }
+}
+
+sub finalize_class ($self) { $_->() for $self->finalizers }
 
 # roles 
 
@@ -100,23 +130,33 @@ sub required_methods ($self) {
 sub requires_method ($self, $name) {
     my $REQUIRES = $self->$*->{'REQUIRES'};
     return 0 unless $REQUIRES;
-    return List::Util::first { $_ eq $name } $REQUIRES->*{'ARRAY'}->@*;
+    foreach ( $REQUIRES->*{'ARRAY'}->@* ) {
+        return 1 if $_ eq $name;
+    }
+    return 0;
 }
 
 sub add_required_method ($self, $name) {
+    die "[mop::PANIC] Cannot add a method requirement ($name) to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     unless ( $self->$*->{'REQUIRES'} ) {
         no strict 'refs';
         *{ $self->name . '::REQUIRES'} = [ $name ];
     }
     else {
-        my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};    
-        unless ( List::Util::first { $_ eq $name } $REQUIRES->@* ) {
-            push $REQUIRES->@* => $name;
+        my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};   
+        foreach ( $REQUIRES->@* ) {
+            return if $_ eq $name;
         }
+        push $REQUIRES->@* => $name;
     }
 }
 
 sub delete_required_method ($self, $name) {
+    die "[mop::PANIC] Cannot delete method requirement ($name) from (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     return unless $self->$*->{'REQUIRES'};
     my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};
     $REQUIRES->@* = grep { $_ ne $name } $REQUIRES->@*;
@@ -190,7 +230,7 @@ sub add_method ($self, $name, $code) {
 
     no strict 'refs';
     my $full_name = $self->name . '::' . $name;
-    *{$full_name} = Sub::Name::subname( 
+    *{$full_name} = Sub::Util::set_subname( 
         $full_name, 
         Scalar::Util::blessed($code) ? $code->body : $code
     );
@@ -204,14 +244,12 @@ sub alias_method ($self, $name, $code) {
     *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) ? $code->body : $code;
 }
 
-# Finalizer 
+# Finalization
 
-FINALIZE { 
-    # NOTE:
-    # We need to close mop::role here as well.
-    my $meta = __PACKAGE__->new( name => __PACKAGE__ ); 
-    our $CLOSED = 1;
-};
+BEGIN {
+    our $IS_CLOSED;
+    our @FINALIZERS = ( sub { $IS_CLOSED = 1 } );
+}
 
 1;
 

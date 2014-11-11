@@ -21,7 +21,10 @@ package Foo 0.01 {
 
     sub foo { 'Foo::foo' }
 
-    FINALIZE { our $CLOSED = 1 };
+    BEGIN { 
+        our $IS_CLOSED;
+        our @FINALIZERS = sub { $IS_CLOSED = 1 };
+    }
 } 
 
 package Bar {
@@ -29,15 +32,16 @@ package Bar {
     use warnings;
 
     use mop::internal::util 'FINALIZE';
-    
-    use Scalar::Util qw[ blessed ];
 
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
 
     use base 'Foo';
 
-    FINALIZE { our $CLOSED = 1 };
+    BEGIN { 
+        our $IS_CLOSED;
+        our @FINALIZERS = sub { $IS_CLOSED = 1 };
+    }
 } 
 
 package Baz { 
@@ -48,7 +52,10 @@ package Baz {
 
     our @ISA = ('Bar');
 
-    FINALIZE { our $CLOSED = 1 };
+    BEGIN { 
+        our $IS_CLOSED;
+        our @FINALIZERS = sub { $IS_CLOSED = 1 };
+    }
 }
 
 # test them ...

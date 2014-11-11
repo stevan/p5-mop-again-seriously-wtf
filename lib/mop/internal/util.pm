@@ -3,17 +3,47 @@ package mop::internal::util;
 use v5.20;
 use mro;
 use warnings;
-use experimental 'signatures', 'postderef';
+use feature 'signatures', 'postderef';
+no warnings 'experimental::signatures', 'experimental::postderef';
 
-use mop::internal::util::package::FINALIZE;
+use Devel::Hook ();
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub import ($pkg, @args) {
-    if ( @args && $args[0] eq 'FINALIZE' ) {
-        mop::internal::util::package::FINALIZE->import_into( scalar caller )
+sub import ($class, @args) {
+    my $calling_pkg = caller;
+    if ( @args ) {
+        if ( $args[0] eq 'FINALIZE' ) {
+            $class->install_finalization_runner_for_package( $calling_pkg )
+        }
     }
+}
+
+## Class finalization 
+
+# NOTE:
+# This feature is here simply because we need
+# to run the FINALIZE blocks in FIFO order
+# and the raw UNITCHECK blocks run in LIFO order
+# which can present issues when more then one 
+# class/role is in a single compiliation unit
+# and the later class/role depends on a former
+# class/role to have been finalized.
+#
+# It is important to note that UNITCHECK, while
+# compilation unit specific, is *not* package 
+# specific, so we need to manage the per-package
+# stuff on our own. 
+# - SL
+
+sub install_finalization_runner_for_package ($class, $pkg) {
+    die "[mop::PANIC] To late to install finalization runner for <$pkg>, current-phase: (${^GLOBAL_PHASE})" 
+        unless ${^GLOBAL_PHASE} eq 'START';
+
+    Devel::Hook->push_UNITCHECK_hook(sub { 
+        mop::role->new( name => $pkg )->finalize_class; 
+    });
 }
 
 ## Instance construction and destruction 
