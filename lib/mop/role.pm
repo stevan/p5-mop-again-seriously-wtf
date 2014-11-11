@@ -26,7 +26,9 @@ sub new ($class, %args) {
         $stash = \%{ $name . '::' };
     }
 
-    return bless \$stash => $class;
+    my $self = bless \$stash => $class;
+    $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
+    $self;    
 }
 
 # access to the package itself
