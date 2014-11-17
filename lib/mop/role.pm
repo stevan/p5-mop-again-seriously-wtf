@@ -119,6 +119,68 @@ sub does_role ($self, $role_to_test) {
     return 0;
 }
 
+# attributes 
+
+sub attributes ($self) {
+    my $HAS = $self->$*->{'HAS'};
+    return () unless $HAS;
+
+    my $attrs = $HAS->*{'HASH'};
+    return () unless keys %$attrs;
+
+    my @attrs;
+    foreach my $candidate ( keys %$attrs ) {
+        my $attr = mop::attribute->new( name => $candidate, initializer => $attrs->{ $candidate } );
+        if ( $attr->stash_name eq $self->name || $attr->was_aliased_from( $self->roles ) ) {
+            push @attrs => $attr;
+        }
+    }
+    return @attrs;
+}
+
+sub has_attribute ($self, $name) {
+    # TODO
+}
+
+sub get_attribute ($self, $name) {
+    # TODO
+}
+
+sub delete_attribute ($self, $name) {
+    # TODO
+}
+
+sub add_attribute ($self, $name, $initializer) {
+    die "[mop::PANIC] Cannot add attribute ($name) to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
+    unless ( $self->$*->{'HAS'} ) {
+        no strict 'refs';
+        %{ $self->name . '::HAS'} = ( $name => $initializer );
+    }
+    else {
+        my $HAS = $self->$*->{'HAS'}->*{'HASH'};   
+        $HAS->{ $name } = Sub::Util::set_subname(
+            ($self->name . '::__ANON__'),
+            $initializer
+        );
+    }
+}
+
+sub alias_attribute ($self, $name, $initializer) {
+    die "[mop::PANIC] Cannot alias method ($name) to (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
+    unless ( $self->$*->{'HAS'} ) {
+        no strict 'refs';
+        %{ $self->name . '::HAS'} = ( $name => $initializer );
+    }
+    else {
+        my $HAS = $self->$*->{'HAS'}->*{'HASH'};   
+        $HAS->{ $name } = $initializer;
+    }
+}
+
 # required methods
 
 sub required_methods ($self) {
