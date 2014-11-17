@@ -14,7 +14,7 @@ our @ISA; BEGIN { @ISA  = ('mop::object') }
 
 sub new ($class, %args) {
     my $body = $args{'body'} or die 'The method `body` is required';
-    my $self = bless \$body => 'mop::method';
+    my $self = bless \$body => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self; 
 }
