@@ -66,6 +66,24 @@ sub DEMOLISHALL ($instance)  {
     return;
 }
 
+## Attribute gathering ...
+
+# NOTE:
+# The %HAS variable will cache things much like 
+# the package stash method/cache works. It will 
+# be possible to distinguish the local attributes 
+# from the inherited ones because the default sub
+# will have a different stash name. 
+
+sub GATHER_ATTRIBUTES ($meta) {
+    foreach my $super ( map { mop::class->new( name => $_ ) } $meta->mro ) {
+        foreach my $attr ( $super->attributes ) {
+            $meta->alias_attribute( $attr->name, $attr )
+                unless $meta->has_attribute( $attr->name );
+        }
+    }
+}
+
 ## Role application and composition
 
 sub APPLY_ROLES ($meta, $roles, %opts) {
