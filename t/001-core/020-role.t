@@ -29,6 +29,13 @@ my @METHODS = qw[
     roles
     does_role
 
+    attributes
+    has_attribute
+    get_attribute
+    delete_attribute
+    add_attribute
+    alias_attribute
+
     finalizers
     has_finalizers
     add_finalizer 

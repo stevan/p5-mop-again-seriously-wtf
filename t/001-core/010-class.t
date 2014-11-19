@@ -37,6 +37,13 @@ my @METHODS = qw[
 
     construct_instance
 
+    attributes
+    has_attribute
+    get_attribute
+    delete_attribute
+    add_attribute
+    alias_attribute
+
     finalizers
     has_finalizers
     add_finalizer
