@@ -141,7 +141,8 @@ Gives you the following output:
     RV = 0x7fcbdb003468
     SV = PVCV(0x7fcbdb026ee8) at 0x7fcbdb003468
       REFCNT = 2
-      FLAGS = ()
+      FLAGS = (POK,pPOK)
+      PROTOTYPE = "-1"
       COMP_STASH = 0x7fcbdb003120 "main"
       ROOT = 0x0
       GVGV::GV = 0x7fcbdb17d2d8   "Test" :: "foo"
@@ -152,13 +153,17 @@ Gives you the following output:
       PADLIST = 0x0
       OUTSIDE = 0x0 (null)
 
+  # Note the PROTOTYPE and FLAGS, these didn't always 
+  # show up, they only appeared if we had tried to print 
+  # the value in 'foo', which at the time is -1, and 
+  # then auto-vivify. I suspect this has something to do
+  # with dualvars, but I don't know that for sure.
+
 Right now the code (since it is in perl-space) is perhaps
 not doing required method creation and detection as safely 
 as it could be, but that can be fixed in the XS version. For
 now, this works and we have these notes reminding us to 
 improve it.
-
-
 
 =cut
 
