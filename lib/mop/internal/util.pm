@@ -80,6 +80,9 @@ sub GATHER_ATTRIBUTES ($meta) {
         foreach my $attr ( $super->attributes ) {
             $meta->alias_attribute( $attr->name, $attr )
                 unless $meta->has_attribute( $attr->name );
+                    # FIXME - this should also check for aliased 
+                    #         attributes, as we want the least 
+                    #         derived class to win this.
         }
     }
 }
