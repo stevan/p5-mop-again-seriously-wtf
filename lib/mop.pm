@@ -109,6 +109,57 @@ with C<mop::class> will still give you sensible information
 about that class. Ideally this will make back-compat issues
 much easier to handle, though this is still to be tested.
 
+=head2 Required Methods
+
+Required methods are implemented using the existing Perl 
+feature of an undefined subroutine. This is basically a C<sub>
+without a body. For example:
+
+  sub foo; 
+
+  foo(); # Undefined subroutine &main::foo called at ...
+
+They are actually stored in the symbol table as a -1 instead
+of actually creating the GLOB. However, if there already is 
+a GLOB, or the GLOB is autovivified for some reason (calling
+C<can> with the method name, etc.) then perl will "upgrade"
+it into a special kind of CV. For example, this code:
+
+  use Devel::Peek;
+
+  package Test {
+    sub foo;
+  }
+
+  Dump(Test->can('foo'));
+
+Gives you the following output:
+
+  SV = IV(0x7fcbdb027be0) at 0x7fcbdb027bf0
+    REFCNT = 1
+    FLAGS = (TEMP,ROK)
+    RV = 0x7fcbdb003468
+    SV = PVCV(0x7fcbdb026ee8) at 0x7fcbdb003468
+      REFCNT = 2
+      FLAGS = ()
+      COMP_STASH = 0x7fcbdb003120 "main"
+      ROOT = 0x0
+      GVGV::GV = 0x7fcbdb17d2d8   "Test" :: "foo"
+      FILE = "test.pl"
+      DEPTH = 0
+      FLAGS = 0x0
+      OUTSIDE_SEQ = 0
+      PADLIST = 0x0
+      OUTSIDE = 0x0 (null)
+
+Right now the code (since it is in perl-space) is perhaps
+not doing required method creation and detection as safely 
+as it could be, but that can be fixed in the XS version. For
+now, this works and we have these notes reminding us to 
+improve it.
+
+
+
 =cut
 
 
