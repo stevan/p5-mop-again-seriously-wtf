@@ -39,9 +39,11 @@ isa_ok($Foo, 'mop::class');
 
     is($attributes[0]->name, 'bar', '... got the attribute name');
     is($attributes[0]->initializer->(), 'BAR', '... got the attribute initializer value');
+    ok($Foo->has_attribute('bar'), '... the class agrees that we do have this attribute');
 
     is($attributes[1]->name, 'baz', '... got the attribute name');
     is($attributes[1]->initializer->(), 'BAZ', '... got the attribute initializer value');
+    ok($Foo->has_attribute('baz'), '... the class agrees that we do have this attribute');
 }
 
 $Foo->add_attribute( gorch => sub { 'GORCH' } );
@@ -58,12 +60,15 @@ $Foo->add_attribute( gorch => sub { 'GORCH' } );
 
     is($attributes[0]->name, 'bar', '... got the attribute name');
     is($attributes[0]->initializer->(), 'BAR', '... got the attribute initializer value');
+    ok($Foo->has_attribute('bar'), '... the class agrees that we do have this attribute');
 
     is($attributes[1]->name, 'baz', '... got the attribute name');
     is($attributes[1]->initializer->(), 'BAZ', '... got the attribute initializer value');
+    ok($Foo->has_attribute('baz'), '... the class agrees that we do have this attribute');
 
     is($attributes[2]->name, 'gorch', '... got the attribute name');
     is($attributes[2]->initializer->(), 'GORCH', '... got the attribute initializer value');
+    ok($Foo->has_attribute('gorch'), '... the class agrees that we do have this attribute');
 }
 
 $Foo->alias_attribute( bling => sub { 'BLING' } );
@@ -80,15 +85,19 @@ $Foo->alias_attribute( bling => sub { 'BLING' } );
 
     is($attributes[0]->name, 'bar', '... got the attribute name');
     is($attributes[0]->initializer->(), 'BAR', '... got the attribute initializer value');
+    ok($Foo->has_attribute('bar'), '... the class agrees that we do have this attribute');
 
     is($attributes[1]->name, 'baz', '... got the attribute name');
     is($attributes[1]->initializer->(), 'BAZ', '... got the attribute initializer value');
+    ok($Foo->has_attribute('baz'), '... the class agrees that we do have this attribute');
 
     is($attributes[2]->name, 'gorch', '... got the attribute name');
     is($attributes[2]->initializer->(), 'GORCH', '... got the attribute initializer value');
+    ok($Foo->has_attribute('gorch'), '... the class agrees that we do have this attribute');
 
     ok(exists $Foo::HAS{'bling'}, '... that said, we do have the attribute though');
     is($Foo::HAS{'bling'}->(), 'BLING', '... and it works as expected');
+    ok(!$Foo->has_attribute('bling'), '... the class agrees that we do NOT have this attribute');
 }
 
 done_testing;

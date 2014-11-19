@@ -139,15 +139,42 @@ sub attributes ($self) {
 }
 
 sub has_attribute ($self, $name) {
-    # TODO
+    my $HAS = $self->$*->{'HAS'};
+    return 0 unless $HAS;
+
+    my $attrs = $HAS->*{'HASH'};
+    return 0 unless exists $attrs->{ $name };
+    
+    my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
+    return 0 unless $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles );
+
+    return 1;
 }
 
 sub get_attribute ($self, $name) {
-    # TODO
+    my $HAS = $self->$*->{'HAS'};
+    return unless $HAS;
+
+    my $attrs = $HAS->*{'HASH'};
+    return unless exists $attrs->{ $name };
+    
+    my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
+    return unless $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles );
+    
+    return $attr;
 }
 
 sub delete_attribute ($self, $name) {
-    # TODO
+    my $HAS = $self->$*->{'HAS'};
+    return unless $HAS;
+
+    my $attrs = $HAS->*{'HASH'};
+    return unless exists $attrs->{ $name };
+    
+    my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
+    return unless $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles );
+    
+    return delete $attrs->{ $name };
 }
 
 sub add_attribute ($self, $name, $initializer) {
