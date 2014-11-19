@@ -104,7 +104,7 @@ BEGIN {
         BEGIN { 
             our @FINALIZERS = (sub {
                 mop::internal::util::APPLY_ROLES( 
-                    mop::role->new( name => __PACKAGE__ ), 
+                    mop::class->new( name => __PACKAGE__ ), 
                     \@DOES, 
                     to => 'class' 
                 )
