@@ -18,7 +18,7 @@ BEGIN {
         use feature 'signatures', 'postderef';
         no warnings 'experimental::signatures', 'experimental::postderef';
 
-        our @REQUIRES = ('equal_to');
+        sub equal_to;
 
         sub not_equal_to ($self, $other) {
             not $self->equal_to($other);
@@ -35,7 +35,7 @@ BEGIN {
 
         our @DOES = ('Eq');
 
-        our @REQUIRES = ('compare');
+        sub compare;
 
         sub equal_to ($self, $other) {
             $self->compare($other) == 0;
@@ -74,7 +74,7 @@ BEGIN {
         use feature 'signatures', 'postderef';
         no warnings 'experimental::signatures', 'experimental::postderef';
 
-        our @REQUIRES = ('to_string');
+        sub to_string;
     }
 
     package US::Currency {

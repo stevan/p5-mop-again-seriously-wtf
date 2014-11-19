@@ -184,34 +184,61 @@ sub alias_attribute ($self, $name, $initializer) {
 # required methods
 
 sub required_methods ($self) {
-    my $REQUIRES = $self->$*->{'REQUIRES'};
-    return () unless $REQUIRES;
-    return $REQUIRES->*{'ARRAY'}->@*;
+    my @required;
+    foreach my $candidate ( keys $self->$*->%* ) {
+        if ( my $glob = \($self->$*->{ $candidate }) ) {
+            next if ref $glob eq 'GLOB';
+            next if ref $glob ne 'SCALAR';
+            next if not defined $glob->$*;
+            push @required => $candidate if $glob->$* == -1;
+        }
+    }
+    return @required;
 }
 
 sub requires_method ($self, $name) {
-    my $REQUIRES = $self->$*->{'REQUIRES'};
-    return 0 unless $REQUIRES;
-    foreach ( $REQUIRES->*{'ARRAY'}->@* ) {
-        return 1 if $_ eq $name;
-    }
-    return 0;
+    return 0 unless exists $self->$*->{ $name };
+    my $glob = \($self->$*->{ $name });
+    return 0 if ref $glob eq 'GLOB';
+    return 0 if ref $glob ne 'SCALAR';
+    return 0 if not defined $glob->$*;
+    return 1 if $glob->$* == -1;
+    die "[mop::PANIC] I found a (" . (ref $glob) . ") with a value of (" . $glob->$* . ") at '$name', I expected a GLOB or a SCALAR";
 }
 
 sub add_required_method ($self, $name) {
     die "[mop::PANIC] Cannot add a method requirement ($name) to (" . $self->name . ") because it has been closed"
         if $self->is_closed;
 
-    unless ( $self->$*->{'REQUIRES'} ) {
-        no strict 'refs';
-        *{ $self->name . '::REQUIRES'} = [ $name ];
+    if ( exists $self->$*->{ $name } ) {
+        my $glob = \($self->$*->{ $name });
+        # NOTE: 
+        # If something happens to autovivify the
+        # typeglob for this $name, then this will 
+        # throw the exception below. This can be 
+        # caused by any number of things, such as 
+        # calling ->can($name) or having another 
+        # type of variable (SCALAR, ARRAY, HASH)
+        # with the same $name. Basically it can 
+        # only be a C<sub foo;> and nothing else.
+        # 
+        # It is possible this is just too fragile
+        # but perhaps we can do something on the 
+        # XS side later on to better capture this
+        # and remove some of the fragility.
+        # - SL
+        die "[mop::PANIC] Cannot add a method requirement ($name) because a typeglob exists for ($name) and we cannot easily determine if method is required or not"
+            if ref $glob eq 'GLOB'
+            || ref $glob ne 'SCALAR'
+            || not defined $glob->$*;
+        # if it is just a SCALAR ref and derefs 
+        # to -1, then we already require that 
+        # method, so we can just skip.
+        return if $glob->$* == -1;
+        die "[mop::PANIC] I found a (" . (ref $glob) . ") with a value of (" . $glob->$* . ") at '$name', I expected a GLOB or a SCALAR";
     }
     else {
-        my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};   
-        foreach ( $REQUIRES->@* ) {
-            return if $_ eq $name;
-        }
-        push $REQUIRES->@* => $name;
+        $self->$*->{ $name } = -1;
     }
 }
 
@@ -219,9 +246,18 @@ sub delete_required_method ($self, $name) {
     die "[mop::PANIC] Cannot delete method requirement ($name) from (" . $self->name . ") because it has been closed"
         if $self->is_closed;
 
-    return unless $self->$*->{'REQUIRES'};
-    my $REQUIRES = $self->$*->{'REQUIRES'}->*{'ARRAY'};
-    $REQUIRES->@* = grep { $_ ne $name } $REQUIRES->@*;
+    return unless exists $self->$*->{ $name };
+    
+    my $glob = \($self->$*->{ $name });
+    return if ref $glob eq 'GLOB';
+    return if ref $glob ne 'SCALAR';
+    return if not defined $glob->$*;
+
+    if ( $glob->$* == -1 ) {
+        return delete $self->$*->{ $name };
+    }
+    
+    die "[mop::PANIC] I found a (" . (ref $glob) . ") with a value of (" . $glob->$* . ") at '$name', I expected a GLOB or a SCALAR";
 }
 
 # methods 
@@ -229,10 +265,14 @@ sub delete_required_method ($self, $name) {
 sub methods ($self) {
     my @methods;
     foreach my $candidate ( keys $self->$*->%* ) {
-        if ( my $code = $self->$*->{ $candidate }->*{'CODE'} ) {
-            $code = mop::method->new( body => $code );
-            if ( $code->stash_name eq $self->name || $code->was_aliased_from( $self->roles ) ) {
-                push @methods => $code;
+        if ( exists $self->$*->{ $candidate } ) {
+            my $glob = \($self->$*->{ $candidate });
+            next unless ref $glob eq 'GLOB';
+            if ( my $code = $glob->$*->*{'CODE'} ) {
+                $code = mop::method->new( body => $code );
+                if ( $code->stash_name eq $self->name || $code->was_aliased_from( $self->roles ) ) {
+                    push @methods => $code;
+                }
             }
         }
     }
@@ -241,7 +281,9 @@ sub methods ($self) {
 
 sub has_method ($self, $name) {
     return 0 unless exists $self->$*->{ $name };
-    if ( my $code = $self->$*->{ $name }->*{'CODE'} ) {
+    my $glob = \($self->$*->{ $name });
+    return 0 unless ref $glob eq 'GLOB';
+    if ( my $code = $glob->$*->*{'CODE'} ) {
         $code = mop::method->new( body => $code );
         return 0 unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
         return 1;
@@ -251,7 +293,9 @@ sub has_method ($self, $name) {
 
 sub get_method ($self, $name) {
     return unless exists $self->$*->{ $name };
-    if ( my $code = $self->$*->{ $name }->*{'CODE'} ) {
+    my $glob = \($self->$*->{ $name });
+    return unless ref $glob eq 'GLOB';
+    if ( my $code = $glob->$*->*{'CODE'} ) {    
         $code = mop::method->new( body => $code );
         return unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
         return $code;
@@ -264,7 +308,11 @@ sub delete_method ($self, $name) {
         if $self->is_closed;
 
     return unless exists $self->$*->{ $name };
-    if ( my $code = $self->$*->{ $name }->*{'CODE'} ) {
+
+    my $glob = \($self->$*->{ $name });
+    return unless ref $glob eq 'GLOB';
+
+    if ( my $code = $glob->$*->*{'CODE'} ) {
         $code = mop::method->new( body => $code );
         return unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
         my $glob = $self->$*->{ $name };      

@@ -17,7 +17,7 @@ BEGIN {
         use v5.20;
         use warnings;
 
-        our @REQUIRES = ('foo');
+        sub foo;
 
         sub bar { 'Bar::Role::bar' } 
     }
@@ -71,7 +71,7 @@ BEGIN {
     $BarRole->add_required_method('gorch');
 
     ok($BarRole->requires_method('gorch'), '... we require the &gorch method');
-    is_deeply([ $BarRole->required_methods ], ['foo', 'gorch'], '... got the expected result from ->required_methods');
+    is_deeply([ sort $BarRole->required_methods ], ['foo', 'gorch'], '... got the expected result from ->required_methods');
 
 }
 
