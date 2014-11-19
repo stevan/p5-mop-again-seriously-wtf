@@ -131,7 +131,7 @@ sub attributes ($self) {
     my @attrs;
     foreach my $candidate ( keys %$attrs ) {
         my $attr = mop::attribute->new( name => $candidate, initializer => $attrs->{ $candidate } );
-        if ( $attr->stash_name eq $self->name || $attr->was_aliased_from( $self->roles ) ) {
+        if ( $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles ) ) {
             push @attrs => $attr;
         }
     }
@@ -270,7 +270,7 @@ sub methods ($self) {
             next unless ref $glob eq 'GLOB';
             if ( my $code = $glob->$*->*{'CODE'} ) {
                 $code = mop::method->new( body => $code );
-                if ( $code->stash_name eq $self->name || $code->was_aliased_from( $self->roles ) ) {
+                if ( $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles ) ) {
                     push @methods => $code;
                 }
             }
