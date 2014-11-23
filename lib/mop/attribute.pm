@@ -37,6 +37,11 @@ sub was_aliased_from ($self, @packages) {
     return 0;
 }
 
+BEGIN {
+    our $IS_CLOSED;
+    our @FINALIZERS = ( sub { $IS_CLOSED = 1 } );
+}
+
 1;
 
 __END__

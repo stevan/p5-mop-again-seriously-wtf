@@ -1,7 +1,10 @@
 package mop;
 
 use v5.20;
+use mro;
 use warnings;
+use feature 'signatures', 'postderef';
+no warnings 'experimental::signatures', 'experimental::postderef';
 
 use mop::internal::util;
 
@@ -10,6 +13,27 @@ use mop::attribute;
 use mop::method;
 use mop::role;
 use mop::class;
+
+our $IS_BOOTSTRAPPED;
+
+sub import ($class, @args) {
+    # start the bootstrapping ...
+    $IS_BOOTSTRAPPED = 0;
+
+    # NOTE:
+    # Run the finalizers for the three packages that we 
+    # could not run it for previously. The issue is that 
+    # the finalize runner needs mop::role, and that cannot
+    # run until mop::role is loaded. These three packages
+    # are all needed by mop::role, so we have to tie the 
+    # knot here to make all things well.
+    foreach my $pkg (qw[ mop::object mop::attribute mop::method ]) {
+        mop::role->new( name => $pkg )->run_all_finalizers;     
+    }
+
+    # bootstrapping is complete ...
+    $IS_BOOTSTRAPPED = 1;
+}
 
 1;
 

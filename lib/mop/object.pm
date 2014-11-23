@@ -24,6 +24,11 @@ sub DESTROY ($self) {
     $self->can('DEMOLISH') && mop::internal::util::DEMOLISHALL( $self )
 }
 
+BEGIN {
+    our $IS_CLOSED;
+    our @FINALIZERS = ( sub { $IS_CLOSED = 1 } );
+}
+
 1;
 
 __END__
