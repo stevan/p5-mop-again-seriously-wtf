@@ -101,7 +101,7 @@ sub add_finalizer ($self, $finalizer) {
     }
 }
 
-sub finalize_class ($self) { $_->() for $self->finalizers }
+sub run_all_finalizers ($self) { $_->() for $self->finalizers }
 
 # roles 
 

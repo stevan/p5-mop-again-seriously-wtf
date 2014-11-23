@@ -39,7 +39,7 @@ my @METHODS = qw[
     finalizers
     has_finalizers
     add_finalizer 
-    finalize_class   
+    run_all_finalizers   
 
     required_methods
     requires_method
