@@ -165,6 +165,168 @@ as it could be, but that can be fixed in the XS version. For
 now, this works and we have these notes reminding us to 
 improve it.
 
+=head2 Moose style syntax
+
+Moxie is the working title for this module, that may change
+if I can find another.
+
+One of the key differences between it and Moose will be 
+that it will perform inheritance and role composition at 
+compile time instead of runtime. This is required because 
+we run the FINALIZER stuff during the UNITCHECK time, so we 
+need to know about the class earlier.
+
+Unfortunately C<has> is still running at runtime, but that 
+should be okay since we can set up the inherited attribute
+cache and let new C<has> calls just add to it (and overwrite
+where applicable). 
+
+Of course, this hasn't been written yet, so ... we will see. 
+
+  package Eq {
+      use Moxie;
+
+      sub equal_to;
+
+      sub not_equal_to ($self, $other) {
+          not $self->equal_to($other);
+      }
+  }
+
+  package Comparable {
+      use Moxie with => 'Eq';
+
+      sub compare;
+
+      sub equal_to ($self, $other) {
+          $self->compare($other) == 0;
+      }
+
+      sub greater_than ($self, $other)  {
+          $self->compare($other) == 1;
+      }
+
+      sub less_than  ($self, $other) {
+          $self->compare($other) == -1;
+      }
+
+      sub greater_than_or_equal_to ($self, $other)  {
+          $self->greater_than($other) || $self->equal_to($other);
+      }
+
+      sub less_than_or_equal_to ($self, $other)  {
+          $self->less_than($other) || $self->equal_to($other);
+      }
+  }
+
+  package Printable {
+      use Moxie;
+
+      sub to_string;
+  }
+
+  package US::Currency {
+      use Moxie 
+          extends => 'mop::object',
+             with => 'Comparable', 'Printable';
+
+      has amount => ( is 'rw', default 0 );
+
+      sub compare ($self, $other) {
+          $self->amount <=> $other->amount;
+      }
+
+      sub to_string ($self) {
+          sprintf '$%0.2f USD' => $self->amount;
+      }
+  }
+
+Couple of notes:
+
+=over 4
+
+=item There is no C<Moxie::Role> package.
+
+If you look above, I talk about how a package is both a 
+role and a class and it only matters in how you treat them, 
+this is what is going on here.
+
+=item There no fat commas between C<has> options.
+
+Must like in the previous prototype, these "options" are now 
+defined as "traits", and are implemented as functions. It is 
+assumed that C<is 'rw'> is simply a function call to C<is> 
+with a single argument C<'rw'>. The trait will then return 
+a CODE ref that can be applied to the attribute object itself.
+Here is a quick sketch of what an implementation of C<has> 
+might look like:
+
+  sub has ($name, @traits) {
+      my $attr = ${^CLASS}->add_attribute( $name, undef );
+      foreach my $trait ( @traits ) {
+          $trait->( ${^CLASS}, $attr );
+      }
+      return;
+  }
+
+Lots of hand waving going on here, but hopefully the idea 
+is clear enough.
+
+=back
+
+=head2 new mop style syntax
+
+This is the exact same syntax as in the previous prototype
+(p5-mop-redux), so just refer to that project for more 
+details.
+
+  role Eq {
+      method equal_to;
+  
+      method not_equal_to ($other) {
+          not $self->equal_to($other);
+      }
+  }
+  
+  role Comparable with Eq {
+      method compare;
+      method equal_to ($other) {
+          $self->compare($other) == 0;
+      }
+  
+      method greater_than ($other)  {
+          $self->compare($other) == 1;
+      }
+  
+      method less_than  ($other) {
+          $self->compare($other) == -1;
+      }
+  
+      method greater_than_or_equal_to ($other)  {
+          $self->greater_than($other) || $self->equal_to($other);
+      }
+  
+      method less_than_or_equal_to ($other)  {
+          $self->less_than($other) || $self->equal_to($other);
+      }
+  }
+  
+  role Printable {
+      method to_string;
+  }
+  
+  class US::Currency with Comparable, Printable {
+      has $!amount is ro = 0;
+  
+      method compare ($other) {
+          $!amount <=> $other->amount;
+      }
+  
+      method to_string {
+          sprintf '$%0.2f USD' => $!amount;
+      }
+  }
+
 =cut
 
 
