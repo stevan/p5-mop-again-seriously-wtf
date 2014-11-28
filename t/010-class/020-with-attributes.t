@@ -16,10 +16,12 @@ package Foo 0.01 {
     use v5.20;
     use warnings;
 
-    our %HAS = (
-        bar => sub { 'BAR' },
-        baz => sub { 'BAZ' },
-    );
+    our %HAS; BEGIN {
+        %HAS = (
+            bar => sub { 'BAR' },
+            baz => sub { 'BAZ' },
+        )
+    };
 } 
 
 # test them ...
