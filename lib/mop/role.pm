@@ -61,6 +61,14 @@ sub is_closed ($self) {
     return $self->$*->{'IS_CLOSED'}->*{'SCALAR'}->$* ? 1 : 0;
 }
 
+sub set_is_closed ($self, $value) {
+    no strict 'refs';
+    no warnings 'once';
+    ${ $self->name . '::IS_CLOSED'} = $value;
+}
+
+# ...
+
 sub is_abstract ($self) {
     # if you have required methods, you are abstract
     # that is a hard enforced rule here ...
@@ -76,6 +84,12 @@ sub is_abstract ($self) {
     # required methods, but also keep the strict 
     # checking of required methods as a indicator 
     # of abstract-ness
+}
+
+sub set_is_abstract ($self, $value) {
+    no strict 'refs';
+    no warnings 'once';
+    ${ $self->name . '::IS_ABSTRACT'} = $value;
 }
 
 # finalization 
@@ -112,6 +126,12 @@ sub roles ($self) {
     my $DOES = $self->$*->{'DOES'};
     return () unless $DOES;
     return $DOES->*{'ARRAY'}->@*;
+}
+
+sub set_roles ($self, @roles) {
+    no strict 'refs';
+    no warnings 'once';
+    @{ $self->name . '::DOES'} = ( @roles );
 }
 
 sub does_role ($self, $role_to_test) {

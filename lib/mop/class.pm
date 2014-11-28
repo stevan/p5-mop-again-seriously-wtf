@@ -30,6 +30,12 @@ sub superclasses ($self) {
     return $ISA->*{'ARRAY'}->@*;
 }
 
+sub set_superclasses ($self, @supers) {
+    no strict 'refs';
+    no warnings 'once';
+    @{ $self->name . '::ISA'} = ( @supers );
+}
+
 sub mro ($self, $type = mro::get_mro( $self->name )) { 
     return mro::get_linear_isa( $self->name, $type )->@*;
 }
