@@ -62,6 +62,9 @@ sub is_closed ($self) {
 }
 
 sub set_is_closed ($self, $value) {
+    die "[mop::PANIC] Cannot set is_closed in (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     no strict 'refs';
     no warnings 'once';
     ${ $self->name . '::IS_CLOSED'} = $value;
@@ -87,6 +90,9 @@ sub is_abstract ($self) {
 }
 
 sub set_is_abstract ($self, $value) {
+    die "[mop::PANIC] Cannot set is_abstract in (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     no strict 'refs';
     no warnings 'once';
     ${ $self->name . '::IS_ABSTRACT'} = $value;
@@ -130,6 +136,9 @@ sub roles ($self) {
 }
 
 sub set_roles ($self, @roles) {
+    die "[mop::PANIC] Cannot set roles in (" . $self->name . ") because it has been closed"
+        if $self->is_closed;
+
     no strict 'refs';
     no warnings 'once';
     @{ $self->name . '::DOES'} = ( @roles );
