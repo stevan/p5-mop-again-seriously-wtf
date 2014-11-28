@@ -5,10 +5,12 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
+my %METACACHE;
+
 sub import {
-    my $pkg   = caller;
-    my $class = shift;    
-    my @args  = @_;
+    shift;
+    my $pkg  = caller;
+    my @args = @_;
 
     my (@extends, @with);
     my ($in_extends, $in_with) = (0, 0);
@@ -19,19 +21,40 @@ sub import {
         push @with    => $arg if $in_with;   
     }
 
-    use Data::Dumper;
-    warn Dumper [ \@extends, \@with ];
+    mop::internal::util::INSTALL_FINALIZATION_RUNNER_FOR( $pkg );
 
-    #${^CLASS} = mop::class->new( name => $class );
+    my $metatype  = (scalar @extends ? 'class' : 'role'); 
+    my $metaclass = 'mop::' . $metatype; 
 
-    #undef ${^CLASS};
+    my $meta = $metaclass->new( name => $pkg );
+    $meta->set_superclasses( @extends ) if @extends;
+    if ( @with ) {
+        $meta->set_roles( @with );
+        $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@with, to => $metatype ) });
+    }
+    $meta->add_finalizer(sub { $meta->set_is_closed(1) });    
+
+    feature->import('signatures', 'postderef');
+    warnings->unimport('experimental::signatures', 'experimental::postderef');
+    {
+        no strict 'refs';
+        *{$pkg . '::has'} = \&has;
+    }
+
+    $METACACHE{ $pkg } = $meta;
 }
 
 sub has ($name, @traits) {
-    my $attr = ${^CLASS}->add_attribute( $name, undef );
-    foreach my $trait ( @traits ) {
-        $trait->( ${^CLASS}, $attr );
+    my $pkg = caller;
+    my $meta  = $METACACHE{ $pkg };
+
+    $meta->add_attribute( $name, sub { undef } );
+
+    if ( @traits ) {
+        my $attr = $meta->get_attribute( $name );
+        $_->( $meta, $attr ) foreach @traits;
     }
+
     return;
 }
 
