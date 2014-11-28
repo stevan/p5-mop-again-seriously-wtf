@@ -48,6 +48,11 @@ sub INSTALL_FINALIZATION_RUNNER_FOR ($pkg) {
 
 ## Instance construction and destruction 
 
+# TODO:
+# add caches here using a `state` var, similar 
+# to what we do in GATHER_ALL_ATTRIBUTES below.
+# - SL
+
 sub BUILDALL ($instance, $args) {
     foreach my $c ( mro::get_linear_isa( ref $instance )->@* ) {
         if ( my $build = $c->can('BUILD') ) {
