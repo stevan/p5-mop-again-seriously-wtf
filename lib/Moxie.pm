@@ -7,6 +7,8 @@ no warnings 'experimental::signatures', 'experimental::postderef';
 
 my %METACACHE;
 
+my %TRAITS;
+
 sub import {
     shift;
     my $pkg  = caller;
@@ -44,15 +46,24 @@ sub import {
     $METACACHE{ $pkg } = $meta;
 }
 
-sub has ($name, @traits) {
-    my $pkg = caller;
-    my $meta  = $METACACHE{ $pkg };
+sub has ($name, %traits) {
+    my $pkg  = caller;
+    my $meta = $METACACHE{ $pkg };
 
-    $meta->add_attribute( $name, sub { undef } );
+    # this is the only one we handle 
+    # specially, everything else gets
+    # called as a trait ...
+    $traits{default} //= sub { undef };
 
-    if ( @traits ) {
+    $meta->add_attribute( $name, delete $traits{default} );
+
+    if ( keys %traits ) {
         my $attr = $meta->get_attribute( $name );
-        $_->( $meta, $attr ) foreach @traits;
+        foreach my $k ( keys %traits ) {
+            die "[Moxie::PANIC] Cannot locate trait ($k) to apply to attributes ($name)"
+                unless exists $TRAITS{ $k };
+            $TRAITS{ $k }->( $meta, $attr, $traits{ $k } );
+        }
     }
 
     return;
