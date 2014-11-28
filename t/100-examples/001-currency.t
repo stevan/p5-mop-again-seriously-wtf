@@ -87,11 +87,7 @@ BEGIN {
 
         our @ISA  = ('mop::object');
         our @DOES = ('Comparable', 'Printable');
-
-        sub new ($class, %args) {
-            $args{amount} //= 0;
-            $class->SUPER::new( %args );
-        }
+        our %HAS  = (amount => sub { 0 });
 
         sub compare ($self, $other) {
             $self->{amount} <=> $other->{amount};
