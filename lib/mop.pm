@@ -254,7 +254,7 @@ Of course, this hasn't been written yet, so ... we will see.
           extends => 'mop::object',
              with => 'Comparable', 'Printable';
 
-      has amount => ( is 'rw', default 0 );
+      has amount => ( is => 'rw', default => sub { 0 } );
 
       sub compare ($self, $other) {
           $self->amount <=> $other->amount;
@@ -275,26 +275,8 @@ If you look above, I talk about how a package is both a
 role and a class and it only matters in how you treat them, 
 this is what is going on here.
 
-=item There no fat commas between C<has> options.
-
-Must like in the previous prototype, these "options" are now 
-defined as "traits", and are implemented as functions. It is 
-assumed that C<is 'rw'> is simply a function call to C<is> 
-with a single argument C<'rw'>. The trait will then return 
-a CODE ref that can be applied to the attribute object itself.
-Here is a quick sketch of what an implementation of C<has> 
-might look like:
-
-  sub has ($name, @traits) {
-      my $attr = ${^CLASS}->add_attribute( $name, undef );
-      foreach my $trait ( @traits ) {
-          $trait->( ${^CLASS}, $attr );
-      }
-      return;
-  }
-
-Lots of hand waving going on here, but hopefully the idea 
-is clear enough.
+The only thing that kind of sucks about this is that 
+we have to explictly inherit from C<mop::object>.
 
 =back
 
