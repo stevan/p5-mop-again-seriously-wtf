@@ -31,7 +31,7 @@ BEGIN {
         use feature 'signatures', 'postderef';
         no warnings 'experimental::signatures', 'experimental::postderef';
 
-        use mop::internal::util 'FINALIZE';
+        use mop::internal::util FINALIZE => 'UNITCHECK';
 
         our @DOES = ('Eq');
 
@@ -83,7 +83,7 @@ BEGIN {
         use feature 'signatures', 'postderef';
         no warnings 'experimental::signatures', 'experimental::postderef';
 
-        use mop::internal::util 'FINALIZE';        
+        use mop::internal::util FINALIZE => 'UNITCHECK';
 
         our @ISA  = ('mop::object');
         our @DOES = ('Comparable', 'Printable');

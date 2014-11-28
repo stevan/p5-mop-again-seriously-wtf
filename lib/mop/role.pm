@@ -10,7 +10,7 @@ use Symbol       ();
 use Sub::Util    ();
 use Scalar::Util ();
 
-use mop::internal::util 'FINALIZE';
+use mop::internal::util FINALIZE => 'UNITCHECK';
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';

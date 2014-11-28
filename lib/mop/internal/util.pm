@@ -6,16 +6,25 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
-use Devel::Hook ();
+use Devel::Hook       ();
+use Exporter::Lexical (); # just for _lex_stuff, which is evil I know, sorry
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub import ($class, @args) {
+sub import ($class, %args) {
     my $calling_pkg = caller;
-    if ( @args ) {
-        if ( $args[0] eq 'FINALIZE' ) {
-            INSTALL_FINALIZATION_RUNNER_FOR( $calling_pkg )
+    foreach my $arg ( keys %args ) {
+        if ( $arg eq 'FINALIZE' ) {
+            if ( $args{ $arg } eq 'UNITCHECK' ) {
+                INSTALL_FINALIZATION_RUNNER_FOR_UNITCHECK( $calling_pkg );    
+            }
+            elsif ( $args{ $arg } eq 'ENDOFSCOPE' ) {
+                INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE( $calling_pkg );
+            }
+            else {
+                die "[mop::PANIC] No idea what to do with (" . $args{ $arg } . ") as option for FINALIZE";
+            }
         }
     }
 }
@@ -37,13 +46,27 @@ sub import ($class, @args) {
 # stuff on our own. 
 # - SL
 
-sub INSTALL_FINALIZATION_RUNNER_FOR ($pkg) {
+sub INSTALL_FINALIZATION_RUNNER_FOR_UNITCHECK ($pkg) {
     die "[mop::PANIC] To late to install finalization runner for <$pkg>, current-phase: (${^GLOBAL_PHASE})" 
         unless ${^GLOBAL_PHASE} eq 'START';
 
     Devel::Hook->push_UNITCHECK_hook(sub { 
         mop::role->new( name => $pkg )->run_all_finalizers; 
     });
+}
+
+package  
+    mop::internal::util::__SCOPE_GUARD__ {
+    sub new     { bless [ $_[1] ] => $_[0] }
+    sub DESTROY { $_[0]->[0]->()           } 
+}
+
+sub INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE ($pkg) {
+    Exporter::Lexical::_lex_stuff(q[
+        ;my $__SCOPE_GUARD__ = mop::internal::util::__SCOPE_GUARD__->new(sub { 
+            mop::role->new( name => __PACKAGE__ )->run_all_finalizers
+        });1;
+    ]);
 }
 
 ## Instance construction and destruction 
@@ -81,30 +104,15 @@ sub DEMOLISHALL ($instance)  {
 # will have a different stash name. 
 
 sub GATHER_ALL_ATTRIBUTES ($meta) {
-    state $ATTRIBUTES_BEEN_GATHERED_IN = {};
-
-    unless ( exists $ATTRIBUTES_BEEN_GATHERED_IN->{ $meta->name } ) {
-        my @mro = $meta->mro;
-        shift @mro; # no need to search ourselves ...
-        foreach my $super ( map { mop::role->new( name => $_ ) } @mro ) {
-            foreach my $attr ( $super->attributes ) {
-                $meta->alias_attribute( $attr->name, $attr->initializer ) 
-                    unless $meta->has_attribute( $attr->name ) 
-                        || $meta->has_attribute_alias( $attr->name );
-            }
+    my @mro = $meta->mro;
+    shift @mro; # no need to search ourselves ...
+    foreach my $super ( map { mop::role->new( name => $_ ) } @mro ) {
+        foreach my $attr ( $super->attributes ) {
+            $meta->alias_attribute( $attr->name, $attr->initializer ) 
+                unless $meta->has_attribute( $attr->name ) 
+                    || $meta->has_attribute_alias( $attr->name );
         }
-        $ATTRIBUTES_BEEN_GATHERED_IN->{ $meta->name } = 1;
     }
-    # return nothing in void context, it 
-    # typically means we are doing this 
-    # at compile time or something, so we 
-    # need to just skip it
-    return unless defined wantarray; 
-    # however, if we are calling this 
-    # to actually get the values, ...
-    my $HAS = $meta->stash->{'HAS'};
-    return () unless $HAS;
-    return $HAS->*{'HASH'}->%*;
 }
 
 ## Role application and composition

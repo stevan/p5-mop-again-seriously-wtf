@@ -26,7 +26,7 @@ package Bar {
     use v5.20;
     use warnings;
 
-    use mop::internal::util 'FINALIZE';    
+    use mop::internal::util FINALIZE => 'UNITCHECK';  
 
     our (@ISA, %HAS); 
     BEGIN { 

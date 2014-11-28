@@ -5,6 +5,8 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
+use Symbol;
+
 my (%METACACHE, %TRAITS);
 
 sub import {
@@ -21,7 +23,7 @@ sub import {
         push @with    => $arg if $in_with;   
     }
 
-    mop::internal::util::INSTALL_FINALIZATION_RUNNER_FOR( $pkg );
+    mop::internal::util::INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE( $pkg );
 
     my $metatype  = (scalar @extends ? 'class' : 'role'); 
     my $metaclass = 'mop::' . $metatype; 
@@ -32,6 +34,11 @@ sub import {
         $meta->set_roles( @with );
         $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@with, to => $metatype ) });
     }
+    
+    $meta->add_finalizer(sub {
+        mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta )
+    }) if $metatype eq 'class';    
+
     $meta->add_finalizer(sub { $meta->set_is_closed(1) });    
 
     feature->import('signatures', 'postderef');
@@ -40,6 +47,11 @@ sub import {
         no strict 'refs';
         *{$pkg . '::has'} = \&has;
     }
+
+    $meta->add_finalizer(sub {
+        no strict 'refs';
+        *{$pkg . '::has'} = Symbol::gensym();
+    }); 
 
     $METACACHE{ $pkg } = $meta;
 }

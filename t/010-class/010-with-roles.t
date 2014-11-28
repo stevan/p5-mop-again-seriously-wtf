@@ -33,7 +33,7 @@ BEGIN {
         use v5.20;
         use warnings;
 
-        use mop::internal::util 'FINALIZE';
+        use mop::internal::util FINALIZE => 'UNITCHECK';
 
         our @DOES = ('Bar::Role', 'Baz::Role');
 

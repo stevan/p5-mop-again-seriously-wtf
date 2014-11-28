@@ -6,7 +6,7 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
-use mop::internal::util 'FINALIZE';
+use mop::internal::util FINALIZE => 'UNITCHECK';
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -21,12 +21,13 @@ sub construct_instance ($self, $candidate) {
         if $self->is_abstract;
 
     my %instance;
-
-    my %proto = mop::internal::util::GATHER_ALL_ATTRIBUTES( $self );
-    foreach my $k ( keys %proto ) {
-        $instance{ $k } = exists $candidate->{ $k } 
-            ? $candidate->{ $k }
-            : $proto{ $k }->();
+    if ( my $HAS = $self->stash->{'HAS'} ) {
+        my %proto =  $HAS->*{'HASH'}->%*;
+        foreach my $k ( keys %proto ) {
+            $instance{ $k } = exists $candidate->{ $k } 
+                ? $candidate->{ $k }
+                : $proto{ $k }->();
+        }
     }
 
     return bless \%instance => $self->name;
