@@ -18,12 +18,15 @@ our $AUTHORITY = 'cpan:STEVAN';
 our @ISA; BEGIN { @ISA = ('mop::object') }
 
 sub new ($class, %args) {
-    my $name = $args{'name'} or die 'The role `name` is required';
-    
+    die 'The parameter `name` is required, and it must be a string'
+        unless exists  $args{'name'} 
+            && defined $args{'name'} 
+            && length  $args{'name'} > 0;
+
     my $stash;
     {
         no strict 'refs';
-        $stash = \%{ $name . '::' };
+        $stash = \%{ $args{'name'} . '::' };
     }
 
     my $self = bless \$stash => $class;

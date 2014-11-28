@@ -13,8 +13,20 @@ our $AUTHORITY = 'cpan:STEVAN';
 our @ISA; BEGIN { @ISA  = ('mop::object') }
 
 sub new ($class, %args) {
-    my $name        = $args{'name'}        or die 'The attribute `name` is required';
-    my $initializer = $args{'initializer'} or die 'The attribute `initializer` is required';
+
+    die 'The parameter `name` is required, and it must be a string'
+        unless exists  $args{'name'} 
+            && defined $args{'name'} 
+            && length  $args{'name'} > 0;
+
+    die 'The parameter `initializer` is required'
+        unless exists $args{'initializer'}
+            && ref    $args{'initializer'} 
+            && ref    $args{'initializer'} eq 'CODE';
+
+    my $name        = $args{'name'};
+    my $initializer = $args{'initializer'};
+
     # NOTE:
     # this is basically just a blessed HE (HashEntry)
     # because we want to avoid having to have need 

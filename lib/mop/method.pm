@@ -13,7 +13,12 @@ our $AUTHORITY = 'cpan:STEVAN';
 our @ISA; BEGIN { @ISA  = ('mop::object') }
 
 sub new ($class, %args) {
-    my $body = $args{'body'} or die 'The method `body` is required';
+    die 'The parameter `body` is required'
+        unless exists $args{'body'}
+            && ref    $args{'body'} 
+            && ref    $args{'body'} eq 'CODE';
+
+    my $body = $args{'body'};
     my $self = bless \$body => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self; 
