@@ -5,9 +5,7 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
-my %METACACHE;
-
-my %TRAITS;
+my (%METACACHE, %TRAITS);
 
 sub import {
     shift;
@@ -68,5 +66,25 @@ sub has ($name, %traits) {
 
     return;
 }
+
+BEGIN {
+    $TRAITS{'is'} = sub ($m, $a, $type) {
+        my $slot = $a->name;
+        if ( $type eq 'ro' ) {
+            $m->add_method( $slot => sub { 
+                die "Cannot assign to a readonly attribute" if scalar @_ != 1;
+                $_[0]->{ $slot };
+            });
+        } elsif ( $type eq 'rw' ) {
+            $m->add_method( $slot => sub { 
+                $_[0]->{ $slot } = $_[1] if $_[1];
+                $_[0]->{ $slot };
+            });            
+        } else {
+            die "[Moxie::PANIC] Got strange option ($type) to trait (is)";
+        }
+    };
+}
+
 
 1;

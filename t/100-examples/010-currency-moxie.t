@@ -60,15 +60,16 @@ BEGIN {
                with => 'Comparable', 'Printable';
 
         has 'amount' => (
+            is      => 'ro',
             default => sub { 0 }
         );
 
         sub compare ($self, $other) {
-            $self->{amount} <=> $other->{amount};
+            $self->amount <=> $other->amount;
         }
 
         sub to_string ($self) {
-            sprintf '$%0.2f USD' => $self->{amount};
+            sprintf '$%0.2f USD' => $self->amount;
         }
     }
 
@@ -93,6 +94,8 @@ ok(!$Eq->requires_method('not_equal_to'), '... EQ::not_equal_to is NOT a stub me
     ok($dollar->DOES( 'Eq' ), '... the dollar does the Eq role');
     ok($dollar->DOES( 'Comparable' ), '... the dollar does the Comparable role');
     ok($dollar->DOES( 'Printable' ), '... the dollar does the Printable role');
+
+    can_ok($dollar, 'amount');
 
     can_ok($dollar, 'equal_to');
     can_ok($dollar, 'not_equal_to');
