@@ -15,7 +15,7 @@ sub import ($class, @args) {
     my $calling_pkg = caller;
     if ( @args ) {
         if ( $args[0] eq 'FINALIZE' ) {
-            $class->install_finalization_runner_for_package( $calling_pkg )
+            INSTALL_FINALIZATION_RUNNER_FOR( $calling_pkg )
         }
     }
 }
@@ -37,7 +37,7 @@ sub import ($class, @args) {
 # stuff on our own. 
 # - SL
 
-sub install_finalization_runner_for_package ($class, $pkg) {
+sub INSTALL_FINALIZATION_RUNNER_FOR ($pkg) {
     die "[mop::PANIC] To late to install finalization runner for <$pkg>, current-phase: (${^GLOBAL_PHASE})" 
         unless ${^GLOBAL_PHASE} eq 'START';
 
