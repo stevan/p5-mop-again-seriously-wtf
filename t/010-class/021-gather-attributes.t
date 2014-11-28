@@ -79,6 +79,8 @@ isa_ok($Bar, 'mop::class');
     is($attributes[0]->name, 'baz', '... got the attribute name');
     is($attributes[0]->initializer->(), 'Bar::BAZ', '... got the attribute initializer value');
     ok($Bar->has_attribute('baz'), '... the class agrees that we do have this attribute');
+    ok(!$Bar->has_attribute('bar'), '... the class agrees that we do not have this attribute');
+    ok($Bar->has_attribute_alias('bar'), '... the class agrees that we do have an alias of this attribute');
 }
 
 {
