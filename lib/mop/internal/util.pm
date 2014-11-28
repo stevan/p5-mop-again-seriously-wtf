@@ -80,16 +80,31 @@ sub DEMOLISHALL ($instance)  {
 # from the inherited ones because the default sub
 # will have a different stash name. 
 
-sub GATHER_ATTRIBUTES ($meta) {
-    foreach my $super ( map { mop::class->new( name => $_ ) } $meta->mro ) {
-        foreach my $attr ( $super->attributes ) {
-            $meta->alias_attribute( $attr->name, $attr )
-                unless $meta->has_attribute( $attr->name );
-                    # FIXME - this should also check for aliased 
-                    #         attributes, as we want the least 
-                    #         derived class to win this.
+sub GATHER_ALL_ATTRIBUTES ($meta) {
+    state $ATTRIBUTES_BEEN_GATHERED_IN = {};
+
+    unless ( exists $ATTRIBUTES_BEEN_GATHERED_IN->{ $meta->name } ) {
+        my @mro = $meta->mro;
+        shift @mro; # no need to search ourselves ...
+        foreach my $super ( map { mop::role->new( name => $_ ) } @mro ) {
+            foreach my $attr ( $super->attributes ) {
+                $meta->alias_attribute( $attr->name, $attr->initializer ) 
+                    unless $meta->has_attribute( $attr->name ) 
+                        || $meta->has_attribute_alias( $attr->name );
+            }
         }
+        $ATTRIBUTES_BEEN_GATHERED_IN->{ $meta->name } = 1;
     }
+    # return nothing in void context, it 
+    # typically means we are doing this 
+    # at compile time or something, so we 
+    # need to just skip it
+    return unless defined wantarray; 
+    # however, if we are calling this 
+    # to actually get the values, ...
+    my $HAS = $meta->stash->{'HAS'};
+    return () unless $HAS;
+    return $HAS->*{'HASH'}->%*;
 }
 
 ## Role application and composition

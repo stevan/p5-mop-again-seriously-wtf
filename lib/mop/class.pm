@@ -19,7 +19,17 @@ our @DOES; BEGIN { @DOES = ('mop::role')   }
 sub construct_instance ($self, $candidate) {
     die "[mop::PANIC] Cannot construct instance, the class (" . $self->name . ") is abstract"
         if $self->is_abstract;
-    return bless $candidate => $self->name;
+
+    my %instance;
+
+    my %proto = mop::internal::util::GATHER_ALL_ATTRIBUTES( $self );
+    foreach my $k ( keys %proto ) {
+        $instance{ $k } = exists $candidate->{ $k } 
+            ? $candidate->{ $k }
+            : $proto{ $k }->();
+    }
+
+    return bless \%instance => $self->name;
 }
 
 # inheritance 
