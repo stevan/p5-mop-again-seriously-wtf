@@ -111,6 +111,7 @@ sub add_finalizer ($self, $finalizer) {
 
     unless ( $self->$*->{'FINALIZERS'} ) {
         no strict 'refs';
+        no warnings 'once';
         *{ $self->name . '::FINALIZERS'} = [ $finalizer ];
     }
     else {
@@ -206,6 +207,7 @@ sub add_attribute ($self, $name, $initializer) {
 
     unless ( $self->$*->{'HAS'} ) {
         no strict 'refs';
+        no warnings 'once';
         %{ $self->name . '::HAS'} = ( $name => $initializer );
     }
     else {
@@ -223,6 +225,7 @@ sub alias_attribute ($self, $name, $initializer) {
 
     unless ( $self->$*->{'HAS'} ) {
         no strict 'refs';
+        no warnings 'once';
         %{ $self->name . '::HAS'} = ( $name => $initializer );
     }
     else {
@@ -375,6 +378,7 @@ sub delete_method ($self, $name) {
         $self->$*->{ $name } = Symbol::gensym();
         {
             no strict 'refs';
+            no warnings 'once';
             foreach my $type ( keys %to_save ) {
                 *{ $self->name . '::' . $name } = $to_save{ $type };
             }
@@ -389,6 +393,7 @@ sub add_method ($self, $name, $code) {
         if $self->is_closed;
 
     no strict 'refs';
+    no warnings 'once';
     my $full_name = $self->name . '::' . $name;
     *{$full_name} = Sub::Util::set_subname( 
         $full_name, 
@@ -401,6 +406,7 @@ sub alias_method ($self, $name, $code) {
         if $self->is_closed;
 
     no strict 'refs';
+    no warnings 'once';
     *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) ? $code->body : $code;
 }
 
