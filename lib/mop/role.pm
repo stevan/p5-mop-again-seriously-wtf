@@ -175,6 +175,18 @@ sub has_attribute ($self, $name) {
     return 1;
 }
 
+sub has_attribute_alias ($self, $name) {
+    my $HAS = $self->$*->{'HAS'};
+    return 0 unless $HAS;
+
+    my $attrs = $HAS->*{'HASH'};
+    return 0 unless exists $attrs->{ $name };
+    
+    my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
+    return 1 if $attr->stash_name ne $self->name;
+    return 0;
+}
+
 sub get_attribute ($self, $name) {
     my $HAS = $self->$*->{'HAS'};
     return unless $HAS;
@@ -340,6 +352,17 @@ sub has_method ($self, $name) {
         $code = mop::method->new( body => $code );
         return 0 unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
         return 1;
+    }
+    return 0;
+}
+
+sub has_method_alias ($self, $name) {
+    return 0 unless exists $self->$*->{ $name };
+    my $glob = \($self->$*->{ $name });
+    return 0 unless ref $glob eq 'GLOB';
+    if ( my $code = $glob->$*->*{'CODE'} ) {
+        $code = mop::method->new( body => $code );
+        return 1 if $code->stash_name ne $self->name;
     }
     return 0;
 }
