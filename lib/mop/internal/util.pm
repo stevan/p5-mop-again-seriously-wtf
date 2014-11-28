@@ -98,6 +98,11 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
     die "[mop::PANIC] You must specify what type of object you want roles applied `to`" 
         unless exists $opts{to};
 
+    foreach my $r ( $meta->roles ) {
+        die "[mop::PANIC] Could not find role ($_) in the set of roles in $meta (" . $meta->name . ")" 
+            unless scalar grep { $r eq $_ } @$roles;
+    }
+
     my (
         $methods, 
         $conflicts,
