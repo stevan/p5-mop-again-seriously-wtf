@@ -27,7 +27,7 @@ sub import {
     my $metaclass = 'mop::' . $metatype; 
 
     my $meta = $metaclass->new( name => $pkg );
-    $meta->set_superclasses( @extends ) if @extends;
+    $meta->set_superclasses( @extends ) if $metatype eq 'class';
     if ( @with ) {
         $meta->set_roles( @with );
         $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@with, to => $metatype ) });
