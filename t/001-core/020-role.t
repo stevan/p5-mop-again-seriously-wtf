@@ -24,13 +24,18 @@ my @METHODS = qw[
     authority
 
     is_closed
+    set_is_closed
+
     is_abstract
+    set_is_abstract
 
     roles
+    set_roles
     does_role
 
     attributes
     has_attribute
+    has_attribute_alias
     get_attribute
     delete_attribute
     add_attribute
@@ -48,6 +53,7 @@ my @METHODS = qw[
 
     methods
     has_method
+    has_method_alias
     get_method
     delete_method
     add_method
