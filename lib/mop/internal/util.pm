@@ -72,8 +72,7 @@ sub INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE ($pkg) {
 ## Instance construction and destruction 
 
 # TODO:
-# add caches here using a `state` var, similar 
-# to what we do in GATHER_ALL_ATTRIBUTES below.
+# add caches here using a `state` var
 # - SL
 
 sub BUILDALL ($instance, $args) {
