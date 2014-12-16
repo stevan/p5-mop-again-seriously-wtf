@@ -33,6 +33,17 @@ sub import ($class, @args) {
 
     # bootstrapping is complete ...
     $IS_BOOTSTRAPPED = 1;
+
+    my $caller = caller;
+
+    # make the assumption that if we are 
+    # loaded outside of main then we are 
+    # likely being loaded in a class, so
+    # turn on signatures
+    if ( $caller ne 'main' ) {
+        feature->import('signatures');
+        warnings->unimport('experimental::signatures');
+    }
 }
 
 1;
