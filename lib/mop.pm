@@ -344,6 +344,83 @@ details.
       }
   }
 
+=head2 Pragma syntax
+
+This is an experiment to see what it might look like to 
+have a pragma based syntax for this.
+
+  package Eq;
+
+  use v5.20;
+  use warnings;
+  use mop;
+
+  sub equal_to;
+
+  sub not_equal_to ($self, $other) {
+      not $self->equal_to($other);
+  }
+
+  package Comparable;
+
+  use v5.20;
+  use warnings;
+  use mop;
+
+  use role 'Eq';
+
+  sub compare;
+
+  sub equal_to ($self, $other) {
+      $self->compare($other) == 0;
+  }
+
+  sub greater_than ($self, $other)  {
+      $self->compare($other) == 1;
+  }
+
+  sub less_than ($self, $other) {
+      $self->compare($other) == -1;
+  }
+
+  sub greater_than_or_equal_to ($self, $other)  {
+      $self->greater_than($other) || $self->equal_to($other);
+  }
+
+  sub less_than_or_equal_to ($self, $other)  {
+      $self->less_than($other) || $self->equal_to($other);
+  }
+
+  package Printable;
+  
+  use v5.20;
+  use warnings;
+  use mop;
+
+  sub to_string;
+
+  package US::Currency;
+
+  use v5.20;
+  use warnings;
+  use mop;
+  
+  use parent 'mop::object';
+  use role   'Comparable', 'Printable';
+
+  use attr '$!amount' => (
+      is      => 'rw', 
+      default => sub { 0 } 
+  );
+
+  sub compare ($self, $other) {
+      $self->amount <=> $other->amount;
+  }
+
+  sub to_string ($self) {
+      sprintf '$%0.2f USD' => $self->amount;
+  }
+
 =cut
 
 
