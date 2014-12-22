@@ -164,7 +164,7 @@ sub attributes ($self) {
     my @attrs;
     foreach my $candidate ( keys %$attrs ) {
         my $attr = mop::attribute->new( name => $candidate, initializer => $attrs->{ $candidate } );
-        if ( $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles ) ) {
+        if ( $attr->stash_name eq $self->name || ($self->roles && $attr->was_aliased_from( $self->roles )) ){
             push @attrs => $attr;
         }
     }
