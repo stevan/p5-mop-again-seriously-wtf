@@ -51,6 +51,8 @@ sub import {
 
     $meta->add_finalizer(sub { $meta->set_is_closed(1) });    
 
+    strict->import;
+    warnings->import;
     feature->import('signatures', 'postderef');
     warnings->unimport('experimental::signatures', 'experimental::postderef');
     {
