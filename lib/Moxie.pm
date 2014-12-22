@@ -74,7 +74,7 @@ sub has ($name, %traits) {
     # this is the only one we handle 
     # specially, everything else gets
     # called as a trait ...
-    $traits{default} //= eval 'sub { undef }';
+    $traits{default} //= eval 'sub { undef }'; # we need this to be a unique CV ... sigh
 
 
     $meta->add_attribute( $name, delete $traits{default} );
