@@ -10,7 +10,8 @@ use mop::internal::util;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub new ($class, %args) {
+sub new ($class, @args) {
+    my %args = scalar @args == 1 && ref $args[0] ? %{ $args[0] } : @args;
     my $self = mop::class->new( name => $class )->construct_instance( \%args );
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self;
