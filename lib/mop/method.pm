@@ -15,7 +15,6 @@ our @ISA; BEGIN { @ISA  = ('mop::object') }
 sub new ($class, %args) {
     die 'The parameter `body` is required'
         unless exists $args{'body'}
-            && ref    $args{'body'} 
             && ref    $args{'body'} eq 'CODE';
 
     my $body = $args{'body'};
