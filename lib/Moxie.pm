@@ -32,6 +32,7 @@ sub import {
     }
 
     use_package_optimistically $_ foreach @extends, @with;
+
     mop::internal::util::INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE( $pkg );
 
     my $metatype  = (scalar @extends ? 'class' : 'role'); 
