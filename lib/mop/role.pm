@@ -179,7 +179,7 @@ sub has_attribute ($self, $name) {
     return 0 unless exists $attrs->{ $name };
     
     my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
-    return 0 unless $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles );
+    return 0 unless $attr->stash_name eq $self->name || ($self->roles && $attr->was_aliased_from( $self->roles ));
 
     return 1;
 }
@@ -204,7 +204,7 @@ sub get_attribute ($self, $name) {
     return unless exists $attrs->{ $name };
     
     my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
-    return unless $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles );
+    return unless $attr->stash_name eq $self->name || ($self->roles && $attr->was_aliased_from( $self->roles ));
     
     return $attr;
 }
@@ -217,7 +217,7 @@ sub delete_attribute ($self, $name) {
     return unless exists $attrs->{ $name };
     
     my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
-    return unless $attr->stash_name eq $self->name or $attr->was_aliased_from( $self->roles );
+    return unless $attr->stash_name eq $self->name || ($self->roles && $attr->was_aliased_from( $self->roles ));
     
     return delete $attrs->{ $name };
 }
@@ -344,7 +344,7 @@ sub methods ($self) {
             next unless ref $glob eq 'GLOB';
             if ( my $code = $glob->$*->*{'CODE'} ) {
                 $code = mop::method->new( body => $code );
-                if ( $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles ) ) {
+                if ( $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles )) ){
                     push @methods => $code;
                 }
             }
@@ -359,7 +359,7 @@ sub has_method ($self, $name) {
     return 0 unless ref $glob eq 'GLOB';
     if ( my $code = $glob->$*->*{'CODE'} ) {
         $code = mop::method->new( body => $code );
-        return 0 unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
+        return 0 unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
         return 1;
     }
     return 0;
@@ -382,7 +382,7 @@ sub get_method ($self, $name) {
     return unless ref $glob eq 'GLOB';
     if ( my $code = $glob->$*->*{'CODE'} ) {    
         $code = mop::method->new( body => $code );
-        return unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
+        return unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
         return $code;
     }
     return;
@@ -399,7 +399,7 @@ sub delete_method ($self, $name) {
 
     if ( my $code = $glob->$*->*{'CODE'} ) {
         $code = mop::method->new( body => $code );
-        return unless $code->stash_name eq $self->name or $code->was_aliased_from( $self->roles );
+        return unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
         my $glob = $self->$*->{ $name };      
         my %to_save;
         foreach my $type (qw[ SCALAR ARRAY HASH IO ]) {
