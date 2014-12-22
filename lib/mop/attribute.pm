@@ -21,7 +21,6 @@ sub new ($class, %args) {
 
     die 'The parameter `initializer` is required'
         unless exists $args{'initializer'}
-            && ref    $args{'initializer'} 
             && ref    $args{'initializer'} eq 'CODE';
 
     my $name        = $args{'name'};
