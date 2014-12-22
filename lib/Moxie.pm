@@ -5,7 +5,11 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
+use mop ();
+
 use Symbol;
+use Scalar::Util;
+use Module::Runtime qw[ use_package_optimistically ];
 
 my (%METACACHE, %TRAITS);
 
@@ -14,15 +18,20 @@ sub import {
     my $pkg  = caller;
     my @args = @_;
 
-    my (@extends, @with);
-    my ($in_extends, $in_with) = (0, 0);
+    my ($current, @extends, @with);
     foreach my $arg ( @args ) {
-        $in_extends++ && $in_with--    || next if $arg eq 'extends';
-        ++$in_with    && --$in_extends || next if $arg eq 'with';
-        push @extends => $arg if $in_extends;
-        push @with    => $arg if $in_with;   
+        if ( $arg eq 'extends' ) {
+            $current = \@extends;
+        }
+        elsif ( $arg eq 'with' ) {
+            $current = \@with;
+        }
+        else {
+            push @$current => $arg;
+        }
     }
 
+    use_package_optimistically $_ foreach @extends, @with;
     mop::internal::util::INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE( $pkg );
 
     my $metatype  = (scalar @extends ? 'class' : 'role'); 
@@ -45,7 +54,8 @@ sub import {
     warnings->unimport('experimental::signatures', 'experimental::postderef');
     {
         no strict 'refs';
-        *{$pkg . '::has'} = \&has;
+        *{$pkg . '::has'}     = \&has;
+        *{$pkg . '::blessed'} = \&Scalar::Util::blessed;
     }
 
     $meta->add_finalizer(sub {
@@ -63,7 +73,8 @@ sub has ($name, %traits) {
     # this is the only one we handle 
     # specially, everything else gets
     # called as a trait ...
-    $traits{default} //= sub { undef };
+    $traits{default} //= eval 'sub { undef }';
+
 
     $meta->add_attribute( $name, delete $traits{default} );
 
@@ -94,6 +105,18 @@ BEGIN {
             });            
         } else {
             die "[Moxie::PANIC] Got strange option ($type) to trait (is)";
+        }
+    };
+
+    $TRAITS{'required'} = sub ($m, $a, $bool) {
+        if ( $bool ) {
+            my $class = $m->name;
+            my $attr  = $a->name;
+            my $init  = sub { die "[Moxie::ERROR] The attribute `$attr` is required" };
+
+            Sub::Util::set_subname( ($class . '::__ANON__'), $init );
+
+            $a->set_initializer( $init );
         }
     };
 }
