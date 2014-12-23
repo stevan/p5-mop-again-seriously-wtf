@@ -116,6 +116,13 @@ sub GATHER_ALL_ATTRIBUTES ($meta) {
 
 ## Role application and composition
 
+# FIXME!
+# Questions
+## Are we composing required methods? 
+## Are we composing attributes?
+# pretty sure the answer is "no" for both ...
+# - SL
+
 sub APPLY_ROLES ($meta, $roles, %opts) {
     die "[mop::PANIC] You must specify what type of object you want roles applied `to`" 
         unless exists $opts{to};
