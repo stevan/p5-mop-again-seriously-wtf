@@ -42,14 +42,7 @@ sub import {
     $meta->set_superclasses( @extends ) if $metatype eq 'class';
     if ( @with ) {
         $meta->set_roles( @with );
-        $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@with, to => $metatype ) });
     }
-    
-    $meta->add_finalizer(sub {
-        mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta )
-    }) if $metatype eq 'class';    
-
-    $meta->add_finalizer(sub { $meta->set_is_closed(1) });    
 
     strict->import;
     warnings->import;
@@ -61,9 +54,50 @@ sub import {
         *{$pkg . '::blessed'} = \&Scalar::Util::blessed;
     }
 
+    # cleanup ...
+
     $meta->add_finalizer(sub {
-        no strict 'refs';
-        *{$pkg . '::has'} = Symbol::gensym();
+
+        # first remove the has sub
+        {
+            no strict 'refs';
+            *{$pkg . '::has'} = Symbol::gensym();
+        }
+
+        # then process all the attribute traits ...
+        foreach my $attribute ( $meta->attributes ) {
+            my %traits = %{ $attribute->traits };
+            if ( keys %traits ) {
+                foreach my $k ( keys %traits ) {
+                    die "[Moxie::PANIC] Cannot locate trait ($k) to apply to attributes (" . $attribute->name . ")"
+                        unless exists $TRAITS{ $k };
+                    $TRAITS{ $k }->( $meta, $attribute, $traits{ $k } );
+                }
+            }
+        }
+
+        # next apply all the roles ...
+
+        # NOTE:
+        # This is assumed to take place 
+        # after all the attributes have
+        # been created and their trait 
+        # finalizers have been registered
+        # if ever that is not the case, 
+        # it should be fixed.
+        # - SL
+        mop::internal::util::APPLY_ROLES( $meta, \@with, to => $metatype );
+
+        # perform some optimizations
+
+        # because we know we are very 
+        # shortly about to close the 
+        # class ...
+        mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta )
+            if $metatype eq 'class';    
+
+        # close the class ...
+        $meta->set_is_closed(1);    
     }); 
 
     $METACACHE{ $pkg } = $meta;
@@ -78,17 +112,7 @@ sub has ($name, %traits) {
     # called as a trait ...
     $traits{default} //= eval 'sub { undef }'; # we need this to be a unique CV ... sigh
 
-
-    $meta->add_attribute( $name, delete $traits{default} );
-
-    if ( keys %traits ) {
-        my $attr = $meta->get_attribute( $name );
-        foreach my $k ( keys %traits ) {
-            die "[Moxie::PANIC] Cannot locate trait ($k) to apply to attributes ($name)"
-                unless exists $TRAITS{ $k };
-            $TRAITS{ $k }->( $meta, $attr, $traits{ $k } );
-        }
-    }
+    $meta->add_attribute( $name, delete $traits{default}, \%traits );
 
     return;
 }
