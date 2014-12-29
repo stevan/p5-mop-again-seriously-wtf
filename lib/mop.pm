@@ -7,7 +7,9 @@ use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
 use Module::Runtime ();
+use Symbol          ();
 
+use Devel::CallParser;
 use XSLoader; 
 BEGIN { 
     our $VERSION   = '0.01';
@@ -23,7 +25,7 @@ use mop::method;
 use mop::role;
 use mop::class;
 
-our $IS_BOOTSTRAPPED;
+our ($IS_BOOTSTRAPPED, %TRAITS);
 
 sub import ($class, @args) {
     # start the bootstrapping ...
@@ -48,11 +50,10 @@ sub import ($class, @args) {
     # make the assumption that if we are 
     # loaded outside of main then we are 
     # likely being loaded in a class, so
-    # turn on signatures
+    # turn on all the features 
     if ( $caller ne 'main' ) {
-        feature->import('signatures');
-        warnings->unimport('experimental::signatures');
-        
+        my $meta;
+
         # now handle any arguments ...
         if ( @args ) {
 
@@ -69,23 +70,106 @@ sub import ($class, @args) {
 
             Module::Runtime::use_package_optimistically( $_ ) foreach @isa, @does;
 
-            mop::internal::util::INSTALL_FINALIZATION_RUNNER( $caller );
-
             my $metatype  = (scalar @isa ? 'class' : 'role'); 
             my $metaclass = 'mop::' . $metatype; 
 
-            my $meta = $metaclass->new( name => $caller );
+            $meta = $metaclass->new( name => $caller );
             $meta->set_superclasses( @isa ) if $metatype eq 'class';
             if ( @does ) {
                 $meta->set_roles( @does );
-                $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@does, to => $metatype ) });
-            }   
+                $meta->add_finalizer(
+                    bless sub { mop::internal::util::APPLY_ROLES( $meta, \@does, to => $metatype ) } => 'mop::internal::MARKER::APPLY_ROLES'
+                );
+            }
 
-            $meta->add_finalizer(sub { $meta->set_is_closed(1) });
+            $meta->add_finalizer(sub {
+                mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta )
+            }) if $metatype eq 'class';
+        }
+        else {
+            # if we have no args we can only assume a role (for now)
+            $meta = mop::role->new( name => $caller );
         }
 
+        # install our finalizer feature ...
+        mop::internal::util::INSTALL_FINALIZATION_RUNNER( $caller );   
+
+        # turn on signatures ...
+        feature->import('signatures');
+        warnings->unimport('experimental::signatures');
+
+        # import has keyword
+        {
+            no strict 'refs';
+            *{ $caller . '::has' } = sub { 1 };
+
+            mop::internal::util::guts::syntax::install_keyword_handler(
+                \&{ $caller . '::has' }, 
+                sub {
+                    use strict 'refs';
+
+                    my $has = mop::internal::util::guts::syntax::parse_full_statement;
+
+                    my ($name, %traits) = $has->();
+
+                    # this is the only one we handle 
+                    # specially, everything else gets
+                    # called as a trait ...
+                    $traits{default} //= eval 'sub { undef }'; # we need this to be a unique CV ... sigh
+
+                    $meta->add_attribute( $name, delete $traits{default} );
+
+                    if ( keys %traits ) {
+                        my $attr = $meta->get_attribute( $name );
+                        foreach my $k ( keys %traits ) {
+                            die "[Moxie::PANIC] Cannot locate trait ($k) to apply to attributes ($name)"
+                                unless exists $TRAITS{ $k };
+                            $TRAITS{ $k }->( $meta, $attr, $traits{ $k } );
+                        }
+                    }
+
+                    # replace this with a noop since 
+                    # we did all our work at compile 
+                    # time already.
+                    return (sub { () }, 1);
+                }
+            ); 
+        }
+
+        $meta->add_finalizer(sub { $meta->set_is_closed(1) });
     }
 
+}
+
+BEGIN {
+    $TRAITS{'is'} = sub ($m, $a, $type) {
+        my $slot = $a->name;
+        if ( $type eq 'ro' ) {
+            $m->add_method( $slot => sub { 
+                die "Cannot assign to `$slot`, it is a readonly attribute" if scalar @_ != 1;
+                $_[0]->{ $slot };
+            });
+        } elsif ( $type eq 'rw' ) {
+            $m->add_method( $slot => sub { 
+                $_[0]->{ $slot } = $_[1] if $_[1];
+                $_[0]->{ $slot };
+            });            
+        } else {
+            die "[Moxie::PANIC] Got strange option ($type) to trait (is)";
+        }
+    };
+
+    $TRAITS{'required'} = sub ($m, $a, $bool) {
+        if ( $bool ) {
+            my $class = $m->name;
+            my $attr  = $a->name;
+            my $init  = sub { die "[Moxie::ERROR] The attribute `$attr` is required" };
+
+            Sub::Util::set_subname( ($class . '::__ANON__::init_for::' . $attr), $init );
+
+            $a->set_initializer( $init );
+        }
+    };
 }
 
 1;

@@ -68,7 +68,7 @@ BEGIN {
             isa  => 'mop::object',
             does => 'Comparable', 'Printable';
 
-        our %HAS  = (amount => sub { 0 });
+        has amount => ( default => sub { 0 } );
 
         sub compare ($self, $other) {
             $self->{amount} <=> $other->{amount};
