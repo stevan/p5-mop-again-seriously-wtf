@@ -39,10 +39,7 @@ sub new ($class, %args) {
 sub name       ($self) { $self->[0] }
 sub stash_name ($self) { B::svref_2object( $self->[1] )->GV->STASH->NAME }
 
-sub initializer     ($self)               { $self->[1] }
-sub set_initializer ($self, $initializer) {
-    $self->[1] = $initializer;
-}
+sub initializer ($self) { $self->[1] }
 
 sub was_aliased_from ($self, @packages) {
     my $stash_name = $self->stash_name;
