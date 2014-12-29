@@ -345,94 +345,100 @@ as it could be, but that can be fixed in the XS version. For
 now, this works and we have these notes reminding us to 
 improve it.
 
-=head2 Moose style syntax
+=head2 Pragma syntax
 
-Moxie is the working title for this module, that may change
-if I can find another.
-
-One of the key differences between it and Moose will be 
+One of the key differences between this and Moose is 
 that it will perform inheritance and role composition at 
 compile time instead of runtime. This is required because 
 we run the FINALIZER stuff during the UNITCHECK time, so we 
 need to know about the class earlier.
 
-Unfortunately C<has> is still running at runtime, but that 
-should be okay since we can set up the inherited attribute
-cache and let new C<has> calls just add to it (and overwrite
-where applicable). 
+To make C<has> happen at compile time we use the keyword
+API to add in a C<has> keyword. 
 
-Of course, this hasn't been written yet, so ... we will see. 
+  package Eq;
 
-  package Eq {
-      use Moxie;
+  use v5.20;
+  use warnings;
+  use mop;
 
-      sub equal_to;
+  sub equal_to;
 
-      sub not_equal_to ($self, $other) {
-          not $self->equal_to($other);
-      }
+  sub not_equal_to ($self, $other) {
+      not $self->equal_to($other);
   }
 
-  package Comparable {
-      use Moxie with => 'Eq';
+  package Comparable;
 
-      sub compare;
+  use v5.20;
+  use warnings;
+  use mop does => 'Eq';
 
-      sub equal_to ($self, $other) {
-          $self->compare($other) == 0;
-      }
+  sub compare;
 
-      sub greater_than ($self, $other)  {
-          $self->compare($other) == 1;
-      }
-
-      sub less_than  ($self, $other) {
-          $self->compare($other) == -1;
-      }
-
-      sub greater_than_or_equal_to ($self, $other)  {
-          $self->greater_than($other) || $self->equal_to($other);
-      }
-
-      sub less_than_or_equal_to ($self, $other)  {
-          $self->less_than($other) || $self->equal_to($other);
-      }
+  sub equal_to ($self, $other) {
+      $self->compare($other) == 0;
   }
 
-  package Printable {
-      use Moxie;
-
-      sub to_string;
+  sub greater_than ($self, $other)  {
+      $self->compare($other) == 1;
   }
 
-  package US::Currency {
-      use Moxie 
-          extends => 'mop::object',
-             with => 'Comparable', 'Printable';
-
-      has amount => ( is => 'rw', default => sub { 0 } );
-
-      sub compare ($self, $other) {
-          $self->amount <=> $other->amount;
-      }
-
-      sub to_string ($self) {
-          sprintf '$%0.2f USD' => $self->amount;
-      }
+  sub less_than ($self, $other) {
+      $self->compare($other) == -1;
   }
+
+  sub greater_than_or_equal_to ($self, $other)  {
+      $self->greater_than($other) || $self->equal_to($other);
+  }
+
+  sub less_than_or_equal_to ($self, $other)  {
+      $self->less_than($other) || $self->equal_to($other);
+  }
+
+  package Printable;
+  
+  use v5.20;
+  use warnings;
+  use mop;
+
+  sub to_string;
+
+  package US::Currency;
+
+  use v5.20;
+  use warnings;
+  use mop
+      isa  => 'mop::object',
+      does => 'Comparable', 'Printable';
+
+  has 'amount' => (
+      is      => 'rw', 
+      default => sub { 0 } 
+  );
+
+  sub compare ($self, $other) {
+      $self->amount <=> $other->amount;
+  }
+
+  sub to_string ($self) {
+      sprintf '$%0.2f USD' => $self->amount;
+  }
+
 
 Couple of notes:
 
 =over 4
 
-=item There is no C<Moxie::Role> package.
+=item There is no C<mop::role> package to specify roles.
 
 If you look above, I talk about how a package is both a 
 role and a class and it only matters in how you treat them, 
 this is what is going on here.
 
 The only thing that kind of sucks about this is that 
-we have to explictly inherit from C<mop::object>.
+we have to explictly inherit from C<mop::object> since
+we cannot make an assumption about your intent.
 
 =back
 
@@ -487,76 +493,6 @@ details.
       method to_string {
           sprintf '$%0.2f USD' => $!amount;
       }
-  }
-
-=head2 Pragma syntax
-
-This is an experiment to see what it might look like to 
-have a pragma based syntax for this.
-
-  package Eq;
-
-  use v5.22;
-  use mop;
-
-  sub equal_to;
-
-  sub not_equal_to ($self, $other) {
-      not $self->equal_to($other);
-  }
-
-  package Comparable;
-
-  use v5.22;
-  use mop does => 'Eq';
-
-  sub compare;
-
-  sub equal_to ($self, $other) {
-      $self->compare($other) == 0;
-  }
-
-  sub greater_than ($self, $other)  {
-      $self->compare($other) == 1;
-  }
-
-  sub less_than ($self, $other) {
-      $self->compare($other) == -1;
-  }
-
-  sub greater_than_or_equal_to ($self, $other)  {
-      $self->greater_than($other) || $self->equal_to($other);
-  }
-
-  sub less_than_or_equal_to ($self, $other)  {
-      $self->less_than($other) || $self->equal_to($other);
-  }
-
-  package Printable;
-  
-  use v5.22;
-  use mop;
-
-  sub to_string;
-
-  package US::Currency;
-
-  use v5.22;
-  use mop
-      isa  => 'mop::object',
-      does => 'Comparable', 'Printable';
-
-  has '$!amount' => (
-      is      => 'rw', 
-      default => sub { 0 } 
-  );
-
-  sub compare ($self, $other) {
-      $self->amount <=> $other->amount;
-  }
-
-  sub to_string ($self) {
-      sprintf '$%0.2f USD' => $self->amount;
   }
 
 =cut
