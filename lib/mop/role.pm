@@ -6,14 +6,14 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use Symbol       ();
 use Sub::Util    ();
 use Scalar::Util ();
 
-use mop::internal::util FINALIZE => 'UNITCHECK';
-
-our $VERSION   = '0.01';
-our $AUTHORITY = 'cpan:STEVAN';
+use mop::internal::util 'FINALIZE';
 
 our @ISA; BEGIN { @ISA = ('mop::object') }
 

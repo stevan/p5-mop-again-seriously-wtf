@@ -15,8 +15,7 @@ BEGIN {
     package Eq {
         use v5.20;
         use warnings;
-        use feature 'signatures', 'postderef';
-        no warnings 'experimental::signatures', 'experimental::postderef';
+        use mop;
 
         sub equal_to;
 
@@ -28,12 +27,8 @@ BEGIN {
     package Comparable {
         use v5.20;
         use warnings;
-        use feature 'signatures', 'postderef';
-        no warnings 'experimental::signatures', 'experimental::postderef';
-
-        use mop::internal::util FINALIZE => 'UNITCHECK';
-
-        our @DOES = ('Eq');
+        use mop
+            does => 'Eq';
 
         sub compare;
 
@@ -56,23 +51,12 @@ BEGIN {
         sub less_than_or_equal_to ($self, $other)  {
             $self->less_than($other) || $self->equal_to($other);
         }
-
-        BEGIN { 
-            our @FINALIZERS = (sub {
-                mop::internal::util::APPLY_ROLES( 
-                    mop::role->new( name => __PACKAGE__ ), 
-                    \@DOES, 
-                    to => 'role' 
-                )
-            })
-        }
     }
 
     package Printable {
         use v5.20;
         use warnings;
-        use feature 'signatures', 'postderef';
-        no warnings 'experimental::signatures', 'experimental::postderef';
+        use mop;
 
         sub to_string;
     }
@@ -80,13 +64,10 @@ BEGIN {
     package US::Currency {
         use v5.20;
         use warnings;
-        use feature 'signatures', 'postderef';
-        no warnings 'experimental::signatures', 'experimental::postderef';
+        use mop
+            isa  => 'mop::object',
+            does => 'Comparable', 'Printable';
 
-        use mop::internal::util FINALIZE => 'UNITCHECK';
-
-        our @ISA  = ('mop::object');
-        our @DOES = ('Comparable', 'Printable');
         our %HAS  = (amount => sub { 0 });
 
         sub compare ($self, $other) {
@@ -95,16 +76,6 @@ BEGIN {
 
         sub to_string ($self) {
             sprintf '$%0.2f USD' => $self->{amount};
-        }
-
-        BEGIN { 
-            our @FINALIZERS = (sub {
-                mop::internal::util::APPLY_ROLES( 
-                    mop::class->new( name => __PACKAGE__ ), 
-                    \@DOES, 
-                    to => 'class' 
-                )
-            })
         }
     }
 

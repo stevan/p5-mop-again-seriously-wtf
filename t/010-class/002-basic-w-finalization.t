@@ -17,7 +17,7 @@ package Foo 0.01 {
     use v5.20;
     use warnings;
 
-    use mop::internal::util FINALIZE => 'UNITCHECK';
+    use mop::internal::util 'FINALIZE';
 
     sub foo { 'Foo::foo' }
 
@@ -31,7 +31,7 @@ package Bar {
     use v5.20;
     use warnings;
 
-    use mop::internal::util FINALIZE => 'UNITCHECK';
+    use mop::internal::util 'FINALIZE';
 
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
@@ -48,7 +48,7 @@ package Baz {
     use v5.20;
     use warnings;
     
-    use mop::internal::util FINALIZE => 'UNITCHECK';
+    use mop::internal::util 'FINALIZE';
 
     our @ISA = ('Bar');
 

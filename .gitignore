@@ -1,2 +1,10 @@
 .DS_Store
 __NOTES__.txt
+Makefile
+Makefile.old
+*.c
+*.bs
+*.o
+blib/*
+MYMETA.*
+pm_to_blib

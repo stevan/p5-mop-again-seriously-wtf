@@ -6,25 +6,15 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
-use Devel::Hook       ();
-use Exporter::Lexical (); # just for _lex_stuff, which is evil I know, sorry
-
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub import ($class, %args) {
+sub import ($class, @args) {
     my $calling_pkg = caller;
-    foreach my $arg ( keys %args ) {
+    while ( @args ) {
+        my $arg = shift @args;
         if ( $arg eq 'FINALIZE' ) {
-            if ( $args{ $arg } eq 'UNITCHECK' ) {
-                INSTALL_FINALIZATION_RUNNER_FOR_UNITCHECK( $calling_pkg );    
-            }
-            elsif ( $args{ $arg } eq 'ENDOFSCOPE' ) {
-                INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE( $calling_pkg );
-            }
-            else {
-                die "[mop::PANIC] No idea what to do with (" . $args{ $arg } . ") as option for FINALIZE";
-            }
+            INSTALL_FINALIZATION_RUNNER( $calling_pkg );   
         }
     }
 }
@@ -46,27 +36,13 @@ sub import ($class, %args) {
 # stuff on our own. 
 # - SL
 
-sub INSTALL_FINALIZATION_RUNNER_FOR_UNITCHECK ($pkg) {
+sub INSTALL_FINALIZATION_RUNNER ($pkg) {
     die "[mop::PANIC] To late to install finalization runner for <$pkg>, current-phase: (${^GLOBAL_PHASE})" 
         unless ${^GLOBAL_PHASE} eq 'START';
 
-    Devel::Hook->push_UNITCHECK_hook(sub { 
-        mop::role->new( name => $pkg )->run_all_finalizers; 
-    });
-}
-
-package  
-    mop::internal::util::__SCOPE_GUARD__ {
-    sub new     { bless [ $_[1] ] => $_[0] }
-    sub DESTROY { $_[0]->[0]->()           } 
-}
-
-sub INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE ($pkg) {
-    Exporter::Lexical::_lex_stuff(q[
-        ;my $__SCOPE_GUARD__ = mop::internal::util::__SCOPE_GUARD__->new(sub { 
-            mop::role->new( name => __PACKAGE__ )->run_all_finalizers
-        });1;
-    ]);
+    push @{ mop::internal::util::guts::get_UNITCHECK_AV() } => (
+        sub { mop::role->new( name => $pkg )->run_all_finalizers }
+    );
 }
 
 ## Instance construction and destruction 

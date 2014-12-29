@@ -6,10 +6,10 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
-use mop::internal::util FINALIZE => 'UNITCHECK';
-
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
+
+use mop::internal::util 'FINALIZE';
 
 our @ISA;  BEGIN { @ISA  = ('mop::object') }
 our @DOES; BEGIN { @DOES = ('mop::role')   }

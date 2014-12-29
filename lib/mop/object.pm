@@ -5,10 +5,10 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
-use mop::internal::util;
-
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
+
+use mop::internal::util;
 
 sub new ($class, @args) {
     my %args = scalar @args == 1 && ref $args[0] ? %{ $args[0] } : @args;

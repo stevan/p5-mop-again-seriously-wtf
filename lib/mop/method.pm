@@ -5,10 +5,10 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
-use B ();
-
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
+
+use B ();
 
 our @ISA; BEGIN { @ISA  = ('mop::object') }
 

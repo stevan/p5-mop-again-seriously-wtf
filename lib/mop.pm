@@ -6,6 +6,15 @@ use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures', 'experimental::postderef';
 
+use Module::Runtime ();
+
+use XSLoader; 
+BEGIN { 
+    our $VERSION   = '0.01';
+    our $AUTHORITY = 'cpan:STEVAN';
+    XSLoader::load( __PACKAGE__, $VERSION ); 
+}
+
 use mop::internal::util;
 
 use mop::object;
@@ -43,7 +52,40 @@ sub import ($class, @args) {
     if ( $caller ne 'main' ) {
         feature->import('signatures');
         warnings->unimport('experimental::signatures');
+        
+        # now handle any arguments ...
+        if ( @args ) {
+
+            my ($current, @isa, @does);
+            foreach my $arg ( @args ) {
+                if ( $arg eq 'isa' ) {
+                    $current = \@isa;
+                } elsif ( $arg eq 'does' ) {
+                    $current = \@does;
+                } else {
+                    push @$current => $arg;
+                }
+            }
+
+            Module::Runtime::use_package_optimistically( $_ ) foreach @isa, @does;
+
+            mop::internal::util::INSTALL_FINALIZATION_RUNNER( $caller );
+
+            my $metatype  = (scalar @isa ? 'class' : 'role'); 
+            my $metaclass = 'mop::' . $metatype; 
+
+            my $meta = $metaclass->new( name => $caller );
+            $meta->set_superclasses( @isa ) if $metatype eq 'class';
+            if ( @does ) {
+                $meta->set_roles( @does );
+                $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@does, to => $metatype ) });
+            }   
+
+            $meta->add_finalizer(sub { $meta->set_is_closed(1) });
+        }
+
     }
+
 }
 
 1;

@@ -12,6 +12,3 @@
 requires 'Symbol'       => 0;    # used in mop::role (core module)
 requires 'Scalar::Util' => 0;    # used in mop::role (core module)
 requires 'Sub::Util'    => 1.40; # used in mop::role (core module (as of 5.22))
-
-requires 'Devel::Hook'       => 0;    # used in mop::internal::util (simple to be replaced)
-requires 'Exporter::Lexical' => 0;    # used in mop::internal::util (simple to be replaced)
