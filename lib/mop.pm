@@ -29,6 +29,24 @@ our $IS_BOOTSTRAPPED = 0;
 
 our %TRAITS;
 
+# TODO:
+# Everything that this &import method does should be 
+# in util subroutines so that someone else can just
+# come in and use it sensibly to implement their own 
+# object system if they want. The idea is that the 
+# simple, bare bones sugar I provide here is just barely
+# one step above the raw version which uses the package
+# variables and mop::internal::util::* methods directly
+# inside BEGIN blocks, etc. 
+#
+# In short, there is no need to make people jump through 
+# stupid meta-layer subclass stuff in order to maintain 
+# a level or purity that perl just doesn't give a fuck
+# about anyway. In the 'age of objects' we have forgotten 
+# that subroutines are also an excellent form of encapsulation
+# and re-use. 
+# - SL
+
 sub import ($class, @args) {
     # start the bootstrapping ...
     unless ( $IS_BOOTSTRAPPED ) {
@@ -55,7 +73,6 @@ sub import ($class, @args) {
     # turn on all the features 
     if ( $caller ne 'main' ) {
         my $meta;
-
 
         # FIXME:
         # There are a lot of assumptions here that 
