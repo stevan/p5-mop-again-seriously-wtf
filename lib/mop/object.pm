@@ -8,9 +8,13 @@ no warnings 'experimental::signatures', 'experimental::postderef';
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Scalar::Util ();
+
 use mop::internal::util;
 
 sub new ($class, @args) {
+    die "[mop::PANIC] cannot call 'new' with a blessed instance"
+        if Scalar::Util::blessed $class;
     my %args = scalar @args == 1 && ref $args[0] ? %{ $args[0] } : @args;
     my $self = mop::class->new( name => $class )->construct_instance( \%args );
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );

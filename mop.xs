@@ -3,11 +3,14 @@
 #include "callparser1.h"
 #include "XSUB.h"
 
+/* ======================================================= */
+// BEGIN: Shameless Steal from Parse::Keyword 
+/* ======================================================= */
+
 #ifndef cv_clone
 #define cv_clone(a) Perl_cv_clone(aTHX_ a)
 #endif
 
-// shamelessly stolen from Parse::Keyword
 static SV *parser_fn(OP *(fn)(pTHX_ U32), bool named)
 {
     I32 floor;
@@ -81,6 +84,10 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
                    newCVREF(0, newSVOP(OP_CONST, 0, args_generator)));
 }
 
+/* ======================================================= */
+// END: Shameless Steal from Parse::Keyword 
+/* ======================================================= */
+
 MODULE = mop  PACKAGE = mop::internal::util::guts
  
 AV* 
@@ -93,6 +100,12 @@ get_UNITCHECK_AV()
 
 MODULE = mop  PACKAGE = mop::internal::util::guts::syntax
 
+# NOTE:
+# Everything in this package has been stolen from 
+# Parse::Keyword, it could almost certainly use some 
+# improvement, but is good for now.
+# - SL
+
 PROTOTYPES: DISABLE
 
 void
@@ -100,13 +113,13 @@ install_keyword_handler(keyword, handler)
         SV *keyword
         SV *handler
   CODE:
-        cv_set_call_parser((CV*)SvRV(keyword), parser_callback, handler);
+        cv_set_call_parser( (CV*) SvRV( keyword ), parser_callback, handler );
 
-SV *
+SV*
 parse_full_statement(named = FALSE)
         bool named
     CODE:
-        RETVAL = parser_fn(Perl_parse_fullstmt, named);
+        RETVAL = parser_fn( Perl_parse_fullstmt, named );
     OUTPUT:
         RETVAL
 

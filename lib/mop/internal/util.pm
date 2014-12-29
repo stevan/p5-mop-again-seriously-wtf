@@ -48,11 +48,13 @@ sub INSTALL_FINALIZATION_RUNNER ($pkg) {
 ## Instance construction and destruction 
 
 # TODO:
-# add caches here using a `state` var
+# - add caches here using a `state` var
+# - the ->can("BUILD") is likely not doing the right thing, fix it.
+#     - should be able to use a %seen hash to avoid calling a BUILD/DEMOLISH twice
 # - SL
 
 sub BUILDALL ($instance, $args) {
-    foreach my $c ( mro::get_linear_isa( ref $instance )->@* ) {
+    foreach my $c ( reverse mro::get_linear_isa( ref $instance )->@* ) {
         if ( my $build = $c->can('BUILD') ) {
             $instance->$build( $args );
         }
@@ -92,13 +94,6 @@ sub GATHER_ALL_ATTRIBUTES ($meta) {
 
 ## Role application and composition
 
-# FIXME!
-# Questions
-## Are we composing required methods? 
-## Are we composing attributes?
-# pretty sure the answer is "no" for both ...
-# - SL
-
 sub APPLY_ROLES ($meta, $roles, %opts) {
     die "[mop::PANIC] You must specify what type of object you want roles applied `to`" 
         unless exists $opts{to};
@@ -112,7 +107,7 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
         $methods, 
         $conflicts,
         $required
-    ) = COMPOSE_ALL_ROLES( 
+    ) = COMPOSE_ALL_ROLE_METHODS( 
         map { mop::role->new( name => $_ ) } @$roles 
     );
 
@@ -155,7 +150,7 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
     return;
 }
 
-sub COMPOSE_ALL_ROLES (@roles) {
+sub COMPOSE_ALL_ROLE_METHODS (@roles) {
     my (%methods, %conflicts, %required);
 
     # flatten the set of required methods ...

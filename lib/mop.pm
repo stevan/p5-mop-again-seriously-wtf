@@ -25,25 +25,27 @@ use mop::method;
 use mop::role;
 use mop::class;
 
-our ($IS_BOOTSTRAPPED, %TRAITS);
+our $IS_BOOTSTRAPPED = 0;
+
+our %TRAITS;
 
 sub import ($class, @args) {
     # start the bootstrapping ...
-    $IS_BOOTSTRAPPED = 0;
+    unless ( $IS_BOOTSTRAPPED ) {
+        # NOTE:
+        # Run the finalizers for the three packages that we 
+        # could not run it for previously. The issue is that 
+        # the finalize runner needs mop::role, and that cannot
+        # run until mop::role is loaded. These three packages
+        # are all needed by mop::role, so we have to tie the 
+        # knot here to make all things well.
+        foreach my $pkg (qw[ mop::object mop::attribute mop::method ]) {
+            mop::role->new( name => $pkg )->run_all_finalizers;     
+        }
 
-    # NOTE:
-    # Run the finalizers for the three packages that we 
-    # could not run it for previously. The issue is that 
-    # the finalize runner needs mop::role, and that cannot
-    # run until mop::role is loaded. These three packages
-    # are all needed by mop::role, so we have to tie the 
-    # knot here to make all things well.
-    foreach my $pkg (qw[ mop::object mop::attribute mop::method ]) {
-        mop::role->new( name => $pkg )->run_all_finalizers;     
+        # bootstrapping is complete ...
+        $IS_BOOTSTRAPPED = 1;
     }
-
-    # bootstrapping is complete ...
-    $IS_BOOTSTRAPPED = 1;
 
     my $caller = caller;
 
@@ -53,6 +55,18 @@ sub import ($class, @args) {
     # turn on all the features 
     if ( $caller ne 'main' ) {
         my $meta;
+
+
+        # FIXME:
+        # There are a lot of assumptions here that 
+        # we are not loading mop.pm in a package 
+        # where it might have already been loaded
+        # so we might want to keep that in mind 
+        # and guard against some of that below, 
+        # in particular I think the FINALIZE handlers
+        # might need to be checked, and perhaps the
+        # 'has' keyword importation as well.
+        # - SL
 
         # now handle any arguments ...
         if ( @args ) {
@@ -74,12 +88,25 @@ sub import ($class, @args) {
             my $metaclass = 'mop::' . $metatype; 
 
             $meta = $metaclass->new( name => $caller );
-            $meta->set_superclasses( @isa ) if $metatype eq 'class';
+            if ( $metatype eq 'class' ) {
+                $meta->set_superclasses( @isa );
+
+                # make sure to 'inherit' the required methods ...
+                # XXX:
+                # this might make more sense to run in the finalizer, 
+                # but that right now will break the required-method
+                # checking (which is known to be fragile), so we keep
+                # it here for now.
+                # - SL
+                foreach my $super ( map { mop::role->new( name => $_ ) } @isa ) {
+                    $meta->add_required_method($_)
+                        for $super->required_methods;
+                }
+            }
+
             if ( @does ) {
                 $meta->set_roles( @does );
-                $meta->add_finalizer(
-                    bless sub { mop::internal::util::APPLY_ROLES( $meta, \@does, to => $metatype ) } => 'mop::internal::MARKER::APPLY_ROLES'
-                );
+                $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@does, to => $metatype ) });
             }
 
             $meta->add_finalizer(sub {
@@ -141,6 +168,8 @@ sub import ($class, @args) {
 
 }
 
+# TODO:
+# Move this to a mop::traits module, like in p5-mop-redux
 BEGIN {
     $TRAITS{'is'} = sub ($m, $a, $type) {
         my $slot = $a->name;
