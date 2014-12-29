@@ -142,7 +142,9 @@ sub import ($class, @args) {
                     # this is the only one we handle 
                     # specially, everything else gets
                     # called as a trait ...
-                    $traits{default} //= eval 'sub { undef }'; # we need this to be a unique CV ... sigh
+                    $traits{default} //= delete $traits{required} 
+                                          ? sub { die "[mop::ERROR] The attribute '$name' is required" }
+                                          : eval 'sub { undef }'; # we need this to be a unique CV ... sigh
 
                     $meta->add_attribute( $name, delete $traits{default} );
 
@@ -184,19 +186,7 @@ BEGIN {
                 $_[0]->{ $slot };
             });            
         } else {
-            die "[Moxie::PANIC] Got strange option ($type) to trait (is)";
-        }
-    };
-
-    $TRAITS{'required'} = sub ($m, $a, $bool) {
-        if ( $bool ) {
-            my $class = $m->name;
-            my $attr  = $a->name;
-            my $init  = sub { die "[Moxie::ERROR] The attribute `$attr` is required" };
-
-            Sub::Util::set_subname( ($class . '::__ANON__::init_for::' . $attr), $init );
-
-            $a->set_initializer( $init );
+            die "[mop::PANIC] Got strange option ($type) to trait (is)";
         }
     };
 }
