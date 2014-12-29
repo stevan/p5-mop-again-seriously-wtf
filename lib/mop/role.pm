@@ -132,7 +132,9 @@ sub run_all_finalizers ($self) { $_->() for $self->finalizers }
 sub roles ($self) {
     my $DOES = $self->$*->{'DOES'};
     return () unless $DOES;
-    return $DOES->*{'ARRAY'}->@*;
+    my $roles = $DOES->*{'ARRAY'};
+    return () unless $roles;
+    return @$roles;
 }
 
 sub set_roles ($self, @roles) {
