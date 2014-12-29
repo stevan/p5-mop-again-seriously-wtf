@@ -103,22 +103,38 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
             unless scalar grep { $r eq $_ } @$roles;
     }
 
+    my @meta_roles = map { mop::role->new( name => $_ ) } @$roles;
+
+    my (
+        $attributes,
+        $attr_conflicts
+    ) = COMPOSE_ALL_ROLE_ATTRIBUTES( @meta_roles );
+
+    die "[mop::PANIC] There should be no conflicting attributes when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
+        if scalar keys %$attr_conflicts;
+
+    foreach my $name ( keys %$attributes ) {
+        # if we have an attribute already by that name ...
+        die "[mop::PANIC] Role Conflict, cannot compose attribute ($name) into (" . $meta->name . ") because ($name) already exists"
+            if $meta->has_attribute( $name );
+        # otherwise alias it ...
+        $meta->alias_attribute( $name, $attributes->{ $name } );
+    }
+
     my (
         $methods, 
-        $conflicts,
-        $required
-    ) = COMPOSE_ALL_ROLE_METHODS( 
-        map { mop::role->new( name => $_ ) } @$roles 
-    );
+        $method_conflicts,
+        $required_methods
+    ) = COMPOSE_ALL_ROLE_METHODS( @meta_roles );
 
     die "[mop::PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
-        if scalar keys %$conflicts;
+        if scalar keys %$method_conflicts;
 
     # check the required method set and 
     # see if what we are composing into 
     # happens to fulfill them 
-    foreach my $name ( keys $required->%* ) {
-        delete $required->{ $name } 
+    foreach my $name ( keys %$required_methods ) {
+        delete $required_methods->{ $name } 
             if $meta->has_method( $name )
     }
 
@@ -127,9 +143,9 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
         # TODO:
         # think about checking for Abstract-ness here
         # it could be done with another $opt(ion).
-        && scalar keys %$required;
+        && scalar keys %$required_methods;
 
-    foreach my $name ( keys $methods->%* ) {
+    foreach my $name ( keys %$methods ) {
         # if we have a method already by that name ...
         if ( $meta->has_method( $name ) ) {
             # if we are a class, the class wins
@@ -145,9 +161,33 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
     # because we are a role (class would have 
     # died above), so we can just stuff in the 
     # required methods ...
-    $meta->add_required_method( $_ ) for keys $required->%*;
+    $meta->add_required_method( $_ ) for keys %$required_methods;
 
     return;
+}
+
+sub COMPOSE_ALL_ROLE_ATTRIBUTES (@roles) {
+    my (%attributes, %conflicts);
+
+    foreach my $role ( @roles ) {
+        foreach my $attr ( $role->attributes ) {
+            my $name = $attr->name;
+            # if we have one already ...
+            if ( exists $attributes{ $name } ) {
+                # mark it as a conflict ...
+                $conflicts{ $name } = undef;
+                # and remove it from our attribute set ...
+                delete $attributes{ $name };
+            }
+            # if we don't have it already ...
+            else {
+                # make a note of it
+                $attributes{ $name } = $attr->initializer;    
+            }
+        }
+    }
+
+    return \%attributes, \%conflicts;
 }
 
 sub COMPOSE_ALL_ROLE_METHODS (@roles) {
