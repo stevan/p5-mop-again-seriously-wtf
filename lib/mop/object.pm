@@ -22,7 +22,16 @@ sub new ($class, @args) {
 }
 
 sub DOES ($self, $role) {
-    mop::class->new( name => ref $self || $self )->does_role( $role )
+    my $class = ref $self || $self;
+    # if we inherit from this, we are good ...
+    return 1 if $class->isa( $role );
+    # next check the roles ...
+    my $meta = mop::class->new( name => $class );
+    # test just the local (and composed) roles first ...
+    return 1 if $meta->does_role( $role );
+    # then check the inheritance hierarchy next ...
+    return 1 if scalar grep { mop::class->new( name => $_ )->does_role( $role ) } $meta->mro;
+    return 0;
 }
 
 sub DESTROY ($self) {
