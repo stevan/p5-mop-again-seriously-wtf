@@ -14,12 +14,12 @@ our @ISA; BEGIN { @ISA  = ('mop::object') }
 
 sub new ($class, %args) {
 
-    die 'The parameter `name` is required, and it must be a string'
+    die "The parameter 'name' is required, and it must be a string"
         unless exists  $args{'name'} 
             && defined $args{'name'} 
             && length  $args{'name'} > 0;
 
-    die 'The parameter `initializer` is required'
+    die "The parameter 'initializer' is required"
         unless exists $args{'initializer'}
             && ref    $args{'initializer'} eq 'CODE';
 
