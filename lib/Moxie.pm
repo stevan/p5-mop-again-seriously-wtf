@@ -18,31 +18,31 @@ sub import {
     my $pkg  = caller;
     my @args = @_;
 
-    my ($current, @extends, @with);
+    my ($current, @isa, @does);
     foreach my $arg ( @args ) {
-        if ( $arg eq 'extends' ) {
-            $current = \@extends;
+        if ( $arg eq 'isa' ) {
+            $current = \@isa;
         }
-        elsif ( $arg eq 'with' ) {
-            $current = \@with;
+        elsif ( $arg eq 'does' ) {
+            $current = \@does;
         }
         else {
             push @$current => $arg;
         }
     }
 
-    use_package_optimistically $_ foreach @extends, @with;
+    use_package_optimistically $_ foreach @isa, @does;
 
     mop::internal::util::INSTALL_FINALIZATION_RUNNER_FOR_ENDOFSCOPE( $pkg );
 
-    my $metatype  = (scalar @extends ? 'class' : 'role'); 
+    my $metatype  = (scalar @isa ? 'class' : 'role'); 
     my $metaclass = 'mop::' . $metatype; 
 
     my $meta = $metaclass->new( name => $pkg );
-    $meta->set_superclasses( @extends ) if $metatype eq 'class';
-    if ( @with ) {
-        $meta->set_roles( @with );
-        $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@with, to => $metatype ) });
+    $meta->set_superclasses( @isa ) if $metatype eq 'class';
+    if ( @does ) {
+        $meta->set_roles( @does );
+        $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@does, to => $metatype ) });
     }
     
     $meta->add_finalizer(sub {

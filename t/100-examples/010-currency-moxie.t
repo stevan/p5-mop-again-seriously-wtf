@@ -23,7 +23,7 @@ BEGIN {
     }
 
     package Comparable {
-        use Moxie with => 'Eq';
+        use Moxie does => 'Eq';
 
         sub compare;
 
@@ -56,8 +56,8 @@ BEGIN {
 
     package US::Currency {
         use Moxie
-            extends => 'mop::object',
-               with => 'Comparable', 'Printable';
+            isa  => 'mop::object',
+            does => 'Comparable', 'Printable';
 
         has 'amount' => (
             is      => 'ro',
