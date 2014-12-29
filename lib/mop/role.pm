@@ -228,6 +228,9 @@ sub add_attribute ($self, $name, $initializer) {
     die "[mop::PANIC] Cannot add attribute ($name) to (" . $self->name . ") because it has been closed"
         if $self->is_closed;
 
+    $initializer = $initializer->initializer
+        if Scalar::Util::blessed($initializer);
+
     # make sure to set this up correctly ...
     Sub::Util::set_subname(($self->name . '::__ANON__'), $initializer);
 
@@ -245,6 +248,9 @@ sub add_attribute ($self, $name, $initializer) {
 sub alias_attribute ($self, $name, $initializer) {
     die "[mop::PANIC] Cannot alias method ($name) to (" . $self->name . ") because it has been closed"
         if $self->is_closed;
+
+    $initializer = $initializer->initializer
+        if Scalar::Util::blessed($initializer);
 
     unless ( $self->$*->{'HAS'} ) {
         no strict 'refs';
