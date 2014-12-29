@@ -351,8 +351,7 @@ have a pragma based syntax for this.
 
   package Eq;
 
-  use v5.20;
-  use warnings;
+  use v5.22;
   use mop;
 
   sub equal_to;
@@ -363,11 +362,8 @@ have a pragma based syntax for this.
 
   package Comparable;
 
-  use v5.20;
-  use warnings;
-  use mop;
-
-  use role 'Eq';
+  use v5.22;
+  use mop does => 'Eq';
 
   sub compare;
 
@@ -393,22 +389,19 @@ have a pragma based syntax for this.
 
   package Printable;
   
-  use v5.20;
-  use warnings;
+  use v5.22;
   use mop;
 
   sub to_string;
 
   package US::Currency;
 
-  use v5.20;
-  use warnings;
-  use mop;
-  
-  use parent 'mop::object';
-  use role   'Comparable', 'Printable';
+  use v5.22;
+  use mop
+      isa  => 'mop::object',
+      does => 'Comparable', 'Printable';
 
-  use attr '$!amount' => (
+  has '$!amount' => (
       is      => 'rw', 
       default => sub { 0 } 
   );
