@@ -140,10 +140,8 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
 
     die "[mop::PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ") but instead we found (" . (join ', ' => keys %$required_methods)  . ")"
         if $opts{to} eq 'class' 
-        # TODO:
-        # think about checking for Abstract-ness here
-        # it could be done with another $opt(ion).
-        && scalar keys %$required_methods;
+        && scalar keys %$required_methods
+        && !$meta->is_abstract;
 
     foreach my $name ( keys %$methods ) {
         # if we have a method already by that name ...
