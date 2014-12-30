@@ -107,18 +107,6 @@ sub import ($class, @args) {
             $meta = $metaclass->new( name => $caller );
             if ( $metatype eq 'class' ) {
                 $meta->set_superclasses( @isa );
-
-                # make sure to 'inherit' the required methods ...
-                # XXX:
-                # this might make more sense to run in the finalizer, 
-                # but that right now will break the required-method
-                # checking (which is known to be fragile), so we keep
-                # it here for now.
-                # - SL
-                foreach my $super ( map { mop::role->new( name => $_ ) } @isa ) {
-                    $meta->add_required_method($_)
-                        for $super->required_methods;
-                }
             }
 
             if ( @does ) {
@@ -127,6 +115,15 @@ sub import ($class, @args) {
             }
 
             $meta->add_finalizer(sub {
+                # make sure to 'inherit' the required methods ...
+                foreach my $super ( map { mop::role->new( name => $_ ) } $meta->superclasses ) {
+                    foreach my $required_method ( $super->required_methods ) {
+                        $meta->add_required_method($required_method)
+                    }
+                }
+
+                # this is an optimization to pre-populate the 
+                # cache for all the attributes 
                 mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta )
             }) if $metatype eq 'class';
         }

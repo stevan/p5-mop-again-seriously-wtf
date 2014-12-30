@@ -351,15 +351,23 @@ sub add_required_method ($self, $name) {
                 # then we know there already is a required method
                 # and we can just return 
                 return if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
-                # otherwise we fall through here ...
+                # otherwise we just return because we
+                # know that we have a CODE ref that is
+                # actually not a required sub, it is a
+                # regular one, which would fulfill the 
+                # the requirements anyway
+                return;
             }
 
         }
+        else {
         
-        # if it is just a SCALAR ref and derefs 
-        # to -1, then we already require that 
-        # method, so we can just skip.
-        return if ref $glob->$* eq 'SCALAR' && $glob->$* == -1;
+            # if it is just a SCALAR ref or derefs 
+            # to -1, then we already require that 
+            # method, so we can just skip.
+            return if ref $glob->$* eq 'SCALAR';
+            return if $glob->$* == -1;
+        }
         die "[mop::PANIC] I found a (" . (ref $glob) . ") with a value of (" . $glob->$* . ") at '$name', I expected a GLOB or a SCALAR";
     }
     else {
