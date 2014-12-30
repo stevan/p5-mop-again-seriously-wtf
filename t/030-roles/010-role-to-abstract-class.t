@@ -19,15 +19,17 @@ package Gorch {
     use v5.20;
     use warnings;
     use mop 
-        isa  => 'mop::object',
-        does => 'Foo';
+        isa    => 'mop::object',
+        does   => 'Foo';
+
+    BEGIN { our $IS_ABSTRACT = 1 }
 }
 
 ok(mop::class->new( name => 'Gorch' )->is_abstract, '... composing a role with still required methods creates an abstract class');
 eval { Gorch->new };
 like(
     $@,
-    qr/Cannot instantiate abstract class \(Gorch\)/,
+    qr/^\[mop\:\:PANIC\] Cannot construct instance, the class \(Gorch\) is abstract/,
     '... cannot create an instance of Gorch'
 );
 
