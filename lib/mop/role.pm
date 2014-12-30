@@ -269,9 +269,23 @@ sub required_methods ($self) {
     my @required;
     foreach my $candidate ( keys $self->$*->%* ) {
         if ( my $glob = \($self->$*->{ $candidate }) ) {
-            next if ref $glob eq 'GLOB';
-            next if ref $glob ne 'SCALAR';
-            next if not defined $glob->$*;
+            # if it is a GLOB ref then ...
+            if (ref $glob eq 'GLOB') {
+                # check the CODE slot for it, if 
+                # we do not have CODE slot, then
+                # we can move on ...
+                next if not defined $glob->$*->{CODE};
+                # if our CODE slot is defined, lets 
+                # check it in more detail ...
+                my $op = B::svref_2object( $glob->$*->{CODE} );
+                # if it is not a CV or the ROOT of it is
+                # not a NULL op, then we move on ...
+                next if not( $op->isa('B::CV') && $op->ROOT->isa('B::NULL') );
+            }
+            else {
+                next if ref $glob ne 'SCALAR';
+                next if not defined $glob->$*;
+            }
             push @required => $candidate if $glob->$* == -1;
         }
     }
@@ -281,10 +295,24 @@ sub required_methods ($self) {
 sub requires_method ($self, $name) {
     return 0 unless exists $self->$*->{ $name };
     my $glob = \($self->$*->{ $name });
-    return 0 if ref $glob eq 'GLOB';
-    return 0 if ref $glob ne 'SCALAR';
-    return 0 if not defined $glob->$*;
-    return 1 if $glob->$* == -1;
+    # if it is a GLOB ref then ...
+    if (ref $glob eq 'GLOB') {
+        # check the CODE slot for it, if 
+        # we do not have CODE slot, then
+        # we can move on ...
+        return 0 if not defined $glob->$*->{CODE};
+        # if our CODE slot is defined, lets 
+        # check it in more detail ...
+        my $op = B::svref_2object( $glob->$*->{CODE} );
+        # if it is not a CV or the ROOT of it is
+        # not a NULL op, then we move on ...
+        return 1 if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+    }
+    else {
+        return 0 if ref $glob ne 'SCALAR';
+        return 0 if not defined $glob->$*;
+        return 1 if $glob->$* == -1;
+    }
     die "[mop::PANIC] I found a (" . (ref $glob) . ") with a value of (" . $glob->$* . ") at '$name', I expected a GLOB or a SCALAR";
 }
 
@@ -296,27 +324,42 @@ sub add_required_method ($self, $name) {
         my $glob = \($self->$*->{ $name });
         # NOTE: 
         # If something happens to autovivify the
-        # typeglob for this $name, then this will 
-        # throw the exception below. This can be 
+        # typeglob for this $name, we need to look
+        # a little closer. This situation can be 
         # caused by any number of things, such as 
         # calling ->can($name) or having another 
         # type of variable (SCALAR, ARRAY, HASH)
         # with the same $name. Basically it can 
         # only be a C<sub foo;> and nothing else.
-        # 
-        # It is possible this is just too fragile
-        # but perhaps we can do something on the 
-        # XS side later on to better capture this
-        # and remove some of the fragility.
         # - SL
-        die "[mop::PANIC] Cannot add a method requirement ($name) because a typeglob exists for ($name) and we cannot easily determine if method is required or not"
-            if ref $glob eq 'GLOB'
-            || ref $glob ne 'SCALAR'
-            || not defined $glob->$*;
+        if (ref $glob eq 'GLOB') {
+
+            # if we have a glob, but just not 
+            # the CODE slot for it, then we can 
+            # install our required method.
+            if ( not defined $glob->$*->{CODE} ) {
+                my $fully_qualified_name = $self->name . '::' . $name;
+                eval "sub ${fully_qualified_name}; 1;" or do { warn $@ };
+                ### ....????
+                #$glob->$* = sub { die "Undefined subroutine &${fully_qualified_name} called" };
+                return;
+            } else {
+                # if our CODE slot is defined, lets 
+                # check it in more detail ...
+                my $op = B::svref_2object( $glob->$*->{CODE} );
+                # if it is a CV and the ROOT of it is a NULL op
+                # then we know there already is a required method
+                # and we can just return 
+                return if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+                # otherwise we fall through here ...
+            }
+
+        }
+        
         # if it is just a SCALAR ref and derefs 
         # to -1, then we already require that 
         # method, so we can just skip.
-        return if $glob->$* == -1;
+        return if ref $glob->$* eq 'SCALAR' && $glob->$* == -1;
         die "[mop::PANIC] I found a (" . (ref $glob) . ") with a value of (" . $glob->$* . ") at '$name', I expected a GLOB or a SCALAR";
     }
     else {
@@ -331,14 +374,33 @@ sub delete_required_method ($self, $name) {
     return unless exists $self->$*->{ $name };
     
     my $glob = \($self->$*->{ $name });
-    return if ref $glob eq 'GLOB';
-    return if ref $glob ne 'SCALAR';
-    return if not defined $glob->$*;
 
-    if ( $glob->$* == -1 ) {
-        return delete $self->$*->{ $name };
+    # if it is a GLOB ref then ...
+    if (ref $glob eq 'GLOB') {
+        # if we have a glob, but just not 
+        # the CODE slot for it, then we can 
+        # just return because we don't have 
+        # a required method here ...
+        return if not defined $glob->$*->{CODE};
+        # if our CODE slot is defined, lets 
+        # check it in more detail ...
+        my $op = B::svref_2object( $glob->$*->{CODE} );
+        # if it is a CV and the ROOT of it is a NULL op
+        # then we know there already is a required method
+        # and we can just return 
+        if ( $op->isa('B::CV') && $op->ROOT->isa('B::NULL') ) {
+            return delete $self->$*->{ $name }
+        }
     }
-    
+    else {
+        return if ref $glob ne 'SCALAR';
+        return if not defined $glob->$*;
+
+        if ( $glob->$* == -1 ) {
+            return delete $self->$*->{ $name };
+        }
+    }    
+
     die "[mop::PANIC] I found a (" . (ref $glob) . ") with a value of (" . $glob->$* . ") at '$name', I expected a GLOB or a SCALAR";
 }
 

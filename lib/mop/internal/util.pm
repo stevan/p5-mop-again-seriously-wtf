@@ -135,10 +135,10 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
     # happens to fulfill them 
     foreach my $name ( keys %$required_methods ) {
         delete $required_methods->{ $name } 
-            if $meta->has_method( $name )
+            if $meta->name->can( $name );
     }
 
-    die "[mop::PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
+    die "[mop::PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ") but instead we found (" . (join ', ' => keys %$required_methods)  . ")"
         if $opts{to} eq 'class' 
         # TODO:
         # think about checking for Abstract-ness here
