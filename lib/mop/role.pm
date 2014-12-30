@@ -274,10 +274,10 @@ sub required_methods ($self) {
                 # check the CODE slot for it, if 
                 # we do not have CODE slot, then
                 # we can move on ...
-                next if not defined $glob->$*->{CODE};
+                next if not defined $glob->*{'CODE'};
                 # if our CODE slot is defined, lets 
                 # check it in more detail ...
-                my $op = B::svref_2object( $glob->$*->{CODE} );
+                my $op = B::svref_2object( $glob->*{'CODE'} );
                 # if it is not a CV or the ROOT of it is
                 # not a NULL op, then we move on ...
                 next if not( $op->isa('B::CV') && $op->ROOT->isa('B::NULL') );
@@ -285,8 +285,9 @@ sub required_methods ($self) {
             else {
                 next if ref $glob ne 'SCALAR';
                 next if not defined $glob->$*;
+                next if $glob->$* != -1;
             }
-            push @required => $candidate if $glob->$* == -1;
+            push @required => $candidate;
         }
     }
     return @required;
@@ -300,13 +301,14 @@ sub requires_method ($self, $name) {
         # check the CODE slot for it, if 
         # we do not have CODE slot, then
         # we can move on ...
-        return 0 if not defined $glob->$*->{CODE};
+        return 0 if not defined $glob->*{'CODE'};
         # if our CODE slot is defined, lets 
         # check it in more detail ...
-        my $op = B::svref_2object( $glob->$*->{CODE} );
+        my $op = B::svref_2object( $glob->*{'CODE'} );
         # if it is not a CV or the ROOT of it is
         # not a NULL op, then we move on ...
         return 1 if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+        return 0;
     }
     else {
         return 0 if ref $glob ne 'SCALAR';
@@ -337,16 +339,14 @@ sub add_required_method ($self, $name) {
             # if we have a glob, but just not 
             # the CODE slot for it, then we can 
             # install our required method.
-            if ( not defined $glob->$*->{CODE} ) {
-                my $fully_qualified_name = $self->name . '::' . $name;
-                eval "sub ${fully_qualified_name}; 1;" or do { warn $@ };
-                ### ....????
-                #$glob->$* = sub { die "Undefined subroutine &${fully_qualified_name} called" };
+            if ( not defined $glob->*{'CODE'} ) {
+                my $pkg_name = $self->name;
+                eval "package $pkg_name { sub ${name}; }; 1;" or do { warn $@ };
                 return;
             } else {
                 # if our CODE slot is defined, lets 
                 # check it in more detail ...
-                my $op = B::svref_2object( $glob->$*->{CODE} );
+                my $op = B::svref_2object( $glob->*{'CODE'} );
                 # if it is a CV and the ROOT of it is a NULL op
                 # then we know there already is a required method
                 # and we can just return 
@@ -381,10 +381,10 @@ sub delete_required_method ($self, $name) {
         # the CODE slot for it, then we can 
         # just return because we don't have 
         # a required method here ...
-        return if not defined $glob->$*->{CODE};
+        return if not defined $glob->*{'CODE'};
         # if our CODE slot is defined, lets 
         # check it in more detail ...
-        my $op = B::svref_2object( $glob->$*->{CODE} );
+        my $op = B::svref_2object( $glob->*{'CODE'} );
         # if it is a CV and the ROOT of it is a NULL op
         # then we know there already is a required method
         # and we can just return 
@@ -413,6 +413,10 @@ sub methods ($self) {
             my $glob = \($self->$*->{ $candidate });
             next unless ref $glob eq 'GLOB';
             if ( my $code = $glob->$*->*{'CODE'} ) {
+                
+                my $op = B::svref_2object( $glob->*{'CODE'} );
+                next if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+
                 $code = mop::method->new( body => $code );
                 if ( $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles )) ){
                     push @methods => $code;
@@ -428,6 +432,10 @@ sub has_method ($self, $name) {
     my $glob = \($self->$*->{ $name });
     return 0 unless ref $glob eq 'GLOB';
     if ( my $code = $glob->$*->*{'CODE'} ) {
+
+        my $op = B::svref_2object( $glob->*{'CODE'} );
+        return 0 if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+
         $code = mop::method->new( body => $code );
         return 0 unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
         return 1;
@@ -440,6 +448,9 @@ sub has_method_alias ($self, $name) {
     my $glob = \($self->$*->{ $name });
     return 0 unless ref $glob eq 'GLOB';
     if ( my $code = $glob->$*->*{'CODE'} ) {
+        my $op = B::svref_2object( $glob->*{'CODE'} );
+        return 0 if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+
         $code = mop::method->new( body => $code );
         return 1 if $code->stash_name ne $self->name;
     }
@@ -451,6 +462,9 @@ sub get_method ($self, $name) {
     my $glob = \($self->$*->{ $name });
     return unless ref $glob eq 'GLOB';
     if ( my $code = $glob->$*->*{'CODE'} ) {    
+        my $op = B::svref_2object( $glob->*{'CODE'} );
+        return if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+
         $code = mop::method->new( body => $code );
         return unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
         return $code;
@@ -468,6 +482,9 @@ sub delete_method ($self, $name) {
     return unless ref $glob eq 'GLOB';
 
     if ( my $code = $glob->$*->*{'CODE'} ) {
+        my $op = B::svref_2object( $glob->*{'CODE'} );
+        return if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+
         $code = mop::method->new( body => $code );
         return unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
         my $glob = $self->$*->{ $name };      
