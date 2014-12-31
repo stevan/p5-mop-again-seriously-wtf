@@ -142,7 +142,7 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
         $required_methods
     ) = COMPOSE_ALL_ROLE_METHODS( @meta_roles );
 
-    die "[mop::PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ")"
+    die "[mop::PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ") but instead we found (" . (join ', ' => keys %$method_conflicts)  . ")"
         if scalar keys %$method_conflicts;
 
     # check the required method set and 
