@@ -185,8 +185,9 @@ sub COMPOSE_ALL_ROLE_ATTRIBUTES (@roles) {
     foreach my $role ( @roles ) {
         foreach my $attr ( $role->attributes ) {
             my $name = $attr->name;
-            # if we have one already ...
-            if ( exists $attributes{ $name } ) {
+            # if we have one already, but 
+            # it is not the same refaddr ...
+            if ( exists $attributes{ $name } && $attributes{ $name } != $attr->initializer ) {
                 # mark it as a conflict ...
                 $conflicts{ $name } = undef;
                 # and remove it from our attribute set ...
@@ -218,9 +219,10 @@ sub COMPOSE_ALL_ROLE_METHODS (@roles) {
         # and every method in that role ...
         foreach my $m ( $r->methods ) {
             my $name = $m->name;
-            # if we have already seen the method,
+            # if we have already seen the method, 
+            # but it is not the same refaddr
             # it is a conflict, which means:            
-            if ( exists $methods{ $name } ) {
+            if ( exists $methods{ $name } && $methods{ $name } != $m->body  ) {
                 # we need to add it to our required-method map
                 $required{ $name } = undef;
                 # and note that it is also a conflict ...
@@ -231,7 +233,7 @@ sub COMPOSE_ALL_ROLE_METHODS (@roles) {
             # if we haven't seen the method ...
             else {
                 # add it to the method map
-                $methods{ $name } = $m;
+                $methods{ $name } = $m->body;
                 # and remove it from the required-method map 
                 delete $required{ $name } 
                     # if it actually exists in it, and ...
