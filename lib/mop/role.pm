@@ -533,7 +533,7 @@ sub alias_method ($self, $name, $code) {
         if $self->is_closed;
 
     no strict 'refs';
-    no warnings 'once';
+    no warnings 'once', 'redefine';
     *{ $self->name . '::' . $name } = Scalar::Util::blessed($code) ? $code->body : $code;
 }
 
