@@ -37,8 +37,23 @@ sub import ($class, @args) {
 # - SL
 
 sub INSTALL_FINALIZATION_RUNNER ($pkg) {
+    # NOTE:
+    # this check is imperfect, ideally things 
+    # will always happen completely at compile 
+    # time, for which the ${^GLOBAL_PHASE} check
+    # is correct, but this does not work for 
+    # code created with eval STRING, in this case ...
     die "[mop::PANIC] To late to install finalization runner for <$pkg>, current-phase: (${^GLOBAL_PHASE})" 
-        unless ${^GLOBAL_PHASE} eq 'START';
+        unless ${^GLOBAL_PHASE} eq 'START' 
+            # we check the caller, and climb
+            # far enough up the stack to work 
+            # reasonably correctly for our common
+            # use cases (at least the ones we have
+            # right now). That said, it is fragile
+            # at best and will break if you aren't 
+            # that number of stack frames away from 
+            # an eval STRING;
+            || (caller(3))[3] eq '(eval)';
 
     push @{ mop::internal::util::guts::get_UNITCHECK_AV() } => (
         sub { mop::role->new( name => $pkg )->run_all_finalizers }
