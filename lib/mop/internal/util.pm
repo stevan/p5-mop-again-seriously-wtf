@@ -165,6 +165,7 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
             next if $opts{to} eq 'class';
             # if we are not a class, (we are a role) and we die with a conflict ...
             die "[mop::PANIC] Role Conflict, cannot compose method ($name) into (" . $meta->name . ") because ($name) already exists"
+                # HMMM, consider removing this, it is not really what we want ...
                 if $meta->get_method( $name )->was_aliased_from( @$roles );
         }
         $meta->alias_method( $name, $methods->{ $name } );
