@@ -12,12 +12,6 @@ BEGIN {
             : plan skip_all => "This test requires Devel::StackTrace");
 }
 
-# XXX for some incredibly confusing reason, adding a do { } block to the
-# default for $!stack_trace makes the stack trace start from the 'has'
-# declaration, while leaving it off makes it start from the place that ->throw
-# was called. no idea at all what causes this... possibly a bug in
-# Parse::Keyword, but i can't reproduce it outside of here. "just another thing
-# to fix in the real implementation" i guess.
 package Throwable {
     use v5.20;
     use warnings;
