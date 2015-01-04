@@ -5,8 +5,6 @@ use warnings;
 
 use Test::More;
 
-use mop;
-
 package Foo {
     use v5.20;
     use warnings;
@@ -61,20 +59,71 @@ package FooBarClass {
         does => 'Foo', 'Bar';
 
     sub foo { 'FooBarClass::foo' }
-
-    BEGIN { our $IS_ABSTRACT = 1 }
 }
+
+{
+    my $FooBarClass = mop::class->new( name => 'FooBarClass' );
+    my ($Foo, $Bar) = map { mop::role->new( name => $_ ) } qw[ Foo Bar ];
+    is_deeply([$FooBarClass->required_methods], [], '... method conflict between roles results in required method');
+    ok($FooBarClass->has_method('foo'), '... FooBarClass does have the foo method');
+    is($FooBarClass->get_method('foo')->body->(), 'FooBarClass::foo', '... FooBarClass foo method is what makes sense');
+    ok($Foo->has_method('foo'), '... Foo still has the foo method');
+    ok($Bar->has_method('foo'), '... Bar still has the foo method');
+}
+
+{
+    local $@ = undef;
+    eval q[
+        package FooBarBrokenClass1 {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'Foo', 'Bar';
+        }
+    ];
+    like(
+        "$@",
+        qr/^\[mop\:\:PANIC\] There should be no conflicting methods when composing \(Foo, Bar\) into the class \(FooBarBrokenClass1\) but instead we found \(foo\)/,
+        '... got the exception we expected'
+    );
+}
+
+{
+    local $@ = undef;
+    eval q[
+        package FooBarBrokenClass2 {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'Foo', 'Bar';
+
+            BEGIN { our $IS_ABSTRACT = 1 };
+        }
+    ];
+    ok(!$@, '... no exception because the class is declared abstract');
+}
+
+package Baz {
+    use v5.20;
+    use warnings;
+    use mop 
+        isa  => 'mop::object',
+        does => 'Foo';
+
+    sub foo { 'Baz::foo' }
+}
+
+{
+    my ($Baz, $Foo) = map { mop::class->new( name => $_ ) } qw[ Baz Foo ];
+    is_deeply([$Baz->required_methods], [], '... no method conflict between class/role');
+    ok($Foo->has_method('foo'), '... Foo still has the foo method');
+    is(Baz->new->foo, 'Baz::foo', '... got the right method');
+}
+
 
 =pod
-
-class Baz with Foo {
-    method foo { 'Baz::foo' }
-}
-
-is_deeply([mop::class->new( name => 'Baz' )->required_methods], [], '... no method conflict between class/role');
-ok(mop::meta('Foo')->has_method('foo'), '... Foo still has the foo method');
-is(Baz->new->foo, 'Baz::foo', '... got the right method');
-
 class Gorch with Foo, Bar is abstract {}
 
 ok(mop::class->new( name => 'Gorch' )->is_abstract, '... method conflict between roles results in required method (and an abstract class)');
