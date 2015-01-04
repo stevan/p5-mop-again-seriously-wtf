@@ -31,11 +31,12 @@ package Bar {
     sub foo { 'Bar::foo' }
 }
 
-TODO: {
-    local $TODO = '... need to think about these some more';
 
-    is_deeply([mop::role->new( name => 'Foo2' )->required_methods], [], '... no method conflict here');
-    ok(mop::role->new( name => 'Foo2' )->has_method('foo'), '... Foo2 has the foo method');
+{
+    my $Foo2 = mop::role->new( name => 'Foo2' );
+    is_deeply([$Foo2->required_methods], [], '... no method conflict here');
+    ok($Foo2->has_method('foo'), '... Foo2 has the foo method');
+    is($Foo2->get_method('foo')->body->(), 'Foo2::foo', '... the method in Foo2 is as we expected');
 }
 
 package FooBar {
@@ -44,16 +45,26 @@ package FooBar {
     use mop does => 'Foo', 'Bar';
 }
 
-TODO: {
-    local $TODO = '... need to think about these some more';
-
-    is_deeply([mop::role->new( name => 'FooBar' )->required_methods], ['foo'], '... method conflict between roles results in required method');
-    ok(!mop::role->new( name => 'FooBar' )->has_method('foo'), '... FooBar does not have the foo method');
-    ok(mop::role->new( name => 'Foo' )->has_method('foo'), '... Foo still has the foo method');
-    ok(mop::role->new( name => 'Bar' )->has_method('foo'), '... Bar still has the foo method');
+{
+    my ($FooBar, $Foo, $Bar) = map { mop::role->new( name => $_ ) } qw[ FooBar Foo Bar ];
+    is_deeply([$FooBar->required_methods], ['foo'], '... method conflict between roles results in required method');
+    ok(!$FooBar->has_method('foo'), '... FooBar does not have the foo method');
+    ok($Foo->has_method('foo'), '... Foo still has the foo method');
+    ok($Bar->has_method('foo'), '... Bar still has the foo method');
 }
 
-fail('... fix the code here');
+package FooBarClass {
+    use v5.20;
+    use warnings;
+    use mop 
+        isa  => 'mop::object', 
+        does => 'Foo', 'Bar';
+
+    sub foo { 'FooBarClass::foo' }
+
+    BEGIN { our $IS_ABSTRACT = 1 }
+}
+
 =pod
 
 class Baz with Foo {

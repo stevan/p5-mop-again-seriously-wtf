@@ -142,8 +142,13 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
         $required_methods
     ) = COMPOSE_ALL_ROLE_METHODS( @meta_roles );
 
-    die "[mop::PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ") but instead we found (" . (join ', ' => keys %$method_conflicts)  . ")"
-        if scalar keys %$method_conflicts;
+    die "[mop::PANIC] There should be no conflicting methods when composing (" . (join ', ' => @$roles) . ") into the class (" . $meta->name . ") but instead we found (" . (join ', ' => keys %$method_conflicts)  . ")"
+        if $opts{to} eq 'class'           # if we are composing into a class ...
+        && (scalar keys %$method_conflicts) # and we have any conflicts ...
+        # and the conflicts are not satisfied by the composing class ...
+        && (scalar grep { !$meta->has_method( $_ ) } keys %$method_conflicts)
+        # and the class is not declared abstract ....
+        && !$meta->is_abstract; 
 
     # check the required method set and 
     # see if what we are composing into 
@@ -154,20 +159,14 @@ sub APPLY_ROLES ($meta, $roles, %opts) {
     }
 
     die "[mop::PANIC] There should be no required methods when composing (" . (join ', ' => @$roles) . ") into (" . $meta->name . ") but instead we found (" . (join ', ' => keys %$required_methods)  . ")"
-        if $opts{to} eq 'class' 
-        && scalar keys %$required_methods
-        && !$meta->is_abstract;
+        if $opts{to} eq 'class'           # if we are composing into a class ...
+        && scalar keys %$required_methods # and we have required methods ...
+        && !$meta->is_abstract;           # and the class is not abstract ...
 
     foreach my $name ( keys %$methods ) {
         # if we have a method already by that name ...
-        if ( $meta->has_method( $name ) ) {
-            # if we are a class, the class wins
-            next if $opts{to} eq 'class';
-            # if we are not a class, (we are a role) and we die with a conflict ...
-            die "[mop::PANIC] Role Conflict, cannot compose method ($name) into (" . $meta->name . ") because ($name) already exists"
-                # HMMM, consider removing this, it is not really what we want ...
-                if $meta->get_method( $name )->was_aliased_from( @$roles );
-        }
+        next if $meta->has_method( $name );
+        # otherwise, alias it ...
         $meta->alias_method( $name, $methods->{ $name } );
     }
 
