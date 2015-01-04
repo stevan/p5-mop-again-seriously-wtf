@@ -92,7 +92,7 @@ package FooBarClass {
 {
     local $@ = undef;
     eval q[
-        package FooBarBrokenClass2 {
+        package Gorch {
             use v5.20;
             use warnings;
             use mop 
@@ -103,6 +103,13 @@ package FooBarClass {
         }
     ];
     ok(!$@, '... no exception because the class is declared abstract');
+
+    my $Gorch = mop::class->new( name => 'Gorch' );
+    my ($Foo, $Bar) = map { mop::role->new( name => $_ ) } qw[ Foo Bar ];
+    is_deeply([$Gorch->required_methods], ['foo'], '... method conflict between roles results in required method');
+    ok(!$Gorch->has_method('foo'), '... Gorch does not have the foo method');
+    ok($Foo->has_method('foo'), '... Foo still has the foo method');
+    ok($Bar->has_method('foo'), '... Bar still has the foo method');
 }
 
 package Baz {
@@ -121,36 +128,5 @@ package Baz {
     ok($Foo->has_method('foo'), '... Foo still has the foo method');
     is(Baz->new->foo, 'Baz::foo', '... got the right method');
 }
-
-
-=pod
-class Gorch with Foo, Bar is abstract {}
-
-ok(mop::class->new( name => 'Gorch' )->is_abstract, '... method conflict between roles results in required method (and an abstract class)');
-is_deeply([mop::meta('Gorch')->required_methods], ['foo'], '... method conflict between roles results in required method');
-
-role WithFinalize1 {
-    method FINALIZE { }
-}
-
-role WithFinalize2 {
-    method FINALIZE { }
-}
-
-eval "class MultipleFinalizeMethods with WithFinalize1, WithFinalize2 { }";
-like($@, qr/Required method\(s\) \[FINALIZE\] are not allowed in MultipleFinalizeMethods unless class is declared abstract/);
-
-role WithNew1 {
-    method new { }
-}
-
-role WithNew2 {
-    method new { }
-}
-
-eval "class MultipleNewMethods with WithNew1, WithNew2 { }";
-like($@, qr/Required method\(s\) \[new\] are not allowed in MultipleNewMethods unless class is declared abstract/);
-
-=cut
 
 done_testing;

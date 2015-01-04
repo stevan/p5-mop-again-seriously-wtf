@@ -3,36 +3,148 @@ use strict;
 use warnings;
 use Test::More;
 
-fail('... fix the code here');
 
-=pod
 
-role R1 { method foo { 1 } }
-role R2 { method foo { 1 } }
-role R3 { method foo { 1 } }
-role R4 { method foo { 1 } }
-role R5 { method foo { 1 } }
+package R1 { 
+    use v5.20;
+    use warnings;
+    use mop;
+    sub foo { 1 } 
+}
 
-eval "class C1 with R1 { }";
-is($@, '');
+package R2 { 
+    use v5.20;
+    use warnings;
+    use mop;
+    sub foo { 1 } 
+}
 
-eval "class C2 with R1, R2 { }";
-like($@, qr/Required method\(s\) \[foo\] are not allowed in C2 unless class is declared abstract/);
+package R3 { 
+    use v5.20;
+    use warnings;
+    use mop;
+    sub foo { 1 } 
+}
 
-eval "class C3 with R1, R2, R3 { }";
-like($@, qr/Required method\(s\) \[foo\] are not allowed in C3 unless class is declared abstract/);
+package R4 { 
+    use v5.20;
+    use warnings;
+    use mop;
+    sub foo { 1 } 
+}
 
-eval "class C4 with R1, R2, R3, R4 { }";
-like($@, qr/Required method\(s\) \[foo\] are not allowed in C4 unless class is declared abstract/);
+package R5 { 
+    use v5.20;
+    use warnings;
+    use mop;
+    sub foo { 1 } 
+}
 
-eval "class C5 with R1, R2, R3, R4, R5 { }";
-like($@, qr/Required method\(s\) \[foo\] are not allowed in C5 unless class is declared abstract/);
+{
+    local $@ = undef;
+    eval q[
+        package C1 {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'R1';
+        }
+    ];
+    ok(!$@, '... no exception, C1 does R1');
+}
 
-role R1_required { method foo; }
+{
+    local $@ = undef;
+    eval q[
+        package C2 {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'R1', 'R2';
+        }
+    ];
+    like(
+        "$@",
+        qr/^\[mop\:\:PANIC\] There should be no conflicting methods when composing \(R1, R2\) into the class \(C2\) but instead we found \(foo\)/, 
+        '... got an exception, C2 does R1, R2'
+    );
+}
 
-eval "class C1_required with R1_required, R2 { }";
-is($@, '');
+{
+    local $@ = undef;
+    eval q[
+        package C3 {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'R1', 'R2', 'R3';
+        }
+    ];
+    like(
+        "$@",
+        qr/^\[mop\:\:PANIC\] There should be no conflicting methods when composing \(R1, R2, R3\) into the class \(C3\) but instead we found \(foo\)/, 
+        '... got an exception, C3 does R1, R2, R3'
+    );
+}
 
-=cut
+{
+    local $@ = undef;
+    eval q[
+        package C4 {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'R1', 'R2', 'R3', 'R4';
+        }
+    ];
+    like(
+        "$@",
+        qr/^\[mop\:\:PANIC\] There should be no conflicting methods when composing \(R1, R2, R3, R4\) into the class \(C4\) but instead we found \(foo\)/, 
+        '... got an exception, C4 does R1, R2, R3, R4'
+    );
+}
+
+{
+    local $@ = undef;
+    eval q[
+        package C5 {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'R1', 'R2', 'R3', 'R4', 'R5';
+        }
+    ];
+    like(
+        "$@",
+        qr/^\[mop\:\:PANIC\] There should be no conflicting methods when composing \(R1, R2, R3, R4, R5\) into the class \(C5\) but instead we found \(foo\)/, 
+        '... got an exception, C5 does R1, R2, R3, R4, R5'
+    );
+}
+
+package R1_required { 
+    use v5.20;
+    use warnings;
+    use mop;
+    sub foo; 
+}
+
+{
+    local $@ = undef;
+    eval q[
+        package C1_required {
+            use v5.20;
+            use warnings;
+            use mop 
+                isa  => 'mop::object', 
+                does => 'R1_required', 'R2';
+        }
+    ];
+    ok(!$@, '... no exception, C1 does R1');
+}
 
 done_testing;
