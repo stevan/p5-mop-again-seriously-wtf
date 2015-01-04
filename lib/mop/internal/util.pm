@@ -204,6 +204,13 @@ sub COMPOSE_ALL_ROLE_ATTRIBUTES (@roles) {
     return \%attributes, \%conflicts;
 }
 
+
+# TODO:
+# We should track the name of the role
+# where the required method was composed 
+# from, as well as the two classes in 
+# which a method conflicted.
+# - SL
 sub COMPOSE_ALL_ROLE_METHODS (@roles) {
     my (%methods, %conflicts, %required);
 
