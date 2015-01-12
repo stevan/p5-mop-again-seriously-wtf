@@ -152,6 +152,13 @@ authority(self)
 MODULE = mop  PACKAGE = mop::method
 
 SV* 
+body(self)
+        SV *self
+    PPCODE: 
+        EXTEND(SP, 1);
+        PUSHs(SvRV(self));
+
+SV* 
 name(self)
         SV *self
     CODE: 
