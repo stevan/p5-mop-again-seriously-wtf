@@ -2,8 +2,7 @@ package mop::method;
 
 use v5.20;
 use warnings;
-use feature 'signatures', 'postderef';
-no warnings 'experimental::signatures', 'experimental::postderef';
+use experimental 'signatures', 'postderef';
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';

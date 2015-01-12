@@ -3,8 +3,7 @@ package mop;
 use v5.20;
 use mro;
 use warnings;
-use feature 'signatures', 'postderef';
-no warnings 'experimental::signatures', 'experimental::postderef';
+use experimental 'signatures', 'postderef';
 
 use Module::Runtime ();
 use Symbol          ();
