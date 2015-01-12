@@ -34,6 +34,8 @@ sub new ($class, %args) {
     $self;    
 }
 
+=pod
+
 # access to the package itself
 
 sub stash ( $self ) { return $self->$* }
@@ -53,6 +55,8 @@ sub authority ($self) {
     return unless exists $self->$*->{'AUTHORITY'};
     return $self->$*->{'AUTHORITY'}->*{'SCALAR'}->$*;
 }
+
+=cut
 
 # access additional package data 
 

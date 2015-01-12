@@ -88,6 +88,61 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 // END: Shameless Steal from Parse::Keyword 
 /* ======================================================= */
 
+/* ======================================================= */
+// BEGIN: mop Code
+/* ======================================================= */
+
+#define MopMcV_get_stash(self) ((HV*) SvRV(SvRV(self)))
+
+#define MopMcV_get_glob(self, name, len) hv_fetch(MopMcV_get_stash(self), name, len, 0)
+
+/* ======================================================= */
+// END: mop Code
+/* ======================================================= */
+
+MODULE = mop  PACKAGE = mop::role
+
+# access to the package itself
+
+SV* 
+stash(self)
+        SV *self
+    PPCODE: 
+        EXTEND(SP, 1);
+        PUSHs(SvRV(self));
+
+# meta-info 
+
+SV* 
+name(self)
+        SV *self
+    CODE: 
+        RETVAL = newSVpv(HvNAME(MopMcV_get_stash(self)), 0);
+    OUTPUT:
+        RETVAL
+
+SV*
+version(self)
+        SV *self
+    PREINIT:
+        SV** version;
+    CODE:
+        version = MopMcV_get_glob(self, "VERSION", 7);
+        RETVAL = version != NULL ? GvSV((GV*) *version) : &PL_sv_undef;
+    OUTPUT: 
+        RETVAL
+
+SV*
+authority(self)
+        SV *self
+    PREINIT: 
+        SV** authority;
+    CODE:
+        authority = MopMcV_get_glob(self, "AUTHORITY", 9);
+        RETVAL = authority != NULL ? GvSV((GV*) *authority) : &PL_sv_undef;
+    OUTPUT: 
+        RETVAL
+
 MODULE = mop  PACKAGE = mop::internal::util::guts
  
 AV* 
