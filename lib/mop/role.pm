@@ -423,7 +423,9 @@ sub methods ($self) {
             if ( my $code = $glob->$*->*{'CODE'} ) {
                 
                 my $op = B::svref_2object( $glob->*{'CODE'} );
-                next if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+                next if $op->isa('B::CV') 
+                     && $op->ROOT->isa('B::NULL') 
+                     && !$op->XSUB;
 
                 $code = mop::method->new( body => $code );
                 if ( $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles )) ){
@@ -442,7 +444,9 @@ sub has_method ($self, $name) {
     if ( my $code = $glob->$*->*{'CODE'} ) {
 
         my $op = B::svref_2object( $glob->*{'CODE'} );
-        return 0 if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+        return 0 if $op->isa('B::CV') 
+                 && $op->ROOT->isa('B::NULL')
+                 && !$op->XSUB;
 
         $code = mop::method->new( body => $code );
         return 0 unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
@@ -457,7 +461,9 @@ sub has_method_alias ($self, $name) {
     return 0 unless ref $glob eq 'GLOB';
     if ( my $code = $glob->$*->*{'CODE'} ) {
         my $op = B::svref_2object( $glob->*{'CODE'} );
-        return 0 if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+        return 0 if $op->isa('B::CV') 
+                 && $op->ROOT->isa('B::NULL')
+                 && !$op->XSUB;
 
         $code = mop::method->new( body => $code );
         return 1 if $code->stash_name ne $self->name;
@@ -471,7 +477,9 @@ sub get_method ($self, $name) {
     return unless ref $glob eq 'GLOB';
     if ( my $code = $glob->$*->*{'CODE'} ) {    
         my $op = B::svref_2object( $glob->*{'CODE'} );
-        return if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+        return if $op->isa('B::CV') 
+               && $op->ROOT->isa('B::NULL')
+               && !$op->XSUB;
 
         $code = mop::method->new( body => $code );
         return unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
@@ -491,7 +499,9 @@ sub delete_method ($self, $name) {
 
     if ( my $code = $glob->$*->*{'CODE'} ) {
         my $op = B::svref_2object( $glob->*{'CODE'} );
-        return if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
+        return if $op->isa('B::CV') 
+               && $op->ROOT->isa('B::NULL')
+               && !$op->XSUB;
 
         $code = mop::method->new( body => $code );
         return unless $code->stash_name eq $self->name || ($self->roles && $code->was_aliased_from( $self->roles ));
