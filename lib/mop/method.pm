@@ -25,8 +25,10 @@ sub new ($class, %args) {
 
 sub body ($self) { $self->$* }
 
+=pod
 sub name       ($self) { B::svref_2object( $self->$* )->GV->NAME        }
 sub stash_name ($self) { B::svref_2object( $self->$* )->GV->STASH->NAME }
+=cut
 
 sub was_aliased_from ($self, @packages) {
     my $stash_name = $self->stash_name;
