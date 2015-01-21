@@ -92,9 +92,13 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 // BEGIN: mop Code
 /* ======================================================= */
 
+// Mop M(eta)c(lass)V(alue)
+
 #define MopMcV_get_stash(self) (HV*) SvRV(SvRV(self))
 #define MopMcV_get_stash_name(self) HvNAME(MopMcV_get_stash(self))
 #define MopMcV_get_glob_at(self, name, len) hv_fetch(MopMcV_get_stash(self), name, len, 0)
+
+// Mop M(eta)m(ethod)V(alue)
 
 #define MopMmV_get_cv(self) (CV*) SvRV(SvRV(self))
 #define MopMmV_get_glob(self) CvGV(MopMmV_get_cv(self))
