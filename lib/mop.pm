@@ -164,7 +164,7 @@ sub import ($class, @args) {
                     if ( keys %traits ) {
                         my $attr = $meta->get_attribute( $name );
                         foreach my $k ( keys %traits ) {
-                            die "[Moxie::PANIC] Cannot locate trait ($k) to apply to attributes ($name)"
+                            die "[mop::PANIC] Cannot locate trait ($k) to apply to attributes ($name)"
                                 unless exists $TRAITS{ $k };
                             $TRAITS{ $k }->( $meta, $attr, $traits{ $k } );
                         }
