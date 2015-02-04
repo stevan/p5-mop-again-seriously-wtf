@@ -92,18 +92,24 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 // BEGIN: mop Code
 /* ======================================================= */
 
+// Mop M(eta)r(ole)V(alue)
+
+#define MopMrV_get_stash(self)              (HV*) SvRV(SvRV(self))
+#define MopMrV_get_stash_name(self)         HvNAME(MopMcV_get_stash(self))
+#define MopMrV_get_glob_at(self, name, len) hv_fetch(MopMcV_get_stash(self), name, len, 0)
+
 // Mop M(eta)c(lass)V(alue)
 
-#define MopMcV_get_stash(self) (HV*) SvRV(SvRV(self))
-#define MopMcV_get_stash_name(self) HvNAME(MopMcV_get_stash(self))
-#define MopMcV_get_glob_at(self, name, len) hv_fetch(MopMcV_get_stash(self), name, len, 0)
+#define MopMcV_get_stash(self)              MopMrV_get_stash(self) 
+#define MopMcV_get_stash_name(self)         MopMrV_get_stash_name(self)
+#define MopMcV_get_glob_at(self, name, len) MopMrV_get_glob_at(self, name, len)
 
 // Mop M(eta)m(ethod)V(alue)
 
-#define MopMmV_get_cv(self) (CV*) SvRV(SvRV(self))
-#define MopMmV_get_glob(self) CvGV(MopMmV_get_cv(self))
-#define MopMmV_get_name(self) GvNAME(MopMmV_get_glob(self))
-#define MopMmV_get_stash(self) (HV*) GvSTASH(MopMmV_get_glob(self))
+#define MopMmV_get_cv(self)         (CV*) SvRV(SvRV(self))
+#define MopMmV_get_glob(self)       CvGV(MopMmV_get_cv(self))
+#define MopMmV_get_name(self)       GvNAME(MopMmV_get_glob(self))
+#define MopMmV_get_stash(self)      (HV*) GvSTASH(MopMmV_get_glob(self))
 #define MopMmV_get_stash_name(self) HvNAME(MopMmV_get_stash(self))
 
 /* ======================================================= */
@@ -127,7 +133,7 @@ SV*
 name(self)
         SV *self
     CODE: 
-        RETVAL = newSVpv(MopMcV_get_stash_name(self), 0);
+        RETVAL = newSVpv(MopMrV_get_stash_name(self), 0);
     OUTPUT:
         RETVAL
 
@@ -137,7 +143,7 @@ version(self)
     PREINIT:
         SV** version;
     CODE:
-        version = MopMcV_get_glob_at(self, "VERSION", 7);
+        version = MopMrV_get_glob_at(self, "VERSION", 7);
         RETVAL = version != NULL ? GvSV((GV*) *version) : &PL_sv_undef;
     OUTPUT: 
         RETVAL
@@ -148,7 +154,7 @@ authority(self)
     PREINIT: 
         SV** authority;
     CODE:
-        authority = MopMcV_get_glob_at(self, "AUTHORITY", 9);
+        authority = MopMrV_get_glob_at(self, "AUTHORITY", 9);
         RETVAL = authority != NULL ? GvSV((GV*) *authority) : &PL_sv_undef;
     OUTPUT: 
         RETVAL
