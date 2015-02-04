@@ -8,7 +8,9 @@ use Test::More;
 package Counter {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     use overload (
         '++' => 'inc',

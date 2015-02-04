@@ -16,7 +16,9 @@ package Foo {
 package Foo2 {
     use v5.20;
     use warnings;
-    use mop does => 'Foo';
+    use mop;
+
+    with 'Foo';
 
     sub foo { 'Foo2::foo' }
 }
@@ -40,7 +42,9 @@ package Bar {
 package FooBar {
     use v5.20;
     use warnings;
-    use mop does => 'Foo', 'Bar';
+    use mop;
+
+    with 'Foo', 'Bar';
 }
 
 {
@@ -54,9 +58,10 @@ package FooBar {
 package FooBarClass {
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'mop::object', 
-        does => 'Foo', 'Bar';
+    use mop;
+
+    extends 'mop::object';
+       with 'Foo', 'Bar';
 
     sub foo { 'FooBarClass::foo' }
 }
@@ -77,9 +82,10 @@ package FooBarClass {
         package FooBarBrokenClass1 {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'Foo', 'Bar';
+            use mop;
+
+            extends 'mop::object';
+               with 'Foo', 'Bar';
         }
     ];
     like(
@@ -95,9 +101,10 @@ package FooBarClass {
         package Gorch {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'Foo', 'Bar';
+            use mop;
+
+            extends 'mop::object';
+               with 'Foo', 'Bar';
 
             BEGIN { our $IS_ABSTRACT = 1 };
         }
@@ -115,9 +122,10 @@ package FooBarClass {
 package Baz {
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'mop::object',
-        does => 'Foo';
+    use mop;
+
+    extends 'mop::object';
+       with 'Foo';
 
     sub foo { 'Baz::foo' }
 }

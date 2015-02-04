@@ -16,19 +16,25 @@ package Service {
 package WithClass {
     use v5.20;
     use warnings;
-    use mop does => 'Service';
+    use mop;
+
+    with 'Service';
 }       
 
 package WithParameters {
     use v5.20;
     use warnings;
-    use mop does => 'Service';
+    use mop;
+
+    with 'Service';
 } 
 
 package WithDependencies {
     use v5.20;
     use warnings;
-    use mop does => 'Service';
+    use mop;
+
+    with 'Service';
 }
 
 foreach my $role (map { mop::role->new( name => $_ ) } qw[ 
@@ -51,9 +57,10 @@ foreach my $role (map { mop::role->new( name => $_ ) } qw[
         package ConstructorInjection { 
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object',
-                does => 'WithClass', 'WithParameters', 'WithDependencies';
+            use mop;
+
+            extends 'mop::object';
+               with 'WithClass', 'WithParameters', 'WithDependencies';
         }
     ];
     is($@, "", '... this worked');

@@ -15,7 +15,9 @@ BEGIN {
 package Throwable {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'message'     => ( is => 'ro', default => sub { '' } );
     has 'stack_trace' => ( is => 'ro', default => sub {

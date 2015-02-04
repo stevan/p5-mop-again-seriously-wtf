@@ -38,7 +38,9 @@ I will just punt until we do the real thing.
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'bar' => (default => sub { 10 });
 
@@ -48,7 +50,9 @@ package Foo {
 package FooBar {
     use v5.20;
     use warnings;
-    use mop isa => 'Foo';
+    use mop;
+
+    extends 'Foo';
     
     has 'bar' => (default => sub { 100 });
 

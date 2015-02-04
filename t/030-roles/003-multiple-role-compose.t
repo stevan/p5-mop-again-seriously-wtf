@@ -26,7 +26,9 @@ package Bar {
 package Baz {
     use v5.20;
     use warnings;
-    use mop does => 'Foo', 'Bar';
+    use mop;
+
+    with 'Foo', 'Bar';
 
     sub baz ($self) { join ", "  => $self->bar, 'baz', $self->foo }
 }
@@ -34,9 +36,10 @@ package Baz {
 package Gorch {
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'mop::object',
-        does => 'Baz';
+    use mop;
+
+    extends 'mop::object';
+       with 'Baz';
 }
 
 ok( mop::role->new(name => 'Baz')->does_role( 'Foo' ), '... Baz does the Foo role');

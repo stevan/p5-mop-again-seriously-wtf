@@ -8,7 +8,9 @@ use Test::More;
 package LinkedList {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'head'  => ( is => 'ro' );
     has 'tail'  => ( is => 'ro' );
@@ -76,7 +78,9 @@ package LinkedList {
 package LinkedListNode {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'previous';
     has 'next';

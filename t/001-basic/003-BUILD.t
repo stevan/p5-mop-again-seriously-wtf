@@ -8,7 +8,9 @@ use Test::More;
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'collector' => ( default => sub { [] } );
 
@@ -26,7 +28,9 @@ package Foo {
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'Foo';
+    use mop;
+
+    extends 'Foo';
 
     sub BUILD ($self, $params) {
         $self->collect( 'Bar' );
@@ -36,7 +40,9 @@ package Bar {
 package Baz {
     use v5.20;
     use warnings;
-    use mop isa => 'Bar';
+    use mop;
+
+    extends 'Bar';
 
     sub BUILD ($self, $params) {
         $self->collect( 'Baz' );

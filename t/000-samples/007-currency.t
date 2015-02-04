@@ -27,8 +27,9 @@ BEGIN {
     package Comparable {
         use v5.20;
         use warnings;
-        use mop
-            does => 'Eq';
+        use mop;
+
+        with 'Eq';
 
         sub compare;
 
@@ -64,9 +65,10 @@ BEGIN {
     package US::Currency {
         use v5.20;
         use warnings;
-        use mop
-            isa  => 'mop::object',
-            does => 'Comparable', 'Printable';
+        use mop;
+
+        extends 'mop::object';
+           with 'Comparable', 'Printable';
 
         has amount => ( default => sub { 0 } );
 

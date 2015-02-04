@@ -8,7 +8,9 @@ use Test::More;
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     BEGIN { our $IS_ABSTRACT = 1 }
 }
@@ -25,7 +27,9 @@ like(
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'Foo';
+    use mop;
+
+    extends 'Foo';
 }
 
 ok(!mop::class->new( name => 'Bar' )->is_abstract, '... Bar is not an abstract class');

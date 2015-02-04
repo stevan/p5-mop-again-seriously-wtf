@@ -19,7 +19,9 @@ sub my_die  { push @FATALS   => join "" => @_ }
 package Logger {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     sub log ( $self, $level, $msg ) {
         no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -38,7 +40,9 @@ package Logger {
 package MyLogger {
     use v5.20;
     use warnings;
-    use mop isa => 'Logger';
+    use mop;
+
+    extends 'Logger';
 
     sub log ( $self, $level, $msg ) {
         no if $] >= 5.017011, warnings => 'experimental::smartmatch';

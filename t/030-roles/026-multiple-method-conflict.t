@@ -46,9 +46,10 @@ package R5 {
         package C1 {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'R1';
+            use mop;
+
+            extends 'mop::object';
+               with 'R1';
         }
     ];
     ok(!$@, '... no exception, C1 does R1');
@@ -60,9 +61,10 @@ package R5 {
         package C2 {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'R1', 'R2';
+            use mop;
+
+            extends 'mop::object';
+               with 'R1', 'R2';
         }
     ];
     like(
@@ -78,9 +80,10 @@ package R5 {
         package C3 {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'R1', 'R2', 'R3';
+            use mop;
+
+            extends 'mop::object';
+               with 'R1', 'R2', 'R3';
         }
     ];
     like(
@@ -96,9 +99,10 @@ package R5 {
         package C4 {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'R1', 'R2', 'R3', 'R4';
+            use mop;
+
+            extends 'mop::object';
+               with 'R1', 'R2', 'R3', 'R4';
         }
     ];
     like(
@@ -114,9 +118,10 @@ package R5 {
         package C5 {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'R1', 'R2', 'R3', 'R4', 'R5';
+            use mop;
+
+            extends 'mop::object';
+               with 'R1', 'R2', 'R3', 'R4', 'R5';
         }
     ];
     like(
@@ -139,9 +144,10 @@ package R1_required {
         package C1_required {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object', 
-                does => 'R1_required', 'R2';
+            use mop;
+
+            extends 'mop::object';
+               with 'R1_required', 'R2';
         }
     ];
     ok(!$@, '... no exception, C1 does R1');

@@ -8,7 +8,9 @@ use Test::More;
 package Point {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'x' => ( is => 'ro', default => sub { 0 } );
     has 'y' => ( is => 'ro', default => sub { 0 } );
@@ -35,7 +37,9 @@ package Point {
 package Point3D {
     use v5.20;
     use warnings;
-    use mop isa => 'Point';
+    use mop; 
+
+    extends 'Point';
 
     has 'z' => ( is => 'ro', default => sub { 0 } );
 

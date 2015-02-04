@@ -18,9 +18,10 @@ package Foo {
 package Gorch {
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'mop::object',
-        does => 'Foo';
+    use mop; 
+    
+    extends 'mop::object';
+       with 'Foo';
 
     BEGIN { our $IS_ABSTRACT = 1 }
 }
@@ -28,7 +29,9 @@ package Gorch {
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'Gorch';
+    use mop;
+
+    extends 'Gorch';
 }
 
 {

@@ -71,7 +71,6 @@ sub import ($class, @args) {
     # likely being loaded in a class, so
     # turn on all the features 
     if ( $caller ne 'main' ) {
-        my $meta;
 
         # FIXME:
         # There are a lot of assumptions here that 
@@ -84,52 +83,12 @@ sub import ($class, @args) {
         # 'has' keyword importation as well.
         # - SL
 
-        # now handle any arguments ...
-        if ( @args ) {
-
-            my ($current, @isa, @does);
-            foreach my $arg ( @args ) {
-                if ( $arg eq 'isa' ) {
-                    $current = \@isa;
-                } elsif ( $arg eq 'does' ) {
-                    $current = \@does;
-                } else {
-                    push @$current => $arg;
-                }
-            }
-
-            Module::Runtime::use_package_optimistically( $_ ) foreach @isa, @does;
-
-            my $metatype  = (scalar @isa ? 'class' : 'role'); 
-            my $metaclass = 'mop::' . $metatype; 
-
-            $meta = $metaclass->new( name => $caller );
-            if ( $metatype eq 'class' ) {
-                $meta->set_superclasses( @isa );
-            }
-
-            if ( @does ) {
-                $meta->set_roles( @does );
-                $meta->add_finalizer(sub { mop::internal::util::APPLY_ROLES( $meta, \@does, to => $metatype ) });
-            }
-
-            $meta->add_finalizer(sub {
-                # make sure to 'inherit' the required methods ...
-                foreach my $super ( map { mop::role->new( name => $_ ) } $meta->superclasses ) {
-                    foreach my $required_method ( $super->required_methods ) {
-                        $meta->add_required_method($required_method)
-                    }
-                }
-
-                # this is an optimization to pre-populate the 
-                # cache for all the attributes 
-                mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta )
-            }) if $metatype eq 'class';
-        }
-        else {
-            # if we have no args we can only assume a role (for now)
-            $meta = mop::role->new( name => $caller );
-        }
+        # NOTE:
+        # create the meta-object, we start 
+        # with this as a role, but it will 
+        # get "cast" to a class if there 
+        # is a need for it. 
+        my $meta = mop::role->new( name => $caller );
 
         # install our finalizer feature ...
         mop::internal::util::INSTALL_FINALIZATION_RUNNER( $caller );   
@@ -141,7 +100,9 @@ sub import ($class, @args) {
         # import has keyword
         {
             no strict 'refs';
-            *{ $caller . '::has' } = sub { 1 };
+            *{ $caller . '::has'     } = sub { 1 };
+            *{ $caller . '::extends' } = sub { 1 };
+            *{ $caller . '::with'    } = sub { 1 };
 
             mop::internal::util::guts::syntax::install_keyword_handler(
                 \&{ $caller . '::has' }, 
@@ -176,9 +137,79 @@ sub import ($class, @args) {
                     return (sub { () }, 1);
                 }
             ); 
+
+            mop::internal::util::guts::syntax::install_keyword_handler(
+                \&{ $caller . '::extends' }, 
+                sub {
+                    use strict 'refs';
+
+                    my $extends = mop::internal::util::guts::syntax::parse_full_statement;
+
+                    my @isa = $extends->();
+
+                    Module::Runtime::use_package_optimistically( $_ ) foreach @isa;
+
+                    ($meta->isa('mop::class') 
+                        ? $meta
+                        : (bless $meta => 'mop::class') # cast into class
+                    )->set_superclasses( @isa );
+
+                    # replace this with a noop since 
+                    # we did all our work at compile 
+                    # time already.
+                    return (sub { () }, 1);
+                }
+            );
+
+            mop::internal::util::guts::syntax::install_keyword_handler(
+                \&{ $caller . '::with' }, 
+                sub {
+                    use strict 'refs';
+
+                    my $with = mop::internal::util::guts::syntax::parse_full_statement;
+
+                    my @does = $with->();
+
+                    Module::Runtime::use_package_optimistically( $_ ) foreach @does;
+
+                    $meta->set_roles( @does );
+
+                    # replace this with a noop since 
+                    # we did all our work at compile 
+                    # time already.
+                    return (sub { () }, 1);
+                }
+            );
         }
 
-        $meta->add_finalizer(sub { $meta->set_is_closed(1) });
+        $meta->add_finalizer(sub { 
+
+
+            if ( $meta->isa('mop::class') ) {
+                # FIXME - move this code to an internal::util::METHOD - SL
+                # make sure to 'inherit' the required methods ...
+                foreach my $super ( map { mop::role->new( name => $_ ) } $meta->superclasses ) {
+                    foreach my $required_method ( $super->required_methods ) {
+                        $meta->add_required_method($required_method)
+                    }
+                }
+
+                # this is an optimization to pre-populate the 
+                # cache for all the attributes 
+                mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta );
+            }
+
+            # apply roles ...
+            if ( my @does = $meta->roles ) {
+                mop::internal::util::APPLY_ROLES( 
+                    $meta, 
+                    \@does, 
+                    to => ($meta->isa('mop::class') ? 'class' : 'role')
+                );
+            }
+
+            $meta->set_is_closed(1);
+        });
     }
 
 }

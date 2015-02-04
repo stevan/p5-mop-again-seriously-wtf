@@ -16,7 +16,9 @@ but it should link back to the same class data.
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 }
 
 my $foo = Foo->new;
@@ -45,7 +47,9 @@ is( Scalar::Util::blessed($foo), 'Foo', '... the class of this object is Foo' );
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'foo';
 
@@ -73,7 +77,9 @@ package Bar {
 package Baz {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'bar';
 

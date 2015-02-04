@@ -24,32 +24,37 @@ package Baz {
 package Bat {
     use v5.20;
     use warnings;
-    use mop does => 'Baz';
+    use mop;
+
+    with 'Baz';
 }
 
 # classes ...
 package Quux { 
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'mop::object', 
-        does => 'Foo', 'Bar'; 
+    use mop;
+
+    extends 'mop::object';
+       with 'Foo', 'Bar'; 
 }
 
 package Quuux { 
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'Quux', 
-        does => 'Foo', 'Baz';
+    use mop;
+
+    extends 'Quux';
+       with 'Foo', 'Baz';
 }
 
 package Xyzzy { 
     use v5.20;
     use warnings;
-    use mop
-        isa  => 'mop::object',             
-        does => 'Foo', 'Bat';
+    use mop;
+    
+    extends 'mop::object';
+       with 'Foo', 'Bat';
 }
 
 ok(Quux->DOES($_),  "... Quux DOES $_")  for qw( Foo Bar         Quux       mop::object UNIVERSAL );

@@ -27,7 +27,9 @@ our $BAZ; BEGIN { $BAZ = [] };
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has bar => ( default => sub { +{ baz => $::BAZ } } );
 
@@ -50,7 +52,9 @@ is( $foo->bar->{'baz'}, $BAZ, '... these are the same values' );
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has bar => ( default => sub { +{ baz => $::BAZ } } );
 

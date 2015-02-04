@@ -11,8 +11,9 @@ my ($foo, $bar);
 package Foo {
     use v5.20;
     use warnings;
-    use mop
-        isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     sub foo ($self) { $::foo++ }
 }
@@ -31,9 +32,10 @@ package Bar {
 package Baz {
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'Foo',
-        does => 'Bar';
+    use mop;
+
+    extends 'Foo';
+       with 'Bar';
 }
 
 TODO: {

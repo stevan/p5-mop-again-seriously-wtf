@@ -8,7 +8,9 @@ use Test::More;
 package BankAccount {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop; 
+
+    extends 'mop::object';
 
     has 'balance' => ( is => 'ro', default => sub { 0 } );
 
@@ -24,7 +26,9 @@ package BankAccount {
 package CheckingAccount {
     use v5.20;
     use warnings;
-    use mop isa => 'BankAccount';
+    use mop;
+
+    extends 'BankAccount';
 
     has 'overdraft_account' => ( is => 'ro' );
 

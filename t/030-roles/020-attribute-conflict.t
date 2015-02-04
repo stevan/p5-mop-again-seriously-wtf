@@ -18,7 +18,8 @@ package Foo {
         package Foo2 {
             use v5.20;
             use warnings;
-            use mop does => 'Foo';
+            use mop;
+            with 'Foo';
             has 'foo';
         }
     ];
@@ -39,7 +40,8 @@ package Bar {
         package FooBar {
             use v5.20;
             use warnings;
-            use mop does => 'Foo', 'Bar';
+            use mop;
+            with 'Foo', 'Bar';
         }
     ];
     like("$@", qr/^\[mop\:\:PANIC\] There should be no conflicting attributes when composing \(Foo, Bar\) into \(FooBar\)/, '... got the expected error message (composite role)');
@@ -52,9 +54,10 @@ package Bar {
         package FooBaz {
             use v5.20;
             use warnings;
-            use mop 
-                isa  => 'mop::object',
-                does => 'Foo';
+            use mop;
+
+            extends 'mop::object';
+               with 'Foo';
 
             has 'foo';
         }

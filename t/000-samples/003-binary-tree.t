@@ -17,7 +17,9 @@ Make the parent a weak-ref ... it is not right now.
 package BinaryTree {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     has 'node'   => ( is => 'rw' );
     has 'parent' => ( is => 'ro' );
@@ -64,7 +66,9 @@ package BinaryTree {
 package MyBinaryTree {
     use v5.20;
     use warnings;
-    use mop isa => 'BinaryTree';
+    use mop;
+
+    extends 'BinaryTree';
 }
 
 {

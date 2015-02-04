@@ -8,7 +8,9 @@ use Test::More;
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     sub foo { "FOO" }
     sub baz { "BAZ" }
@@ -17,7 +19,9 @@ package Foo {
 package FooBar {
     use v5.20;
     use warnings;
-    use mop isa => 'Foo';
+    use mop;
+
+    extends 'Foo';
 
     sub foo ($self) { $self->next::method . "-FOOBAR" }
     sub bar ($self) { $self->next::can }
@@ -27,7 +31,9 @@ package FooBar {
 package FooBarBaz {
     use v5.20;
     use warnings;
-    use mop isa => 'FooBar';
+    use mop;
+
+    extends 'FooBar';
 
     sub foo ($self) { $self->next::method . "-FOOBARBAZ" }
 }
@@ -35,7 +41,9 @@ package FooBarBaz {
 package FooBarBazGorch {
     use v5.20;
     use warnings;
-    use mop isa => 'FooBarBaz';
+    use mop;
+
+    extends 'FooBarBaz';
 
     sub foo ($self) { $self->next::method . "-FOOBARBAZGORCH" }
 }

@@ -10,7 +10,9 @@ our $x;
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     sub inc { ++$::x }
     sub dec { --$::x }
@@ -35,7 +37,9 @@ our $y;
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     sub get_y;
 
@@ -46,7 +50,9 @@ package Bar {
 package Baz {
     use v5.20;
     use warnings;
-    use mop isa => 'Bar';
+    use mop;
+
+    extends 'Bar';
 
     sub get_y { $::y }
 }

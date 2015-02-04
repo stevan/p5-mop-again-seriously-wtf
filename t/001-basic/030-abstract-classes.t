@@ -10,7 +10,9 @@ use mop ();
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     sub bar;
 }
@@ -28,7 +30,9 @@ like(
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'Foo';
+    use mop;
+
+    extends 'Foo';
 
     sub bar { 'Bar::bar' }
 }
@@ -46,7 +50,9 @@ ok(!mop::class->new( name => 'Bar' )->is_abstract, '... Bar is not an abstract c
 package Baz {
     use v5.20;
     use warnings;
-    use mop isa => 'Bar';
+    use mop;
+
+    extends 'Bar';
 
     sub baz;
 }
@@ -65,7 +71,9 @@ like(
 package Gorch {
     use v5.20;
     use warnings;
-    use mop isa => 'Foo';
+    use mop;
+
+    extends 'Foo';
 }
 
 ok(mop::class->new( name => 'Gorch' )->requires_method('bar'), '... bar is a required method');

@@ -10,7 +10,9 @@ my $collector;
 package Foo {
     use v5.20;
     use warnings;
-    use mop isa => 'mop::object';
+    use mop;
+
+    extends 'mop::object';
 
     sub collect ($self, $stuff) {
         push @{ $collector } => $stuff;
@@ -24,7 +26,9 @@ package Foo {
 package Bar {
     use v5.20;
     use warnings;
-    use mop isa => 'Foo';
+    use mop;
+
+    extends 'Foo';
 
     sub DEMOLISH ($self) {
         $self->collect( 'Bar' );
@@ -34,7 +38,9 @@ package Bar {
 package Baz {
     use v5.20;
     use warnings;
-    use mop isa => 'Bar';
+    use mop;
+
+    extends 'Bar';
 
     sub DEMOLISH ($self) {
         $self->collect( 'Baz' );

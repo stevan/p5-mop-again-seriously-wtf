@@ -17,7 +17,9 @@ package Role::Table {
 package Role::Table::RO {
     use v5.20;
     use warnings;
-    use mop does => 'Role::Table';
+    use mop;
+
+    with 'Role::Table';
 
     sub count;
     sub select;
@@ -26,9 +28,10 @@ package Role::Table::RO {
 package Table {
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'mop::object',
-        does => 'Role::Table';
+    use mop;
+
+    extends 'mop::object';
+       with 'Role::Table';
 
     sub query_by_id { 'Table::query_by_id' }
 }
@@ -36,9 +39,10 @@ package Table {
 package Table::RO {
     use v5.20;
     use warnings;
-    use mop 
-        isa  => 'Table',
-        does => 'Role::Table::RO';
+    use mop;
+
+    extends 'Table';
+       with 'Role::Table::RO';
 
     sub count  { 'Table::RO::count' }
     sub select { 'Table::RO::select' }
