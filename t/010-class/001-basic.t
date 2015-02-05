@@ -43,7 +43,7 @@ isnt($Foo, mop::class->new( name => 'Foo' ), '... they are not always the same i
 
 {
     my $FooRole = mop::role->new( name => 'Foo' );
-    isa_ok($FooRole, 'mop::role');
+    isa_ok($FooRole, 'mop::role::immutable');
     isa_ok($Foo, 'mop::class');
 }
 

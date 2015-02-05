@@ -53,7 +53,7 @@ BEGIN {
 
 {
     my $Foo = mop::role->new( name => 'Foo' );
-    isa_ok($Foo, 'mop::role');
+    isa_ok($Foo, 'mop::role::immutable');
 
     is_deeply([ $Foo->roles ], [ 'Bar::Role', 'Baz::Role' ], '... got the list of roles we expected');
 

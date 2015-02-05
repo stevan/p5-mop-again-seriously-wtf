@@ -11,7 +11,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 use mop::internal::util 'FINALIZE';
 
 our @ISA;  BEGIN { @ISA  = ('mop::object') }
-our @DOES; BEGIN { @DOES = ('mop::role')   }
+our @DOES; BEGIN { @DOES = ('mop::role::mutable', 'mop::role::immutable') }
 
 # instance construction 
 

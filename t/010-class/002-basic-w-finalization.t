@@ -67,7 +67,7 @@ isnt($Foo, mop::class->new( name => 'Foo' ), '... they are not always the same i
 
 {
     my $FooRole = mop::role->new( name => 'Foo' );
-    isa_ok($FooRole, 'mop::role');
+    isa_ok($FooRole, 'mop::role::immutable');
     isa_ok($Foo, 'mop::class');
 }
 
@@ -104,7 +104,9 @@ ok(!$Foo->has_method('bar'), '... we do not have a &bar method');
     ok($foo->can('foo'), '... we are our own object');
 }
 
-{
+TODO: {
+    local $TODO = "... this is a remnant of the pre mop::role::(immutable/mutable) split";
+
     like(
         exception { $Foo->delete_method('foo') },
         qr/^\[mop\:\:PANIC\] Cannot delete method \(foo\) from \(Foo\) because it has been closed/,
@@ -130,7 +132,9 @@ ok(!$Bar->has_method('blessed'), '... we do not have the imported &blessed funct
     is(scalar @methods, 0, '... got the amount of method we expected');
 }
 
-{
+TODO: {
+    local $TODO = "... this is a remnant of the pre mop::role::(immutable/mutable) split";
+
     like(
         exception { $Bar->add_method( bar => sub { 'Bar::bar' } ) },
         qr/^\[mop\:\:PANIC\] Cannot add method \(bar\) to \(Bar\) because it has been closed/,

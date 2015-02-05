@@ -116,7 +116,7 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 // END: mop Code
 /* ======================================================= */
 
-MODULE = mop  PACKAGE = mop::role
+MODULE = mop  PACKAGE = mop::role::immutable
 
 # access to the package itself
 

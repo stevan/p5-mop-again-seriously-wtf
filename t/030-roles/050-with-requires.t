@@ -54,8 +54,8 @@ BEGIN {
 }
 
 BEGIN {
-    my $BarRole = mop::role->new( name => 'Bar::Role' );
-    isa_ok($BarRole, 'mop::role');
+    my $BarRole = mop::role::mutable->new( name => 'Bar::Role' );
+    isa_ok($BarRole, 'mop::role::mutable');
 
     ok($BarRole->requires_method('foo'), '... we require the &foo method');
     ok(!$BarRole->requires_method('gorch'), '... we do not require the &gorch method');
@@ -76,8 +76,8 @@ BEGIN {
 }
 
 {
-    my $Foo = mop::role->new( name => 'Foo' );
-    isa_ok($Foo, 'mop::role');
+    my $Foo = mop::role::mutable->new( name => 'Foo' );
+    isa_ok($Foo, 'mop::role::mutable');
 
     is_deeply([ $Foo->roles ], [ 'Bar::Role', 'Baz::Role' ], '... got the list of roles we expected');
 

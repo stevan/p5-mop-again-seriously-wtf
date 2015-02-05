@@ -21,7 +21,11 @@ use mop::internal::util;
 use mop::object;
 use mop::attribute;
 use mop::method;
+
+use mop::role::immutable;
+use mop::role::mutable;
 use mop::role;
+
 use mop::class;
 
 our $IS_BOOTSTRAPPED = 0;
