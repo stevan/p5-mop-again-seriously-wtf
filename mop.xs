@@ -92,25 +92,36 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 // BEGIN: mop Code
 /* ======================================================= */
 
-// Mop M(eta)r(ole)V(alue)
+// constructors
 
-#define MopMrV_get_stash(self)              (HV*) SvRV(SvRV(self))
-#define MopMrV_get_stash_name(self)         HvNAME(MopMcV_get_stash(self))
-#define MopMrV_get_glob_at(self, name, len) hv_fetch(MopMcV_get_stash(self), name, len, 0)
+#define newMopMpV(name) newRV_noinc(newRV_inc((SV*) gv_stashsv(name, GV_ADD)))
+#define newMopMmV(code) newRV_noinc(newRV_inc((SV*) code))
 
-// Mop M(eta)c(lass)V(alue)
+// Mop M(eta)p(ackage)V(alue)
 
-#define MopMcV_get_stash(self)              MopMrV_get_stash(self) 
-#define MopMcV_get_stash_name(self)         MopMrV_get_stash_name(self)
-#define MopMcV_get_glob_at(self, name, len) MopMrV_get_glob_at(self, name, len)
+#define MopMpV_get_stash(self)              ((HV*) SvRV(SvRV(self)))
+#define MopMpV_get_stash_name(self)         HvNAME(MopMpV_get_stash(self))
+#define MopMpV_get_glob_at(self, name, len) hv_fetch(MopMpV_get_stash(self), name, len, 0)
 
 // Mop M(eta)m(ethod)V(alue)
 
-#define MopMmV_get_cv(self)         (CV*) SvRV(SvRV(self))
+#define MopMmV_get_cv(self)         ((CV*) SvRV(SvRV(self)))
 #define MopMmV_get_glob(self)       CvGV(MopMmV_get_cv(self))
 #define MopMmV_get_name(self)       GvNAME(MopMmV_get_glob(self))
-#define MopMmV_get_stash(self)      (HV*) GvSTASH(MopMmV_get_glob(self))
+#define MopMmV_get_stash(self)      ((HV*) GvSTASH(MopMmV_get_glob(self)))
 #define MopMmV_get_stash_name(self) HvNAME(MopMmV_get_stash(self))
+
+// Util 
+
+#define XPUSHav(av) STMT_START { if (av != NULL) { \
+        int av_size = av_top_index(av);            \
+        if (av_size > -1) {                        \
+            int i; av_size++; EXTEND(SP, av_size); \
+            for (i = 0; i < av_size; i++) {        \
+                SV** sv = av_fetch(av, i, 0);      \
+                if (sv != NULL) PUSHs((SV*) *sv);  \
+            }                                      \
+        }}} STMT_END
 
 /* ======================================================= */
 // END: mop Code
@@ -131,46 +142,106 @@ stash(self)
 
 SV* 
 name(self)
-        SV *self
+        SV *self;
     CODE: 
-        RETVAL = newSVpv(MopMrV_get_stash_name(self), 0);
+        RETVAL = newSVpv(MopMpV_get_stash_name(self), 0);
     OUTPUT:
         RETVAL
 
 SV*
 version(self)
-        SV *self
+        SV *self;
     PREINIT:
         SV** version;
     CODE:
-        version = MopMrV_get_glob_at(self, "VERSION", 7);
-        RETVAL = version != NULL ? GvSV((GV*) *version) : &PL_sv_undef;
+        version = MopMpV_get_glob_at(self, "VERSION", 7);
+        RETVAL = (version != NULL && *version != NULL) ? GvSV((GV*) *version) : &PL_sv_undef;
     OUTPUT: 
         RETVAL
 
 SV*
 authority(self)
-        SV *self
-    PREINIT: 
+        SV *self;
+    PREINIT:
         SV** authority;
     CODE:
-        authority = MopMrV_get_glob_at(self, "AUTHORITY", 9);
-        RETVAL = authority != NULL ? GvSV((GV*) *authority) : &PL_sv_undef;
+        authority = MopMpV_get_glob_at(self, "AUTHORITY", 9);
+        RETVAL = (authority != NULL && *authority != NULL) ? GvSV((GV*) *authority) : &PL_sv_undef;
     OUTPUT: 
         RETVAL
+
+# package variables
+
+SV*
+is_closed(self)
+        SV *self;
+    PREINIT:
+        SV** is_closed;
+    CODE:
+        is_closed = MopMpV_get_glob_at(self, "IS_CLOSED", 9);
+        RETVAL = (is_closed != NULL && *is_closed != NULL) 
+            ? SvTRUE(GvSV((GV*) *is_closed)) ? &PL_sv_yes : &PL_sv_no 
+            : &PL_sv_no;
+    OUTPUT: 
+        RETVAL
+
+# finalization 
+
+void
+finalizers(self)
+        SV *self;
+    PREINIT: 
+        SV** finalizers;
+    PPCODE:
+        finalizers = MopMpV_get_glob_at(self, "FINALIZERS", 10);
+        if (finalizers != NULL) {
+            AV* finalizers_av = GvAV((GV*) *finalizers);
+            XPUSHav(finalizers_av);
+        }
+
+SV*
+has_finalizers(self)
+        SV *self;
+    PREINIT:
+        SV** finalizers;
+    CODE:
+        finalizers = MopMpV_get_glob_at(self, "FINALIZERS", 10);
+        if (finalizers != NULL && *finalizers != NULL) {
+            AV* f = GvAV((GV*) *finalizers);
+            RETVAL = (f != NULL && av_top_index(f) > -1) ? &PL_sv_yes : &PL_sv_no;
+        }
+        else {
+            RETVAL = &PL_sv_no;
+        }
+    OUTPUT: 
+        RETVAL
+
+# roles 
+
+void
+roles(self)
+        SV *self;
+    PREINIT: 
+        SV** roles;
+    PPCODE:
+        roles = MopMpV_get_glob_at(self, "DOES", 4);
+        if (roles != NULL) {
+            AV* roles_av = GvAV((GV*) *roles);
+            XPUSHav(roles_av);
+        }
 
 MODULE = mop  PACKAGE = mop::method
 
 SV* 
 body(self)
-        SV *self
+        SV *self;
     PPCODE: 
         EXTEND(SP, 1);
         PUSHs(SvRV(self));
 
 SV* 
 name(self)
-        SV *self
+        SV *self;
     CODE: 
         RETVAL = newSVpv(MopMmV_get_name(self), 0);
     OUTPUT:
@@ -178,9 +249,23 @@ name(self)
 
 SV* 
 stash_name(self)
-        SV *self
+        SV *self;
     CODE: 
         RETVAL = newSVpv(MopMmV_get_stash_name(self), 0);
+    OUTPUT:
+        RETVAL
+
+MODULE = mop  PACKAGE = mop::internal
+
+SV* 
+newMopMpV(name)
+        SV* name;
+
+SV*
+newMopMmV(code)
+        SV* code;
+    CODE:
+        RETVAL = newMopMmV((CV*) SvRV(code));
     OUTPUT:
         RETVAL
 

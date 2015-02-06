@@ -16,20 +16,10 @@ sub new ($class, %args) {
         unless exists $args{'body'}
             && ref    $args{'body'} eq 'CODE';
 
-    my $body = $args{'body'};
-    my $self = bless \$body => $class;
+    my $self = bless mop::internal::newMopMmV( $args{'body'} ) => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self; 
 }
-
-=pod
-
-sub body ($self) { $self->$* }
-
-sub name       ($self) { B::svref_2object( $self->$* )->GV->NAME        }
-sub stash_name ($self) { B::svref_2object( $self->$* )->GV->STASH->NAME }
-
-=cut
 
 sub was_aliased_from ($self, @packages) {
     my $stash_name = $self->stash_name;

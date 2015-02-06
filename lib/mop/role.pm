@@ -22,47 +22,12 @@ sub new ($class, %args) {
             && defined $args{'name'} 
             && length  $args{'name'} > 0;
 
-    my $stash;
-    {
-        no strict 'refs';
-        $stash = \%{ $args{'name'} . '::' };
-    }
-
-    my $self = bless \$stash => $class;
+    my $self = bless mop::internal::newMopMpV( $args{'name'} ) => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self;    
 }
 
-=pod
-
-# access to the package itself
-
-sub stash ( $self ) { return $self->$* }
-
-# meta-info 
-
-sub name ($self) { 
-    B::svref_2object( $self->$* )->NAME;
-}
-
-sub version ($self) { 
-    return unless exists $self->$*->{'VERSION'};
-    return $self->$*->{'VERSION'}->*{'SCALAR'}->$*;
-}
-
-sub authority ($self) { 
-    return unless exists $self->$*->{'AUTHORITY'};
-    return $self->$*->{'AUTHORITY'}->*{'SCALAR'}->$*;
-}
-
-=cut
-
 # access additional package data 
-
-sub is_closed ($self) { 
-    return 0 unless exists $self->$*->{'IS_CLOSED'};
-    return $self->$*->{'IS_CLOSED'}->*{'SCALAR'}->$* ? 1 : 0;
-}
 
 sub set_is_closed ($self, $value) {
     die "[mop::PANIC] Cannot set is_closed in (" . $self->name . ") because it has been closed"
@@ -103,17 +68,6 @@ sub set_is_abstract ($self, $value) {
 
 # finalization 
 
-sub finalizers ($self) {
-    my $FINALIZERS = $self->$*->{'FINALIZERS'};
-    return () unless $FINALIZERS;
-    return $FINALIZERS->*{'ARRAY'}->@*;
-}
-
-sub has_finalizers ($self) {
-    return 0 unless exists $self->$*->{'FINALIZERS'};
-    return (scalar $self->$*->{'FINALIZERS'}->*{'ARRAY'}->@*) ? 1 : 0;
-}
-
 sub add_finalizer ($self, $finalizer) {
     die "[mop::PANIC] Cannot add finalizer to (" . $self->name . ") because it has been closed"
         if $self->is_closed;
@@ -131,14 +85,6 @@ sub add_finalizer ($self, $finalizer) {
 sub run_all_finalizers ($self) { $_->() for $self->finalizers }
 
 # roles 
-
-sub roles ($self) {
-    my $DOES = $self->$*->{'DOES'};
-    return () unless $DOES;
-    my $roles = $DOES->*{'ARRAY'};
-    return () unless $roles;
-    return @$roles;
-}
 
 sub set_roles ($self, @roles) {
     die "[mop::PANIC] Cannot set roles in (" . $self->name . ") because it has been closed"
