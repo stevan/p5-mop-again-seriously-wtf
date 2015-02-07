@@ -100,11 +100,25 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 
 // Mop M(eta)p(ackage)V(alue)
 
+/* 
+    TODO:
+
+    1) ...
+*/
+
 #define MopMpV_get_stash(self)              ((HV*) SvRV(SvRV(self)))
 #define MopMpV_get_stash_name(self)         HvNAME(MopMpV_get_stash(self))
 #define MopMpV_get_glob_at(self, name, len) hv_fetch(MopMpV_get_stash(self), name, len, 0)
 
 // Mop M(eta)m(ethod)V(alue)
+
+/* 
+    TODO:
+
+    1) We need to add the ability to check if a method is required or not.
+    2) Need to add a `was_aliased_from` that does not require the Perl stack
+       so as to avoid that overhead.
+*/
 
 #define MopMmV_get_cv(self)         ((CV*) SvRV(SvRV(self)))
 #define MopMmV_get_glob(self)       CvGV(MopMmV_get_cv(self))
@@ -113,6 +127,19 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 #define MopMmV_get_stash_name(self) HvNAME(MopMmV_get_stash(self))
 
 // Mop M(eta)a(ttribute)V(alue)
+
+/* 
+    TODO:
+    
+    1) We should be more consistent here and have get_name and get_initializer
+       both return the char* and CV* respectively. This would be more in line 
+       with the get_name methods above. 
+    2) Need to add a `was_aliased_from` that does not require the Perl stack
+       so as to avoid that overhead.       
+    3) We should use a better data structure then an AV here, it is overkill
+       and we should use a C side data structure instead, but for now we are 
+       avoiding that complexity in favor of getting shit done.
+*/
 
 #define MopMaV_get_name(self)        ((SV*) *(av_fetch((AV*) SvRV(self), 0, 0)))
 #define MopMaV_get_initializer(self) ((SV*) *(av_fetch((AV*) SvRV(self), 1, 0)))
