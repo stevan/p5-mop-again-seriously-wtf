@@ -96,6 +96,7 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 
 #define newMopMpV(name) newRV_noinc(newRV_inc((SV*) gv_stashsv(name, GV_ADD)))
 #define newMopMmV(code) newRV_noinc(newRV_inc((SV*) code))
+#define newMopMaV(attr) newRV_noinc((SV*) attr)
 
 // Mop M(eta)p(ackage)V(alue)
 
@@ -110,6 +111,14 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 #define MopMmV_get_name(self)       GvNAME(MopMmV_get_glob(self))
 #define MopMmV_get_stash(self)      ((HV*) GvSTASH(MopMmV_get_glob(self)))
 #define MopMmV_get_stash_name(self) HvNAME(MopMmV_get_stash(self))
+
+// Mop M(eta)a(ttribute)V(alue)
+
+#define MopMaV_get_name(self)        ((SV*) *(av_fetch((AV*) SvRV(self), 0, 0)))
+#define MopMaV_get_initializer(self) ((SV*) *(av_fetch((AV*) SvRV(self), 1, 0)))
+#define MopMaV_get_glob(self)        CvGV((CV*) SvRV(MopMaV_get_initializer(self)))
+#define MopMaV_get_stash(self)       ((HV*) GvSTASH(MopMaV_get_glob(self)))
+#define MopMaV_get_stash_name(self)  HvNAME(MopMaV_get_stash(self))
 
 // Utils 
 
@@ -258,6 +267,31 @@ stash_name(self)
     OUTPUT:
         RETVAL
 
+MODULE = mop  PACKAGE = mop::attribute
+
+SV* 
+name(self)
+        SV *self;
+    CODE: 
+        RETVAL = newSVsv(MopMaV_get_name(self));
+    OUTPUT:
+        RETVAL
+
+SV* 
+initializer(self)
+        SV *self;
+    PPCODE: 
+        EXTEND(SP, 1);
+        PUSHs(MopMaV_get_initializer(self));        
+
+SV* 
+stash_name(self)
+        SV *self;
+    CODE: 
+        RETVAL = newSVpv(MopMaV_get_stash_name(self), 0);
+    OUTPUT:
+        RETVAL
+
 MODULE = mop  PACKAGE = mop::internal
 
 SV* 
@@ -269,6 +303,20 @@ newMopMmV(code)
         SV* code;
     CODE:
         RETVAL = newMopMmV((CV*) SvRV(code));
+    OUTPUT:
+        RETVAL
+
+SV*
+newMopMaV(name, init)
+        SV* name; 
+        SV* init;
+    PREINIT:
+        AV* attr;
+    CODE:
+        attr = newAV();
+        av_store(attr, 0, SvREFCNT_inc(name));
+        av_store(attr, 1, SvREFCNT_inc(init));
+        RETVAL = newMopMaV(attr);
     OUTPUT:
         RETVAL
 

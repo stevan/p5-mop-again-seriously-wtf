@@ -30,15 +30,10 @@ sub new ($class, %args) {
     # because we want to avoid having to have need 
     # any attribute instances for the core mop classes
     # - SL
-    my $self = bless [ $name => $initializer ] => $class;
+    my $self = bless mop::internal::newMopMaV($name, $initializer) => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self; 
 }
-
-sub name       ($self) { $self->[0] }
-sub stash_name ($self) { B::svref_2object( $self->[1] )->GV->STASH->NAME }
-
-sub initializer ($self) { $self->[1] }
 
 sub was_aliased_from ($self, @packages) {
     my $stash_name = $self->stash_name;
