@@ -149,7 +149,7 @@ MODULE = mop  PACKAGE = mop::role
 
 SV* 
 stash(self)
-        SV *self
+        SV* self;
     PPCODE: 
         EXTEND(SP, 1);
         PUSHs(SvRV(self));
@@ -158,7 +158,7 @@ stash(self)
 
 SV* 
 name(self)
-        SV *self;
+        SV* self;
     CODE: 
         RETVAL = newSVpv(MopMpV_get_stash_name(self), 0);
     OUTPUT:
@@ -166,7 +166,7 @@ name(self)
 
 SV*
 version(self)
-        SV *self;
+        SV* self;
     PREINIT:
         SV** version;
     CODE:
@@ -177,7 +177,7 @@ version(self)
 
 SV*
 authority(self)
-        SV *self;
+        SV* self;
     PREINIT:
         SV** authority;
     CODE:
@@ -190,7 +190,7 @@ authority(self)
 
 SV*
 is_closed(self)
-        SV *self;
+        SV* self;
     PREINIT:
         SV** is_closed;
     CODE:
@@ -203,7 +203,7 @@ is_closed(self)
 
 void
 finalizers(self)
-        SV *self;
+        SV* self;
     PREINIT: 
         SV** finalizers;
     PPCODE:
@@ -214,7 +214,7 @@ finalizers(self)
 
 SV*
 has_finalizers(self)
-        SV *self;
+        SV* self;
     PREINIT:
         SV** finalizers;
     CODE:
@@ -233,7 +233,7 @@ has_finalizers(self)
 
 void
 roles(self)
-        SV *self;
+        SV* self;
     PREINIT: 
         SV** roles;
     PPCODE:
@@ -246,14 +246,14 @@ MODULE = mop  PACKAGE = mop::method
 
 SV* 
 body(self)
-        SV *self;
+        SV* self;
     PPCODE: 
         EXTEND(SP, 1);
         PUSHs(SvRV(self));
 
 SV* 
 name(self)
-        SV *self;
+        SV* self;
     CODE: 
         RETVAL = newSVpv(MopMmV_get_name(self), 0);
     OUTPUT:
@@ -261,7 +261,7 @@ name(self)
 
 SV* 
 stash_name(self)
-        SV *self;
+        SV* self;
     CODE: 
         RETVAL = newSVpv(MopMmV_get_stash_name(self), 0);
     OUTPUT:
@@ -289,7 +289,7 @@ MODULE = mop  PACKAGE = mop::attribute
 
 SV* 
 name(self)
-        SV *self;
+        SV* self;
     CODE: 
         RETVAL = newSVsv(MopMaV_get_name(self));
     OUTPUT:
@@ -297,14 +297,14 @@ name(self)
 
 SV* 
 initializer(self)
-        SV *self;
+        SV* self;
     PPCODE: 
         EXTEND(SP, 1);
         PUSHs(MopMaV_get_initializer(self));        
 
 SV* 
 stash_name(self)
-        SV *self;
+        SV* self;
     CODE: 
         RETVAL = newSVpv(MopMaV_get_stash_name(self), 0);
     OUTPUT:
