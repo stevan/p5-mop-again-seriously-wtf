@@ -22,15 +22,12 @@ sub new ($class, %args) {
         unless exists $args{'initializer'}
             && ref    $args{'initializer'} eq 'CODE';
 
-    my $name        = $args{'name'};
-    my $initializer = $args{'initializer'};
-
     # NOTE:
     # this is basically just a blessed HE (HashEntry)
     # because we want to avoid having to have need 
     # any attribute instances for the core mop classes
     # - SL
-    my $self = bless mop::internal::newMopMaV($name, $initializer) => $class;
+    my $self = bless mop::internal::newMopMaV( @args{ 'name', 'initializer' } ) => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self; 
 }
