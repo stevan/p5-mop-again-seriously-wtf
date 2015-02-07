@@ -242,6 +242,25 @@ roles(self)
             XPUSHav(GvAV((GV*) *roles));
         }
 
+MODULE = mop  PACKAGE = mop::class
+
+void
+superclasses(self)
+        SV* self;
+    PREINIT: 
+        SV** superclasses;
+    PPCODE:
+        superclasses = MopMpV_get_glob_at(self, "ISA", 3);
+        if (superclasses != NULL) {
+            XPUSHav(GvAV((GV*) *superclasses));
+        }
+
+void 
+mro(self)
+        SV* self;
+    PPCODE:
+        XPUSHav(mro_get_linear_isa(MopMpV_get_stash(self)));
+
 MODULE = mop  PACKAGE = mop::method
 
 SV* 

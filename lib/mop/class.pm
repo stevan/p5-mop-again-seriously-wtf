@@ -34,12 +34,6 @@ sub construct_instance ($self, $candidate) {
 
 # inheritance 
 
-sub superclasses ($self) {
-    my $ISA = $self->$*->{'ISA'};
-    return () unless $ISA;
-    return $ISA->*{'ARRAY'}->@*;
-}
-
 sub set_superclasses ($self, @supers) {
     die "[mop::PANIC] Cannot set superclasses in (" . $self->name . ") because it has been closed"
         if $self->is_closed;
@@ -47,10 +41,6 @@ sub set_superclasses ($self, @supers) {
     no strict 'refs';
     no warnings 'once';
     @{ $self->name . '::ISA'} = ( @supers );
-}
-
-sub mro ($self, $type = mro::get_mro( $self->name )) { 
-    return mro::get_linear_isa( $self->name, $type )->@*;
 }
 
 # finalizer
