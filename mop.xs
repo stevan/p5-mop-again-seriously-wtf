@@ -267,6 +267,24 @@ stash_name(self)
     OUTPUT:
         RETVAL
 
+SV*
+was_aliased_from(self, ...)
+        SV* self;
+    PREINIT:
+        int i;
+        SV* name   = newSVpv(MopMmV_get_stash_name(self), 0);
+        SV* result = &PL_sv_no;     
+    CODE:
+        for (i = 1; i < items; i++) {
+            if (sv_eq(ST(i), name)) {
+                result = &PL_sv_yes;
+                break;
+            } 
+        }
+        RETVAL = result;
+    OUTPUT:
+        RETVAL
+
 MODULE = mop  PACKAGE = mop::attribute
 
 SV* 
@@ -289,6 +307,24 @@ stash_name(self)
         SV *self;
     CODE: 
         RETVAL = newSVpv(MopMaV_get_stash_name(self), 0);
+    OUTPUT:
+        RETVAL
+
+SV*
+was_aliased_from(self, ...)
+        SV* self;
+    PREINIT:
+        int i;
+        SV* name   = newSVpv(MopMaV_get_stash_name(self), 0);
+        SV* result = &PL_sv_no;     
+    CODE:
+        for (i = 1; i < items; i++) {
+            if (sv_eq(ST(i), name)) {
+                result = &PL_sv_yes;
+                break;
+            } 
+        }
+        RETVAL = result;
     OUTPUT:
         RETVAL
 

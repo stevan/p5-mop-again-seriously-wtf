@@ -8,6 +8,7 @@ use experimental 'signatures', 'postderef';
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use B            ();
 use Symbol       ();
 use Sub::Util    ();
 use Scalar::Util ();
