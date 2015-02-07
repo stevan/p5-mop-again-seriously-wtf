@@ -111,9 +111,15 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 #define MopMmV_get_stash(self)      ((HV*) GvSTASH(MopMmV_get_glob(self)))
 #define MopMmV_get_stash_name(self) HvNAME(MopMmV_get_stash(self))
 
-// Util 
+// Utils 
 
-#define XPUSHav(av) STMT_START { if (av != NULL) { \
+#define av_to_bool(av)   (av != NULL && av_top_index(av) > -1) ? &PL_sv_yes : &PL_sv_no
+
+#define GvSV_or_undef(s) ((s != NULL && *s != NULL) ? GvSV((GV*) *s) : &PL_sv_undef)
+#define GvSV_to_bool(s)  ((s != NULL && *s != NULL) ? SvTRUE(GvSV((GV*) *s)) ? &PL_sv_yes : &PL_sv_no : &PL_sv_no)
+
+#define XPUSHav(_av) STMT_START { AV* av = (_av);  \
+    if (av != NULL) {                              \
         int av_size = av_top_index(av);            \
         if (av_size > -1) {                        \
             int i; av_size++; EXTEND(SP, av_size); \
@@ -121,7 +127,8 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
                 SV** sv = av_fetch(av, i, 0);      \
                 if (sv != NULL) PUSHs((SV*) *sv);  \
             }                                      \
-        }}} STMT_END
+        }                                          \
+    }} STMT_END
 
 /* ======================================================= */
 // END: mop Code
@@ -155,7 +162,7 @@ version(self)
         SV** version;
     CODE:
         version = MopMpV_get_glob_at(self, "VERSION", 7);
-        RETVAL = (version != NULL && *version != NULL) ? GvSV((GV*) *version) : &PL_sv_undef;
+        RETVAL = GvSV_or_undef(version);
     OUTPUT: 
         RETVAL
 
@@ -166,7 +173,7 @@ authority(self)
         SV** authority;
     CODE:
         authority = MopMpV_get_glob_at(self, "AUTHORITY", 9);
-        RETVAL = (authority != NULL && *authority != NULL) ? GvSV((GV*) *authority) : &PL_sv_undef;
+        RETVAL = GvSV_or_undef(authority);
     OUTPUT: 
         RETVAL
 
@@ -179,9 +186,7 @@ is_closed(self)
         SV** is_closed;
     CODE:
         is_closed = MopMpV_get_glob_at(self, "IS_CLOSED", 9);
-        RETVAL = (is_closed != NULL && *is_closed != NULL) 
-            ? SvTRUE(GvSV((GV*) *is_closed)) ? &PL_sv_yes : &PL_sv_no 
-            : &PL_sv_no;
+        RETVAL = GvSV_to_bool(is_closed);
     OUTPUT: 
         RETVAL
 
@@ -195,8 +200,7 @@ finalizers(self)
     PPCODE:
         finalizers = MopMpV_get_glob_at(self, "FINALIZERS", 10);
         if (finalizers != NULL) {
-            AV* finalizers_av = GvAV((GV*) *finalizers);
-            XPUSHav(finalizers_av);
+            XPUSHav(GvAV((GV*) *finalizers));
         }
 
 SV*
@@ -208,7 +212,7 @@ has_finalizers(self)
         finalizers = MopMpV_get_glob_at(self, "FINALIZERS", 10);
         if (finalizers != NULL && *finalizers != NULL) {
             AV* f = GvAV((GV*) *finalizers);
-            RETVAL = (f != NULL && av_top_index(f) > -1) ? &PL_sv_yes : &PL_sv_no;
+            RETVAL = av_to_bool(f);
         }
         else {
             RETVAL = &PL_sv_no;
@@ -226,8 +230,7 @@ roles(self)
     PPCODE:
         roles = MopMpV_get_glob_at(self, "DOES", 4);
         if (roles != NULL) {
-            AV* roles_av = GvAV((GV*) *roles);
-            XPUSHav(roles_av);
+            XPUSHav(GvAV((GV*) *roles));
         }
 
 MODULE = mop  PACKAGE = mop::method
@@ -293,7 +296,7 @@ void
 install_keyword_handler(keyword, handler)
         SV *keyword
         SV *handler
-  CODE:
+    CODE:
         cv_set_call_parser( (CV*) SvRV( keyword ), parser_callback, handler );
 
 SV*
