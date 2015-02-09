@@ -249,8 +249,7 @@ was_aliased_from(self, ...)
     CODE:
         if (items == 1) {
             RETVAL = &PL_sv_no;
-        }
-        else {
+        } else {
             AV* args = SLURP_ARGS(1);
             RETVAL = MopMmV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
         }
@@ -288,8 +287,7 @@ was_aliased_from(self, ...)
     CODE:
         if (items == 1) {
             RETVAL = &PL_sv_no;
-        }
-        else {
+        } else {
             AV* args = SLURP_ARGS(1);
             RETVAL = MopMaV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
         }
