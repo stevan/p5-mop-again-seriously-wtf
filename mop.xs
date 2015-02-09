@@ -156,6 +156,36 @@ is_closed(self)
     OUTPUT: 
         RETVAL
 
+void 
+set_is_closed(self, value)
+        SV* self;
+        SV* value;
+    PREINIT:
+        GV* is_closed;
+    PPCODE:
+        MopMpV_Error_if_closed(self, "set_is_closed");
+
+        is_closed = MopMpV_get_glob_at(self, "IS_CLOSED", 9);
+        if (is_closed == NULL) {
+            is_closed = MopMpV_create_glob_at(self, "IS_CLOSED", 9);
+        }
+        MopMpV_set_glob_SV_at(self, is_closed, value);
+
+void 
+set_is_abstract(self, value)
+        SV* self;
+        SV* value;
+    PREINIT:
+        GV* is_abstract;
+    PPCODE:
+        MopMpV_Error_if_closed(self, "set_is_abstract");
+
+        is_abstract = MopMpV_get_glob_at(self, "IS_ABSTRACT", 11);
+        if (is_abstract == NULL) {
+            is_abstract = MopMpV_create_glob_at(self, "IS_ABSTRACT", 11);
+        }
+        MopMpV_set_glob_SV_at(self, is_abstract, value);
+
 # finalization 
 
 void

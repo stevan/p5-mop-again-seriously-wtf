@@ -30,15 +30,6 @@ sub new ($class, %args) {
 
 # access additional package data 
 
-sub set_is_closed ($self, $value) {
-    die "[mop::PANIC] Cannot set is_closed in (" . $self->name . ") because it has been closed"
-        if $self->is_closed;
-
-    no strict 'refs';
-    no warnings 'once';
-    ${ $self->name . '::IS_CLOSED'} = $value;
-}
-
 # ...
 
 sub is_abstract ($self) {
@@ -56,15 +47,6 @@ sub is_abstract ($self) {
     # required methods, but also keep the strict 
     # checking of required methods as a indicator 
     # of abstract-ness
-}
-
-sub set_is_abstract ($self, $value) {
-    die "[mop::PANIC] Cannot set is_abstract in (" . $self->name . ") because it has been closed"
-        if $self->is_closed;
-
-    no strict 'refs';
-    no warnings 'once';
-    ${ $self->name . '::IS_ABSTRACT'} = $value;
 }
 
 # finalization 
