@@ -3,6 +3,18 @@
 #include "callparser1.h"
 #include "XSUB.h"
 
+#include "p5mop.h"
+#include "p5mop.c"
+
+#include "p5mop_MpV.h"
+#include "p5mop_MpV.c"
+
+#include "p5mop_MaV.h"
+#include "p5mop_MaV.c"
+
+#include "p5mop_MmV.h"
+#include "p5mop_MmV.c"
+
 /* ======================================================= */
 // BEGIN: Shameless Steal from Parse::Keyword 
 /* ======================================================= */
@@ -88,88 +100,6 @@ static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 // END: Shameless Steal from Parse::Keyword 
 /* ======================================================= */
 
-/* ======================================================= */
-// BEGIN: mop Code
-/* ======================================================= */
-
-// constructors
-
-#define newMopMpV(name) newRV_noinc(newRV_inc((SV*) gv_stashsv(name, GV_ADD)))
-#define newMopMmV(code) newRV_noinc(newRV_inc((SV*) code))
-#define newMopMaV(attr) newRV_noinc((SV*) attr)
-
-// Mop M(eta)p(ackage)V(alue)
-
-/* 
-    TODO:
-
-    1) ...
-*/
-
-#define MopMpV_get_stash(self)              ((HV*) SvRV(SvRV(self)))
-#define MopMpV_get_stash_name(self)         HvNAME(MopMpV_get_stash(self))
-#define MopMpV_get_glob_at(self, name, len) hv_fetch(MopMpV_get_stash(self), name, len, 0)
-
-// Mop M(eta)m(ethod)V(alue)
-
-/* 
-    TODO:
-
-    1) We need to add the ability to check if a method is required or not.
-    2) Need to add a `was_aliased_from` that does not require the Perl stack
-       so as to avoid that overhead.
-*/
-
-#define MopMmV_get_cv(self)         ((CV*) SvRV(SvRV(self)))
-#define MopMmV_get_glob(self)       CvGV(MopMmV_get_cv(self))
-#define MopMmV_get_name(self)       GvNAME(MopMmV_get_glob(self))
-#define MopMmV_get_stash(self)      ((HV*) GvSTASH(MopMmV_get_glob(self)))
-#define MopMmV_get_stash_name(self) HvNAME(MopMmV_get_stash(self))
-
-// Mop M(eta)a(ttribute)V(alue)
-
-/* 
-    TODO:
-    
-    1) We should be more consistent here and have get_name and get_initializer
-       both return the char* and CV* respectively. This would be more in line 
-       with the get_name methods above. 
-    2) Need to add a `was_aliased_from` that does not require the Perl stack
-       so as to avoid that overhead.       
-    3) We should use a better data structure then an AV here, it is overkill
-       and we should use a C side data structure instead, but for now we are 
-       avoiding that complexity in favor of getting shit done.
-*/
-
-#define MopMaV_get_name(self)        ((SV*) *(av_fetch((AV*) SvRV(self), 0, 0)))
-#define MopMaV_get_initializer(self) ((SV*) *(av_fetch((AV*) SvRV(self), 1, 0)))
-#define MopMaV_get_glob(self)        CvGV((CV*) SvRV(MopMaV_get_initializer(self)))
-#define MopMaV_get_stash(self)       ((HV*) GvSTASH(MopMaV_get_glob(self)))
-#define MopMaV_get_stash_name(self)  HvNAME(MopMaV_get_stash(self))
-
-// Utils 
-
-#define av_to_bool(av)   (av != NULL && av_top_index(av) > -1) ? &PL_sv_yes : &PL_sv_no
-
-#define GvSV_or_undef(s) ((s != NULL && *s != NULL) ? GvSV((GV*) *s) : &PL_sv_undef)
-#define GvSV_to_bool(s)  ((s != NULL && *s != NULL) ? SvTRUE(GvSV((GV*) *s)) ? &PL_sv_yes : &PL_sv_no : &PL_sv_no)
-
-#define XPUSHav(_av) STMT_START { AV* av = (_av);  \
-    if (av != NULL) {                              \
-        int av_size = av_top_index(av);            \
-        if (av_size > -1) {                        \
-            int i; av_size++; EXTEND(SP, av_size); \
-            for (i = 0; i < av_size; i++) {        \
-                SV** sv = av_fetch(av, i, 0);      \
-                if (sv != NULL) PUSHs((SV*) *sv);  \
-            }                                      \
-        }                                          \
-    }} STMT_END
-
-/* ======================================================= */
-// END: mop Code
-/* ======================================================= */
-
 MODULE = mop  PACKAGE = mop::role
 
 # access to the package itself
@@ -195,7 +125,7 @@ SV*
 version(self)
         SV* self;
     PREINIT:
-        SV** version;
+        GV* version;
     CODE:
         version = MopMpV_get_glob_at(self, "VERSION", 7);
         RETVAL = GvSV_or_undef(version);
@@ -206,7 +136,7 @@ SV*
 authority(self)
         SV* self;
     PREINIT:
-        SV** authority;
+        GV* authority;
     CODE:
         authority = MopMpV_get_glob_at(self, "AUTHORITY", 9);
         RETVAL = GvSV_or_undef(authority);
@@ -219,7 +149,7 @@ SV*
 is_closed(self)
         SV* self;
     PREINIT:
-        SV** is_closed;
+        GV* is_closed;
     CODE:
         is_closed = MopMpV_get_glob_at(self, "IS_CLOSED", 9);
         RETVAL = GvSV_to_bool(is_closed);
@@ -232,22 +162,22 @@ void
 finalizers(self)
         SV* self;
     PREINIT: 
-        SV** finalizers;
+        GV* finalizers;
     PPCODE:
         finalizers = MopMpV_get_glob_at(self, "FINALIZERS", 10);
         if (finalizers != NULL) {
-            XPUSHav(GvAV((GV*) *finalizers));
+            XPUSHav(GvAV(finalizers));
         }
 
 SV*
 has_finalizers(self)
         SV* self;
     PREINIT:
-        SV** finalizers;
+        GV* finalizers;
     CODE:
         finalizers = MopMpV_get_glob_at(self, "FINALIZERS", 10);
-        if (finalizers != NULL && *finalizers != NULL) {
-            AV* f = GvAV((GV*) *finalizers);
+        if (finalizers != NULL) {
+            AV* f = GvAV(finalizers);
             RETVAL = av_to_bool(f);
         }
         else {
@@ -262,11 +192,11 @@ void
 roles(self)
         SV* self;
     PREINIT: 
-        SV** roles;
+        GV* roles;
     PPCODE:
         roles = MopMpV_get_glob_at(self, "DOES", 4);
         if (roles != NULL) {
-            XPUSHav(GvAV((GV*) *roles));
+            XPUSHav(GvAV(roles));
         }
 
 MODULE = mop  PACKAGE = mop::class
@@ -275,11 +205,11 @@ void
 superclasses(self)
         SV* self;
     PREINIT: 
-        SV** superclasses;
+        GV* superclasses;
     PPCODE:
         superclasses = MopMpV_get_glob_at(self, "ISA", 3);
         if (superclasses != NULL) {
-            XPUSHav(GvAV((GV*) *superclasses));
+            XPUSHav(GvAV(superclasses));
         }
 
 void 
@@ -337,7 +267,7 @@ SV*
 name(self)
         SV* self;
     CODE: 
-        RETVAL = newSVsv(MopMaV_get_name(self));
+        RETVAL = newSVpv(MopMaV_get_name(self), 0);
     OUTPUT:
         RETVAL
 
@@ -346,7 +276,7 @@ initializer(self)
         SV* self;
     PPCODE: 
         EXTEND(SP, 1);
-        PUSHs(MopMaV_get_initializer(self));        
+        PUSHs(newRV_inc((SV*) MopMaV_get_initializer(self)));        
 
 SV* 
 stash_name(self)
@@ -392,15 +322,6 @@ SV*
 newMopMaV(name, init)
         SV* name; 
         SV* init;
-    PREINIT:
-        AV* attr;
-    CODE:
-        attr = newAV();
-        av_store(attr, 0, SvREFCNT_inc(name));
-        av_store(attr, 1, SvREFCNT_inc(init));
-        RETVAL = newMopMaV(attr);
-    OUTPUT:
-        RETVAL
 
 MODULE = mop  PACKAGE = mop::internal::util::guts
  

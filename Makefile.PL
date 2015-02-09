@@ -14,6 +14,7 @@ my %WriteMakefileArgs = (
         'Devel::CallParser' => '0',
         'ExtUtils::MakeMaker' => '6.30'
     },
+    'INC'                => '-Isrc',
     'EXE_FILES'          => [],
     'LICENSE'            => 'perl',
     'NORECURS'           => 1,
