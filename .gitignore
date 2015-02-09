@@ -2,7 +2,7 @@
 __NOTES__.txt
 Makefile
 Makefile.old
-*.c
+mop.c
 *.bs
 *.o
 blib/*
