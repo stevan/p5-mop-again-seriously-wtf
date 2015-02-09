@@ -49,6 +49,10 @@ char* MopMaV_get_stash_name(pTHX_ SV* self) {
     return HvNAME(MopMaV_get_stash(self));
 }
 
+/* *****************************************************
+ * Methods
+ * ***************************************************** */
+
 bool THX_MopMaV_was_aliased_from(pTHX_ SV* self, AV* candidates) {
     int i, len;
     SV* name;
@@ -63,10 +67,6 @@ bool THX_MopMaV_was_aliased_from(pTHX_ SV* self, AV* candidates) {
     }
     return FALSE;
 }
-
-/* *****************************************************
- * Methods
- * ***************************************************** */
 
 /* *****************************************************
  * Internal Util functions ...
