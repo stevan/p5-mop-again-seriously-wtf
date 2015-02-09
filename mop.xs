@@ -251,9 +251,7 @@ was_aliased_from(self, ...)
             RETVAL = &PL_sv_no;
         }
         else {
-            int i, x;
-            AV* args = newAV();
-            for (i = 1; i < items; i++) { (void)av_store(args, i-1, ST(i)); }
+            AV* args = SLURP_ARGS(1);
             RETVAL = MopMmV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
         }
     OUTPUT:
@@ -292,9 +290,7 @@ was_aliased_from(self, ...)
             RETVAL = &PL_sv_no;
         }
         else {
-            int i;
-            AV* args = newAV();
-            for (i = 1; i < items; i++) { (void)av_store(args, i-1, ST(i)); }
+            AV* args = SLURP_ARGS(1);
             RETVAL = MopMaV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
         }
     OUTPUT:

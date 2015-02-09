@@ -23,4 +23,9 @@
         }                                          \
     }} STMT_END
 
+#define SLURP_ARGS(offset) newAV(); STMT_START { \
+    int i; for (i = offset; i < items; i++) {   \
+        (void)av_store(args, i-offset, ST(i));  \
+    }} STMT_END
+
 #endif /* MOP_H */
