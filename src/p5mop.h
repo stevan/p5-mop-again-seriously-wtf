@@ -6,10 +6,18 @@
 
 // Some useful utils ...
 
+// basically the same as of evaluating C<@foo> in bool context
+
 #define av_to_bool(av)   (av != NULL && av_top_index(av) > -1) ? &PL_sv_yes : &PL_sv_no
 
+// some common GV accessing shortcuts 
+
 #define GvSV_or_undef(s) ((s != NULL) ? GvSV(s) : &PL_sv_undef)
-#define GvSV_to_bool(s)  ((s != NULL) ? SvTRUE(GvSV(s)) ? &PL_sv_yes : &PL_sv_no : &PL_sv_no)
+#define GvSV_to_bool(s)  ((s != NULL) ? (SvTRUE(GvSV(s)) ? &PL_sv_yes : &PL_sv_no) : &PL_sv_no)
+
+// some utils for dealing with returning 
+// a list of values and slurping the remaining
+// args from the stack ... useful stuff really 
 
 #define XPUSHav(_av) STMT_START { AV* av = (_av);  \
     if (av != NULL) {                              \
