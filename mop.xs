@@ -246,18 +246,16 @@ stash_name(self)
 SV*
 was_aliased_from(self, ...)
         SV* self;
-    PREINIT:
-        int i;
-        SV* name   = newSVpv(MopMmV_get_stash_name(self), 0);
-        SV* result = &PL_sv_no;     
     CODE:
-        for (i = 1; i < items; i++) {
-            if (sv_eq(ST(i), name)) {
-                result = &PL_sv_yes;
-                break;
-            } 
+        if (items == 1) {
+            RETVAL = &PL_sv_no;
         }
-        RETVAL = result;
+        else {
+            int i, x;
+            AV* args = newAV();
+            for (i = 1; i < items; i++) { (void)av_store(args, i-1, ST(i)); }
+            RETVAL = MopMmV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
+        }
     OUTPUT:
         RETVAL
 
@@ -289,18 +287,16 @@ stash_name(self)
 SV*
 was_aliased_from(self, ...)
         SV* self;
-    PREINIT:
-        int i;
-        SV* name   = newSVpv(MopMaV_get_stash_name(self), 0);
-        SV* result = &PL_sv_no;     
     CODE:
-        for (i = 1; i < items; i++) {
-            if (sv_eq(ST(i), name)) {
-                result = &PL_sv_yes;
-                break;
-            } 
+        if (items == 1) {
+            RETVAL = &PL_sv_no;
         }
-        RETVAL = result;
+        else {
+            int i;
+            AV* args = newAV();
+            for (i = 1; i < items; i++) { (void)av_store(args, i-1, ST(i)); }
+            RETVAL = MopMaV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
+        }
     OUTPUT:
         RETVAL
 

@@ -6,13 +6,14 @@
 
 // Mop M(eta)a(ttribute)V(alue)
 
-#define newMopMaV(name, init)        THX_newMopMaV(aTHX_ name, init)
-
-#define MopMaV_get_name(self)        THX_MopMaV_get_name(aTHX_ self)
-#define MopMaV_get_initializer(self) THX_MopMaV_get_initializer(aTHX_ self)
-#define MopMaV_get_glob(self)        THX_MopMaV_get_glob(aTHX_ self)
-#define MopMaV_get_stash(self)       THX_MopMaV_get_stash(aTHX_ self)
-#define MopMaV_get_stash_name(self)  THX_MopMaV_get_stash_name(aTHX_ self)
+#define newMopMaV(name, init)                     THX_newMopMaV(aTHX_ name, init)
+             
+#define MopMaV_get_name(self)                     THX_MopMaV_get_name(aTHX_ self)
+#define MopMaV_get_initializer(self)              THX_MopMaV_get_initializer(aTHX_ self)
+#define MopMaV_get_glob(self)                     THX_MopMaV_get_glob(aTHX_ self)
+#define MopMaV_get_stash(self)                    THX_MopMaV_get_stash(aTHX_ self)
+#define MopMaV_get_stash_name(self)               THX_MopMaV_get_stash_name(aTHX_ self)
+#define MopMaV_was_aliased_from(self, candidates) THX_MopMaV_was_aliased_from(aTHX_ self, candidates)
 
 // ...
 
@@ -23,5 +24,6 @@ CV*   THX_MopMaV_get_initializer(pTHX_ SV* self);
 GV*   THX_MopMaV_get_glob(pTHX_ SV* self);
 HV*   THX_MopMaV_get_stash(pTHX_ SV* self);
 char* THX_MopMaV_get_stash_name(pTHX_ SV* self);
+bool  THX_MopMaV_was_aliased_from(pTHX_ SV* self, AV* candidates);
 
 #endif /* MOP_MAV_H */
