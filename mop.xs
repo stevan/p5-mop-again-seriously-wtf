@@ -387,7 +387,7 @@ newMopMaV(name, init)
         SV* name; 
         SV* init;
 
-MODULE = mop  PACKAGE = mop::internal::util::guts
+MODULE = mop  PACKAGE = mop::internal::util
  
 AV* 
 get_UNITCHECK_AV()
@@ -397,7 +397,7 @@ get_UNITCHECK_AV()
     OUTPUT:
         RETVAL
 
-MODULE = mop  PACKAGE = mop::internal::util::guts::syntax
+MODULE = mop  PACKAGE = mop::internal::util::syntax
 
 # NOTE:
 # Everything in this package has been stolen from 

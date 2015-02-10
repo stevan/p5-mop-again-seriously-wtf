@@ -54,7 +54,7 @@ sub INSTALL_FINALIZATION_RUNNER ($pkg) {
             # an eval STRING;
             || (caller(3))[3] eq '(eval)';
 
-    push @{ mop::internal::util::guts::get_UNITCHECK_AV() } => (
+    push @{ mop::internal::util::get_UNITCHECK_AV() } => (
         sub { mop::role->new( name => $pkg )->run_all_finalizers }
     );
 }

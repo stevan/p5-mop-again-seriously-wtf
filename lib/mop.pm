@@ -104,12 +104,12 @@ sub import ($class, @args) {
             *{ $caller . '::extends' } = sub { 1 };
             *{ $caller . '::with'    } = sub { 1 };
 
-            mop::internal::util::guts::syntax::install_keyword_handler(
+            mop::internal::util::syntax::install_keyword_handler(
                 \&{ $caller . '::has' }, 
                 sub {
                     use strict 'refs';
 
-                    my $has = mop::internal::util::guts::syntax::parse_full_statement;
+                    my $has = mop::internal::util::syntax::parse_full_statement;
 
                     my ($name, %traits) = $has->();
 
@@ -138,12 +138,12 @@ sub import ($class, @args) {
                 }
             ); 
 
-            mop::internal::util::guts::syntax::install_keyword_handler(
+            mop::internal::util::syntax::install_keyword_handler(
                 \&{ $caller . '::extends' }, 
                 sub {
                     use strict 'refs';
 
-                    my $extends = mop::internal::util::guts::syntax::parse_full_statement;
+                    my $extends = mop::internal::util::syntax::parse_full_statement;
 
                     my @isa = $extends->();
 
@@ -161,12 +161,12 @@ sub import ($class, @args) {
                 }
             );
 
-            mop::internal::util::guts::syntax::install_keyword_handler(
+            mop::internal::util::syntax::install_keyword_handler(
                 \&{ $caller . '::with' }, 
                 sub {
                     use strict 'refs';
 
-                    my $with = mop::internal::util::guts::syntax::parse_full_statement;
+                    my $with = mop::internal::util::syntax::parse_full_statement;
 
                     my @does = $with->();
 
