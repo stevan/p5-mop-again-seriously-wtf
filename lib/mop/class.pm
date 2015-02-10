@@ -32,17 +32,6 @@ sub construct_instance ($self, $candidate) {
     return bless \%instance => $self->name;
 }
 
-# inheritance 
-
-sub set_superclasses ($self, @supers) {
-    die "[mop::PANIC] Cannot set superclasses in (" . $self->name . ") because it has been closed"
-        if $self->is_closed;
-
-    no strict 'refs';
-    no warnings 'once';
-    @{ $self->name . '::ISA'} = ( @supers );
-}
-
 # finalizer
 
 BEGIN {

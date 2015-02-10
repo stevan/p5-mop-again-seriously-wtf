@@ -34,7 +34,7 @@ GV* THX_MopMpV_get_glob_at(pTHX_ SV* self, char* name, I32 len) {
 GV* THX_MopMpV_create_glob_at(pTHX_ SV* self, char* name, I32 len) {
     HV* stash  = MopMpV_get_stash(self);
     GV* new_gv = (GV*) newSV(0);
-    gv_init_pvn(new_gv, stash, name, len, 0);
+    gv_init_pvn(new_gv, stash, name, len, GV_ADDMULTI);
     (void) hv_store(stash, name, len, (SV*) new_gv, 0);
     return new_gv;
 }
