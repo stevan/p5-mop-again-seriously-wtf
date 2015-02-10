@@ -69,15 +69,6 @@ sub run_all_finalizers ($self) { $_->() for $self->finalizers }
 
 # roles 
 
-sub set_roles ($self, @roles) {
-    die "[mop::PANIC] Cannot set roles in (" . $self->name . ") because it has been closed"
-        if $self->is_closed;
-
-    no strict 'refs';
-    no warnings 'once';
-    @{ $self->name . '::DOES'} = ( @roles );
-}
-
 sub does_role ($self, $role_to_test) {
     # try the simple way first ...
     return 1 if scalar grep { $_ eq $role_to_test } $self->roles;

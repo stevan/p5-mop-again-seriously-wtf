@@ -229,6 +229,27 @@ roles(self)
             XPUSHav(GvAV(roles));
         }
 
+void 
+set_roles(self, ...)
+        SV* self;
+    CODE:
+        if (items > 1) {
+            GV* does;
+            AV* args;
+
+            MopMpV_Error_if_closed(self, "set_roles");
+
+            args = newAV(); 
+            SLURP_ARGS(args, 1);
+            does = MopMpV_get_glob_at(self, "DOES", 4);
+
+            if (does == NULL) {
+                does = MopMpV_create_glob_at(self, "DOES", 4);
+            }
+
+            MopMpV_set_glob_AV_at(self, does, args);
+        }
+
 MODULE = mop  PACKAGE = mop::class
 
 void
