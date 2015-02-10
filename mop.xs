@@ -300,7 +300,8 @@ was_aliased_from(self, ...)
         if (items == 1) {
             RETVAL = &PL_sv_no;
         } else {
-            AV* args = SLURP_ARGS(1);
+            AV* args = newAV(); 
+            SLURP_ARGS(args, 1);
             RETVAL = MopMmV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
         }
     OUTPUT:
@@ -338,7 +339,8 @@ was_aliased_from(self, ...)
         if (items == 1) {
             RETVAL = &PL_sv_no;
         } else {
-            AV* args = SLURP_ARGS(1);
+            AV* args = newAV(); 
+            SLURP_ARGS(args, 1);
             RETVAL = MopMaV_was_aliased_from(self, args) ? &PL_sv_yes : &PL_sv_no;
         }
     OUTPUT:
