@@ -30,6 +30,15 @@ get_UNITCHECK_AV()
     OUTPUT:
         RETVAL
 
+void 
+turn_CvMETHOD_on(code)
+        SV* code;
+    CODE:
+        if (SvTYPE(code) != SVt_RV && SvTYPE(SvRV(code)) != SVt_PVCV) {
+            croak("'code' argument is not a CODE reference");
+        }
+        CvMETHOD_on((CV*) SvRV(code));
+
 MODULE = mop  PACKAGE = mop::internal::util::syntax
 
 # NOTE:
