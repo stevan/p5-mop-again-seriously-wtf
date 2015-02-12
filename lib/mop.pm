@@ -171,6 +171,9 @@ sub import ($class, @args) {
                 );
             }
 
+            mop::internal::util::syntax::teardown_keyword_handler( $meta->name, $_ ) 
+                foreach qw[ with has extends ];
+
             $meta->set_is_closed(1);
         });
     }
