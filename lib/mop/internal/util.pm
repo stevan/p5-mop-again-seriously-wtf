@@ -61,6 +61,11 @@ sub INSTALL_FINALIZATION_RUNNER ($pkg) {
 
 ## Instance construction and destruction 
 
+# XXX:
+# These two methods should get converted into the 
+# WALKCLASS and WALKMETH functions from Perl 6.
+# - SL
+
 # TODO:
 # - add caches here using a `state` var
 # - the ->can("BUILD") is likely not doing the right thing, fix it.

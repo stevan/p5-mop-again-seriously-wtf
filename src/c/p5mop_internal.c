@@ -2,8 +2,7 @@
 // BEGIN: Shameless Steal from Parse::Keyword 
 /* ======================================================= */
 
-static SV *parser_fn(OP *(fn)(pTHX_ U32), bool named)
-{
+static SV *parser_fn(OP *(fn)(pTHX_ U32), bool named) {
     I32 floor;
     CV *code;
     U8 errors;
@@ -36,8 +35,7 @@ static SV *parser_fn(OP *(fn)(pTHX_ U32), bool named)
 }
 
 // shamelessly stolen from Parse::Keyword
-static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
-{
+static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp) {
     dSP;
     SV *args_generator;
     SV *statement = NULL;
