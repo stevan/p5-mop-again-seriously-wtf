@@ -1,1 +1,1 @@
-# *{$Yet . "::" . $Another} = \\&Mop::Prototype;
+## *{$Yet . "::" . $Another} = \\&Mop::Prototype;
