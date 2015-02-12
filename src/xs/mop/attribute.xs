@@ -1,4 +1,3 @@
-
 MODULE = mop  PACKAGE = mop::attribute
 
 SV* 
