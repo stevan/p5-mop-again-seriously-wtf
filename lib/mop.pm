@@ -149,14 +149,8 @@ sub import ($class, @args) {
         $meta->add_finalizer(sub { 
 
             if ( $meta->isa('mop::class') ) {
-                # FIXME - move this code to an internal::util::METHOD - SL
                 # make sure to 'inherit' the required methods ...
-                foreach my $super ( map { mop::role->new( name => $_ ) } $meta->superclasses ) {
-                    foreach my $required_method ( $super->required_methods ) {
-                        $meta->add_required_method($required_method)
-                    }
-                }
-
+                mop::internal::util::INHERIT_REQUIRED_METHODS( $meta );
                 # this is an optimization to pre-populate the 
                 # cache for all the attributes 
                 mop::internal::util::GATHER_ALL_ATTRIBUTES( $meta );

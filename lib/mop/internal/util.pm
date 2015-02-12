@@ -90,6 +90,16 @@ sub DEMOLISHALL ($instance)  {
     return;
 }
 
+## Inheriting required methods 
+
+sub INHERIT_REQUIRED_METHODS ($meta) {
+    foreach my $super ( map { mop::role->new( name => $_ ) } $meta->superclasses ) {
+        foreach my $required_method ( $super->required_methods ) {
+            $meta->add_required_method($required_method)
+        }
+    }
+}
+
 ## Attribute gathering ...
 
 # NOTE:
