@@ -8,6 +8,9 @@ SV*
 newMopMmV(code)
         SV* code;
     CODE:
+        if (SvTYPE(code) != SVt_RV && SvTYPE(SvRV(code)) != SVt_PVCV) {
+            croak("'code' argument is not a CODE reference");
+        }
         RETVAL = newMopMmV((CV*) SvRV(code));
     OUTPUT:
         RETVAL
@@ -42,6 +45,12 @@ install_keyword_handler(keyword, handler)
         SV *keyword
         SV *handler
     CODE:
+        if (SvTYPE(keyword) != SVt_RV && SvTYPE(SvRV(keyword)) != SVt_PVCV) {
+            croak("'keyword' argument is not a CODE reference");
+        }
+        if (SvTYPE(handler) != SVt_RV && SvTYPE(SvRV(handler)) != SVt_PVCV) {
+            croak("'handler' argument is not a CODE reference");
+        }
         cv_set_call_parser( (CV*) SvRV( keyword ), parser_callback, handler );
 
 SV*
