@@ -6,6 +6,12 @@
  * ***************************************************** */
 
 SV* THX_newMopMpV(pTHX_ SV* name) {  
+    assert(name != NULL);
+
+    if (SvTYPE(name) >= SVt_PVAV) {
+        croak("name is not a regular scalar");
+    } 
+
     return newRV_noinc(newRV_inc((SV*) gv_stashsv(name, GV_ADD)));
 }
 
@@ -15,6 +21,12 @@ SV* THX_newMopMpV(pTHX_ SV* name) {
 
 HV* THX_MopMpV_get_stash (pTHX_ SV* self) {
     assert(self != NULL);
+
+    if (SvTYPE(self) != SVt_RV 
+            && SvTYPE(SvRV(self)) != SVt_RV
+                && SvTYPE(SvRV(SvRV(self))) != SVt_PVHV) {
+        croak("self is not a MopMpV structure");
+    }
 
     return (HV*) SvRV(SvRV(self));    
 }
@@ -26,21 +38,21 @@ char* THX_MopMpV_get_stash_name(pTHX_ SV* self) {
 }
 
 bool THX_MopMpV_has_glob_at(pTHX_ SV* self, char* name, I32 len) {
-    assert(self != NULL && name != NULL && len != NULL);
+    assert(self != NULL && name != NULL);
 
     SV** gvp = hv_fetch(MopMpV_get_stash(self), name, len, 0);
     return (gvp == NULL) ? TRUE : FALSE;
 }
 
 GV* THX_MopMpV_get_glob_at(pTHX_ SV* self, char* name, I32 len) {
-    assert(self != NULL && name != NULL && len != NULL);
+    assert(self != NULL && name != NULL);
 
     SV** gvp = hv_fetch(MopMpV_get_stash(self), name, len, 0);
     return (gvp == NULL) ? NULL : (GV*) *gvp;
 }
 
 GV* THX_MopMpV_create_glob_at(pTHX_ SV* self, char* name, I32 len) {
-    assert(self != NULL && name != NULL && len != NULL);
+    assert(self != NULL && name != NULL);
 
     HV* stash  = MopMpV_get_stash(self);
     GV* new_gv = (GV*) newSV(0);

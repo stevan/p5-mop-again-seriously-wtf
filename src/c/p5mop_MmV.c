@@ -25,6 +25,12 @@ SV* THX_newMopMmV(pTHX_ CV* code) {
 CV* THX_MopMmV_get_cv(pTHX_ SV* self) {
     assert(self != NULL);
 
+    if (SvTYPE(self) != SVt_RV 
+            && SvTYPE(SvRV(self)) != SVt_RV
+                && SvTYPE(SvRV(SvRV(self))) != SVt_PVCV) {
+        croak("self is not a MopMmV structure");
+    }
+
     return (CV*) SvRV(SvRV(self));
 }
 
@@ -62,8 +68,8 @@ bool THX_MopMmV_was_aliased_from(pTHX_ SV* self, AV* candidates) {
     int i, len;
     SV* name;
 
-    len  = av_top_index(candidates);
     name = newSVpv(MopMmV_get_stash_name(self), 0);
+    len  = av_top_index(candidates);
 
     for (i = 0; i <= len; i++) {
         if (sv_eq(AvARRAY(candidates)[i], name)) {
