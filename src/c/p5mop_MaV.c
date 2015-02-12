@@ -15,6 +15,8 @@
  * ***************************************************** */
 
 SV* newMopMaV(pTHX_ SV* name, SV* init) {
+    assert(name != NULL && init != NULL);
+
     AV* attr = newAV();
     av_store(attr, 0, SvREFCNT_inc(name));
     av_store(attr, 1, SvREFCNT_inc(init));
@@ -26,26 +28,36 @@ SV* newMopMaV(pTHX_ SV* name, SV* init) {
  * ***************************************************** */
 
 char* MopMaV_get_name(pTHX_ SV* self) {       
+    assert(self != NULL);
+
     SV** name_p = av_fetch((AV*) SvRV(self), 0, 0);
     if (name_p == NULL || *name_p == NULL) return NULL;
     return SvPV_nolen((SV*) *name_p);
 }
 
 CV* MopMaV_get_initializer(pTHX_ SV* self) {
+    assert(self != NULL);
+
     SV** init_p = av_fetch((AV*) SvRV(self), 1, 0);
     if (init_p == NULL || *init_p == NULL) return NULL;
     return (CV*) SvRV((SV*) *init_p);
 }
 
 GV* MopMaV_get_glob(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return CvGV((CV*) MopMaV_get_initializer(self));
 }
 
 HV* MopMaV_get_stash(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return (HV*) GvSTASH(MopMaV_get_glob(self));
 }
 
 char* MopMaV_get_stash_name(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return HvNAME(MopMaV_get_stash(self));
 }
 
@@ -54,6 +66,8 @@ char* MopMaV_get_stash_name(pTHX_ SV* self) {
  * ***************************************************** */
 
 bool THX_MopMaV_was_aliased_from(pTHX_ SV* self, AV* candidates) {
+    assert(self != NULL && candidates != NULL);
+
     int i, len;
     SV* name;
 

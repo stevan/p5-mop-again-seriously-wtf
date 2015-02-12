@@ -14,24 +14,34 @@ SV* THX_newMopMpV(pTHX_ SV* name) {
  * ***************************************************** */
 
 HV* THX_MopMpV_get_stash (pTHX_ SV* self) {
+    assert(self != NULL);
+
     return (HV*) SvRV(SvRV(self));    
 }
 
 char* THX_MopMpV_get_stash_name(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return HvNAME(MopMpV_get_stash(self));
 }
 
 bool THX_MopMpV_has_glob_at(pTHX_ SV* self, char* name, I32 len) {
+    assert(self != NULL && name != NULL && len != NULL);
+
     SV** gvp = hv_fetch(MopMpV_get_stash(self), name, len, 0);
     return (gvp == NULL) ? TRUE : FALSE;
 }
 
 GV* THX_MopMpV_get_glob_at(pTHX_ SV* self, char* name, I32 len) {
+    assert(self != NULL && name != NULL && len != NULL);
+
     SV** gvp = hv_fetch(MopMpV_get_stash(self), name, len, 0);
     return (gvp == NULL) ? NULL : (GV*) *gvp;
 }
 
 GV* THX_MopMpV_create_glob_at(pTHX_ SV* self, char* name, I32 len) {
+    assert(self != NULL && name != NULL && len != NULL);
+
     HV* stash  = MopMpV_get_stash(self);
     GV* new_gv = (GV*) newSV(0);
     gv_init_pvn(new_gv, stash, name, len, GV_ADDMULTI);
@@ -40,12 +50,16 @@ GV* THX_MopMpV_create_glob_at(pTHX_ SV* self, char* name, I32 len) {
 }
 
 void THX_MopMpV_set_glob_SV_at(pTHX_ SV* self, GV* glob, SV* value) {
+    assert(self != NULL && glob != NULL && value != NULL);
+
     SV* sv = GvSV(glob);
     if (sv == NULL) gv_SVadd(glob);
     GvSV(glob) = value;
 }
 
 void THX_MopMpV_set_glob_AV_at(pTHX_ SV* self, GV* glob, AV* value) {
+    assert(self != NULL && glob != NULL && value != NULL);
+
     AV* av = GvAV(glob);
     if (av == NULL) gv_AVadd(glob);
     GvAV(glob) = value;

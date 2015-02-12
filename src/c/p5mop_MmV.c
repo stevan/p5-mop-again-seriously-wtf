@@ -13,6 +13,8 @@
  * ***************************************************** */
 
 SV* THX_newMopMmV(pTHX_ CV* code) {
+    assert(code != NULL);
+
     return newRV_noinc(newRV_inc((SV*) code));
 }
 
@@ -21,22 +23,32 @@ SV* THX_newMopMmV(pTHX_ CV* code) {
  * ***************************************************** */
 
 CV* THX_MopMmV_get_cv(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return (CV*) SvRV(SvRV(self));
 }
 
 GV* THX_MopMmV_get_glob(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return CvGV(MopMmV_get_cv(self));
 }
 
 char* THX_MopMmV_get_name(pTHX_ SV* self) { 
+    assert(self != NULL);
+
     return GvNAME(MopMmV_get_glob(self));
 }
 
 HV* THX_MopMmV_get_stash(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return (HV*) GvSTASH(MopMmV_get_glob(self));
 }
 
 char* THX_MopMmV_get_stash_name(pTHX_ SV* self) {
+    assert(self != NULL);
+
     return HvNAME(MopMmV_get_stash(self));
 }
 
@@ -45,6 +57,8 @@ char* THX_MopMmV_get_stash_name(pTHX_ SV* self) {
  * ***************************************************** */
 
 bool THX_MopMmV_was_aliased_from(pTHX_ SV* self, AV* candidates) {
+    assert(self != NULL && candidates != NULL);
+
     int i, len;
     SV* name;
 
