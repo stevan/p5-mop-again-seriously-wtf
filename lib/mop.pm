@@ -6,7 +6,6 @@ use warnings;
 use experimental 'signatures', 'postderef';
 
 use Module::Runtime ();
-use Symbol          ();
 
 use Devel::CallParser;
 use XSLoader; 
