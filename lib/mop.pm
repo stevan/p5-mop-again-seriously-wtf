@@ -17,6 +17,7 @@ BEGIN {
 }
 
 use mop::internal::util;
+use mop::internal::util::syntax;
 
 use mop::object;
 use mop::attribute;
@@ -97,93 +98,55 @@ sub import ($class, @args) {
         feature->import('signatures');
         warnings->unimport('experimental::signatures');
 
-        # import has keyword
-        {
-            no strict 'refs';
-            *{ $caller . '::has'     } = sub { 1 };
-            *{ $caller . '::extends' } = sub { 1 };
-            *{ $caller . '::with'    } = sub { 1 };
+        # import has, extend and with keyword
+        mop::internal::util::syntax::setup_keyword_handler(
+            ($caller, 'has') => sub {
+                my ($name, %traits) = @_;
 
-            mop::internal::util::syntax::install_keyword_handler(
-                \&{ $caller . '::has' }, 
-                sub {
-                    use strict 'refs';
+                # this is the only one we handle 
+                # specially, everything else gets
+                # called as a trait ...
+                $traits{default} //= delete $traits{required} 
+                                      ? sub { die "[mop::ERROR] The attribute '$name' is required" }
+                                      : eval 'sub { undef }'; # we need this to be a unique CV ... sigh
 
-                    my $has = mop::internal::util::syntax::parse_full_statement;
+                $meta->add_attribute( $name, delete $traits{default} );
 
-                    my ($name, %traits) = $has->();
-
-                    # this is the only one we handle 
-                    # specially, everything else gets
-                    # called as a trait ...
-                    $traits{default} //= delete $traits{required} 
-                                          ? sub { die "[mop::ERROR] The attribute '$name' is required" }
-                                          : eval 'sub { undef }'; # we need this to be a unique CV ... sigh
-
-                    $meta->add_attribute( $name, delete $traits{default} );
-
-                    if ( keys %traits ) {
-                        my $attr = $meta->get_attribute( $name );
-                        foreach my $k ( keys %traits ) {
-                            die "[mop::PANIC] Cannot locate trait ($k) to apply to attributes ($name)"
-                                unless exists $TRAITS{ $k };
-                            $TRAITS{ $k }->( $meta, $attr, $traits{ $k } );
-                        }
+                if ( keys %traits ) {
+                    my $attr = $meta->get_attribute( $name );
+                    foreach my $k ( keys %traits ) {
+                        die "[mop::PANIC] Cannot locate trait ($k) to apply to attributes ($name)"
+                            unless exists $TRAITS{ $k };
+                        $TRAITS{ $k }->( $meta, $attr, $traits{ $k } );
                     }
-
-                    # replace this with a noop since 
-                    # we did all our work at compile 
-                    # time already.
-                    return (sub { () }, 1);
                 }
-            ); 
+                return;
+            }
+        ); 
 
-            mop::internal::util::syntax::install_keyword_handler(
-                \&{ $caller . '::extends' }, 
-                sub {
-                    use strict 'refs';
+        mop::internal::util::syntax::setup_keyword_handler(
+            ($caller, 'extends') => sub {
+                my @isa = @_;
+                Module::Runtime::use_package_optimistically( $_ ) foreach @isa;
+                ($meta->isa('mop::class') 
+                    ? $meta
+                    : (bless $meta => 'mop::class') # cast into class
+                )->set_superclasses( @isa );
+                return;
+            }
+        );
 
-                    my $extends = mop::internal::util::syntax::parse_full_statement;
+        mop::internal::util::syntax::setup_keyword_handler(
+            ($caller, 'with') => sub {
+                my @does = @_;
+                Module::Runtime::use_package_optimistically( $_ ) foreach @does;
+                $meta->set_roles( @does );
+                return;
+            }
+        );
 
-                    my @isa = $extends->();
-
-                    Module::Runtime::use_package_optimistically( $_ ) foreach @isa;
-
-                    ($meta->isa('mop::class') 
-                        ? $meta
-                        : (bless $meta => 'mop::class') # cast into class
-                    )->set_superclasses( @isa );
-
-                    # replace this with a noop since 
-                    # we did all our work at compile 
-                    # time already.
-                    return (sub { () }, 1);
-                }
-            );
-
-            mop::internal::util::syntax::install_keyword_handler(
-                \&{ $caller . '::with' }, 
-                sub {
-                    use strict 'refs';
-
-                    my $with = mop::internal::util::syntax::parse_full_statement;
-
-                    my @does = $with->();
-
-                    Module::Runtime::use_package_optimistically( $_ ) foreach @does;
-
-                    $meta->set_roles( @does );
-
-                    # replace this with a noop since 
-                    # we did all our work at compile 
-                    # time already.
-                    return (sub { () }, 1);
-                }
-            );
-        }
-
+        # install our class finalizers
         $meta->add_finalizer(sub { 
-
 
             if ( $meta->isa('mop::class') ) {
                 # FIXME - move this code to an internal::util::METHOD - SL
