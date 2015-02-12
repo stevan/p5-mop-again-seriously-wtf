@@ -77,6 +77,14 @@ void THX_MopMpV_set_glob_AV_at(pTHX_ SV* self, GV* glob, AV* value) {
     GvAV(glob) = value;
 }
 
+void THX_MopMpV_set_glob_HV_at(pTHX_ SV* self, GV* glob, HV* value) {
+    assert(self != NULL && glob != NULL && value != NULL);
+
+    HV* hv = GvHV(glob);
+    if (hv == NULL) gv_HVadd(glob);
+    GvHV(glob) = value;
+}
+
 /* *****************************************************
  * Methods
  * ***************************************************** */
