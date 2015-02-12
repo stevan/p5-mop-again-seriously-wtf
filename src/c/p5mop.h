@@ -31,10 +31,10 @@
         }                                          \
     }} STMT_END
 
-#define SLURP_ARGS(args, offset) STMT_START {     \
-    int i; for (i = offset; i < items; i++) {     \
-        SV** a = av_store(args, i-offset, ST(i)); \
-        if (a != NULL) { SvREFCNT_inc(*a); }      \
+#define SLURP_ARGS(args, offset) STMT_START {      \
+    int i; for (i = offset; i < items; i++) {      \
+        SV** a = av_store(args, i-offset, ST(i));  \
+        if (a != NULL) { SvREFCNT_inc(*a); }       \
     }} STMT_END
 
 #endif /* MOP_H */
