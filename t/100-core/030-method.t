@@ -13,29 +13,58 @@ BEGIN {
 
 sub foo { 'FOO' }
 
-my $Method = mop::method->new( body => \&foo );
-isa_ok($Method, 'mop::method');
+{
+    my $Method = mop::method->new( body => \&foo );
+    isa_ok($Method, 'mop::method');
 
-my @METHODS = qw[
-    new 
+    my @METHODS = qw[
+        new 
 
-    body
+        body
 
-    name
-    stash_name
-    was_aliased_from
-];
+        name
+        stash_name
+        was_aliased_from
+    ];
 
-can_ok($Method, $_) for @METHODS;
+    can_ok($Method, $_) for @METHODS;
 
-is($Method->body, \&foo, '... got the expected body');
-is($Method->body->(), 'FOO', '... got the expected result from calling body');
+    is($Method->body, \&foo, '... got the expected body');
+    is($Method->body->(), 'FOO', '... got the expected result from calling body');
 
-is($Method->name, 'foo', '... got the expected result from ->name');
-is($Method->stash_name, 'main', '... got the expected result from ->stash_name');
+    is($Method->name, 'foo', '... got the expected result from ->name');
+    is($Method->stash_name, 'main', '... got the expected result from ->stash_name');
 
-ok($Method->was_aliased_from('main'), '... the method was aliased from main::');
-ok(!$Method->was_aliased_from('Foo'), '... the method was not aliased from Foo::');
+    ok($Method->was_aliased_from('main'), '... the method was aliased from main::');
+    ok(!$Method->was_aliased_from('Foo'), '... the method was not aliased from Foo::');
+}
+
+{
+    my $anon   = sub { 'ANON' };
+    my $Method = mop::method->new( body => $anon );
+    isa_ok($Method, 'mop::method');
+
+    my @METHODS = qw[
+        new 
+
+        body
+
+        name
+        stash_name
+        was_aliased_from
+    ];
+
+    can_ok($Method, $_) for @METHODS;
+
+    is($Method->body, $anon, '... got the expected body');
+    is($Method->body->(), 'ANON', '... got the expected result from calling body');
+
+    is($Method->name, '__ANON__', '... got the expected result from ->name');
+    is($Method->stash_name, 'main', '... got the expected result from ->stash_name');
+
+    ok($Method->was_aliased_from('main'), '... the method was aliased from main::');
+    ok(!$Method->was_aliased_from('Foo'), '... the method was not aliased from Foo::');
+}
 
 done_testing;
 
