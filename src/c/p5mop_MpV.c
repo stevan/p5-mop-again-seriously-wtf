@@ -1,6 +1,14 @@
 #include "p5mop.h"
 #include "p5mop_MpV.h"
 
+/* 
+    TODO:
+
+    1) The double ref instance thing is wasteful, we can improve this for sure.
+    2) ... port the rest of the methods 
+
+*/
+
 /* *****************************************************
  * Constructors
  * ***************************************************** */

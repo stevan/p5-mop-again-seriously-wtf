@@ -34,7 +34,6 @@ static SV *parser_fn(OP *(fn)(pTHX_ U32), bool named) {
     }
 }
 
-// shamelessly stolen from Parse::Keyword
 static OP *parser_callback(pTHX_ GV *namegv, SV *psobj, U32 *flagsp) {
     dSP;
     SV *args_generator;

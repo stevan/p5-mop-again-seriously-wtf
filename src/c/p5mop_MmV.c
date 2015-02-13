@@ -5,6 +5,7 @@
     TODO:
 
     1) We need to add the ability to check if a method is required or not.
+    2) The double ref instance thing is wasteful, we can improve this for sure.
 
 */
 
