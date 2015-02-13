@@ -59,35 +59,60 @@ sub INSTALL_FINALIZATION_RUNNER ($pkg) {
     );
 }
 
+## Dispatching and class MRO walking
+
+# NOTE:
+# The dispatcher current returns a CODE ref
+# that maintains internal state, this is 
+# an implementation detail. This could easily
+# return some opaque interator object just 
+# as easily. The only two things which would 
+# need to be aware of this are the WALKCLASS
+# and WALKMETH functions below. Then if everyone
+# used the WALKCLASS/WALKMETH functions, we 
+# can really optimize the dispatcher, which 
+# would then we optimize a lot of other things 
+# as well.
+# - SL
+
+sub DISPATCHER ($class, %opts) {
+    my $meta = $opts{type} || 'mop::role';
+    if ( $opts{reverse} ) {
+        return sub { 
+            state $mro = [ reverse @{ mro::get_linear_isa( $class ) } ]; 
+            return $meta->new( name => ((shift @$mro) || return) ) 
+        };
+    }
+    else {
+        return sub { 
+            state $mro = [ @{ mro::get_linear_isa( $class ) } ]; 
+            return $meta->new( name => ((shift @$mro) || return) ) 
+        };
+    }
+}
+
+sub WALKCLASS ($dispatcher) { $dispatcher->() }
+
+sub WALKMETH ($dispatcher, $method) {
+    {; ($dispatcher->() || return)->get_method( $method ) || redo }       
+}
+
 ## Instance construction and destruction 
 
-# XXX:
-# These two methods should get converted into the 
-# WALKCLASS and WALKMETH functions from Perl 6.
-# - SL
-
-# TODO:
-# - add caches here using a `state` var
-# - the ->can("BUILD") is likely not doing the right thing, fix it.
-#     - should be able to use a %seen hash to avoid calling a BUILD/DEMOLISH twice
-# - SL
-
 sub BUILDALL ($instance, $args) {
-    foreach my $c ( reverse mro::get_linear_isa( ref $instance )->@* ) {
-        if ( my $build = $c->can('BUILD') ) {
-            $instance->$build( $args );
-        }
+    my $dispatcher = DISPATCHER(ref $instance, ( reverse => 1, type => 'mop::class' ));
+    while ( my $method = WALKMETH( $dispatcher, 'BUILD' ) ) {
+        $method->body->( $instance, $args );
     }
-    return;
+    return; 
 }
 
 sub DEMOLISHALL ($instance)  {
-    foreach my $c ( mro::get_linear_isa( ref $instance )->@* ) {
-        if ( my $demolish = $c->can('DEMOLISH') ) {
-            $instance->$demolish();
-        }
+    my $dispatcher = DISPATCHER(ref $instance, ( type => 'mop::class' ));
+    while ( my $method = WALKMETH( $dispatcher, 'DEMOLISH' ) ) {
+        $method->body->( $instance );
     }
-    return;
+    return; 
 }
 
 ## Inheriting required methods 
@@ -110,9 +135,9 @@ sub INHERIT_REQUIRED_METHODS ($meta) {
 # will have a different stash name. 
 
 sub GATHER_ALL_ATTRIBUTES ($meta) {
-    my @mro = $meta->mro;
-    shift @mro; # no need to search ourselves ...
-    foreach my $super ( map { mop::role->new( name => $_ ) } @mro ) {
+    my $dispatcher = DISPATCHER( $meta->name );
+    WALKCLASS( $dispatcher ); # no need to search ourselves ...
+    while ( my $super = WALKCLASS( $dispatcher ) ) {
         foreach my $attr ( $super->attributes ) {
             $meta->alias_attribute( $attr->name, $attr->initializer ) 
                 unless $meta->has_attribute( $attr->name ) 
