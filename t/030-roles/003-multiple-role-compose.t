@@ -6,27 +6,21 @@ use warnings;
 use Test::More;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     has 'bar' => (default => sub { 'bar' });
     sub bar ($self) { $self->{bar} }
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     has 'foo' => (default => sub { 'foo' });
     sub foo ($self) { $self->{foo} }
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Foo', 'Bar';
 
@@ -34,9 +28,7 @@ package Baz {
 }
 
 package Gorch {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'Baz';

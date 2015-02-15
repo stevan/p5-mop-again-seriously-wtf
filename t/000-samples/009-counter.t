@@ -6,9 +6,7 @@ use warnings;
 use Test::More;
 
 package Counter {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 

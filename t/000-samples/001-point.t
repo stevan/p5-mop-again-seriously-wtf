@@ -6,9 +6,7 @@ use warnings;
 use Test::More;
 
 package Point {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -35,9 +33,7 @@ package Point {
 # ... subclass it ...
 
 package Point3D {
-    use v5.20;
-    use warnings;
-    use mop; 
+    use Moxie; 
 
     extends 'Point';
 

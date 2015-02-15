@@ -6,9 +6,7 @@ use warnings;
 use Test::More;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -25,9 +23,7 @@ like(
 );
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Foo';
 }

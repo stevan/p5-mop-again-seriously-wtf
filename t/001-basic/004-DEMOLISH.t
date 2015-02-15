@@ -8,9 +8,7 @@ use Test::More;
 my $collector;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -24,9 +22,7 @@ package Foo {
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Foo';
 
@@ -36,9 +32,7 @@ package Bar {
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Bar';
 

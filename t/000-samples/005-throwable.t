@@ -13,9 +13,7 @@ BEGIN {
 }
 
 package Throwable {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 

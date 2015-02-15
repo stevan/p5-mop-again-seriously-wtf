@@ -6,9 +6,7 @@ use warnings;
 use Test::More;
 
 package LinkedList {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -76,9 +74,7 @@ package LinkedList {
 }
 
 package LinkedListNode {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 

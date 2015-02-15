@@ -9,9 +9,7 @@ use Test::Fatal;
 my ($foo, $bar);
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -19,9 +17,7 @@ package Foo {
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     sub foo ($self) {
         $self->next::method;
@@ -30,9 +26,7 @@ package Bar {
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Foo';
        with 'Bar';

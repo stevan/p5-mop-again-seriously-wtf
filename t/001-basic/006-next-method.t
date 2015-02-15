@@ -6,9 +6,7 @@ use warnings;
 use Test::More;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -17,9 +15,7 @@ package Foo {
 }
 
 package FooBar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Foo';
 
@@ -29,9 +25,7 @@ package FooBar {
 }
 
 package FooBarBaz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'FooBar';
 
@@ -39,9 +33,7 @@ package FooBarBaz {
 }
 
 package FooBarBazGorch {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'FooBarBaz';
 

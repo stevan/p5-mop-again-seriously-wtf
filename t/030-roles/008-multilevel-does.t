@@ -6,23 +6,17 @@ use warnings;
 use Test::More;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 }
 
 package Bar { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
     
     with 'Foo';
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'Bar';
@@ -32,29 +26,21 @@ ok(Baz->DOES('Bar'), '... Baz DOES Bar');
 ok(Baz->DOES('Foo'), '... Baz DOES Foo');
 
 package R1 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 }
 
 package R2 {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 }
 
 package R3 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
     
     with 'R1', 'R2';
 }
 
 package C1 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'R3';

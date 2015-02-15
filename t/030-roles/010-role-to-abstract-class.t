@@ -8,17 +8,13 @@ use Test::More;
 use mop;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     sub bar;
 }
 
 package Gorch {
-    use v5.20;
-    use warnings;
-    use mop; 
+    use Moxie; 
     
     extends 'mop::object';
        with 'Foo';
@@ -27,9 +23,7 @@ package Gorch {
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Gorch';
 }

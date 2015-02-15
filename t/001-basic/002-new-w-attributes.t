@@ -25,9 +25,7 @@ of the case.
 our $BAZ; BEGIN { $BAZ = [] };
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -50,9 +48,7 @@ is( $foo->bar->{'baz'}, $BAZ, '... these are the same values' );
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 

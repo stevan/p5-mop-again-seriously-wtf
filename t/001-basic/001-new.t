@@ -14,9 +14,7 @@ but it should link back to the same class data.
 =cut
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 }
@@ -45,9 +43,7 @@ is( Scalar::Util::blessed($foo), 'Foo', '... the class of this object is Foo' );
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -75,9 +71,7 @@ package Bar {
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 

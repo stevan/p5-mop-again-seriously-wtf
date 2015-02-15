@@ -8,9 +8,7 @@ use Test::More;
 use mop;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     has 'bar' => (default => sub { 'bar' });
 
@@ -18,9 +16,7 @@ package Foo {
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Foo';
 
@@ -28,9 +24,7 @@ package Baz {
 }
 
 package Gorch {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'Baz';

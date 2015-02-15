@@ -8,9 +8,7 @@ use mop;
 our $x;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -35,9 +33,7 @@ package Foo {
 our $y;
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -48,9 +44,7 @@ package Bar {
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Bar';
 

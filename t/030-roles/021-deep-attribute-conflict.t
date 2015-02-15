@@ -6,33 +6,25 @@ use warnings;
 use Test::More;
 
 package Service {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     has 'is_locked' => (default => sub { 0 });
 }
 
 package WithClass {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Service';
 }       
 
 package WithParameters {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Service';
 } 
 
 package WithDependencies {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Service';
 }
@@ -56,9 +48,7 @@ foreach my $role (map { mop::role->new( name => $_ ) } qw[
     local $@;
     eval q[
         package ConstructorInjection { 
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'WithClass', 'WithParameters', 'WithDependencies';

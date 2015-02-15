@@ -7,17 +7,13 @@ use Test::More;
 use Test::Fatal;
 
 package Role::Table {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     sub query_by_id;
 }
 
 package Role::Table::RO {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Role::Table';
 
@@ -26,9 +22,7 @@ package Role::Table::RO {
 }
 
 package Table {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'Role::Table';
@@ -37,9 +31,7 @@ package Table {
 }
 
 package Table::RO {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Table';
        with 'Role::Table::RO';

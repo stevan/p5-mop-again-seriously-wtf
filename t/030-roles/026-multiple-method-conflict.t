@@ -6,37 +6,32 @@ use Test::More;
 
 
 package R1 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
+
     sub foo { 1 } 
 }
 
 package R2 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
+
     sub foo { 1 } 
 }
 
 package R3 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
+
     sub foo { 1 } 
 }
 
 package R4 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
+
     sub foo { 1 } 
 }
 
 package R5 { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
+
     sub foo { 1 } 
 }
 
@@ -44,9 +39,7 @@ package R5 {
     local $@ = undef;
     eval q[
         package C1 {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'R1';
@@ -59,9 +52,7 @@ package R5 {
     local $@ = undef;
     eval q[
         package C2 {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'R1', 'R2';
@@ -78,9 +69,7 @@ package R5 {
     local $@ = undef;
     eval q[
         package C3 {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'R1', 'R2', 'R3';
@@ -97,9 +86,7 @@ package R5 {
     local $@ = undef;
     eval q[
         package C4 {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'R1', 'R2', 'R3', 'R4';
@@ -116,9 +103,7 @@ package R5 {
     local $@ = undef;
     eval q[
         package C5 {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'R1', 'R2', 'R3', 'R4', 'R5';
@@ -132,9 +117,8 @@ package R5 {
 }
 
 package R1_required { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
+
     sub foo; 
 }
 
@@ -142,9 +126,7 @@ package R1_required {
     local $@ = undef;
     eval q[
         package C1_required {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'R1_required', 'R2';

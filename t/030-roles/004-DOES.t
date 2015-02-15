@@ -7,51 +7,37 @@ use Test::More;
 
 # roles ...
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 }
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 }
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 }
 package Bat {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Baz';
 }
 
 # classes ...
 package Quux { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'Foo', 'Bar'; 
 }
 
 package Quuux { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Quux';
        with 'Foo', 'Baz';
 }
 
 package Xyzzy { 
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
     
     extends 'mop::object';
        with 'Foo', 'Bat';

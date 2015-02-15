@@ -36,9 +36,7 @@ I will just punt until we do the real thing.
 =cut
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -48,9 +46,7 @@ package Foo {
 }
 
 package FooBar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Foo';
     

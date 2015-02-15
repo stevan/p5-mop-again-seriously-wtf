@@ -15,9 +15,7 @@ Make the parent a weak-ref ... it is not right now.
 
 
 package BinaryTree {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -64,9 +62,7 @@ package BinaryTree {
 }
 
 package MyBinaryTree {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'BinaryTree';
 }

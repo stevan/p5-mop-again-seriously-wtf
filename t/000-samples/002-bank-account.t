@@ -6,9 +6,7 @@ use warnings;
 use Test::More;
 
 package BankAccount {
-    use v5.20;
-    use warnings;
-    use mop; 
+    use Moxie;
 
     extends 'mop::object';
 
@@ -24,9 +22,7 @@ package BankAccount {
 }
 
 package CheckingAccount {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'BankAccount';
 

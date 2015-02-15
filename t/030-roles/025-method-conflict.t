@@ -6,17 +6,13 @@ use warnings;
 use Test::More;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     sub foo { 'Foo::foo' }
 }
 
 package Foo2 {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Foo';
 
@@ -24,9 +20,7 @@ package Foo2 {
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     sub foo { 'Bar::foo' }
 }
@@ -40,9 +34,7 @@ package Bar {
 }
 
 package FooBar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     with 'Foo', 'Bar';
 }
@@ -56,9 +48,7 @@ package FooBar {
 }
 
 package FooBarClass {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'Foo', 'Bar';
@@ -80,9 +70,7 @@ package FooBarClass {
     local $@ = undef;
     eval q[
         package FooBarBrokenClass1 {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'Foo', 'Bar';
@@ -99,9 +87,7 @@ package FooBarClass {
     local $@ = undef;
     eval q[
         package Gorch {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'Foo', 'Bar';
@@ -120,9 +106,7 @@ package FooBarClass {
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
        with 'Foo';

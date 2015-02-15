@@ -8,9 +8,7 @@ use Test::More;
 use mop ();
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -28,9 +26,7 @@ like(
 );
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Foo';
 
@@ -48,9 +44,7 @@ ok(!mop::class->new( name => 'Bar' )->is_abstract, '... Bar is not an abstract c
 }
 
 package Baz {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Bar';
 
@@ -69,9 +63,7 @@ like(
 );
 
 package Gorch {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Foo';
 }

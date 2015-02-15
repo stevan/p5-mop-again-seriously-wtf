@@ -6,9 +6,7 @@ use warnings;
 use Test::More;
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     has 'foo';
 }
@@ -16,9 +14,7 @@ package Foo {
 {
     eval q[
         package Foo2 {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
             with 'Foo';
             has 'foo';
         }
@@ -28,9 +24,7 @@ package Foo {
 }
 
 package Bar {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     has 'foo';
 }
@@ -38,9 +32,7 @@ package Bar {
 {
     eval q[
         package FooBar {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
             with 'Foo', 'Bar';
         }
     ];
@@ -52,9 +44,7 @@ package Bar {
 {
     eval q[
         package FooBaz {
-            use v5.20;
-            use warnings;
-            use mop;
+            use Moxie;
 
             extends 'mop::object';
                with 'Foo';

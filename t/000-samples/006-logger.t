@@ -18,8 +18,7 @@ sub my_die  { push @FATALS   => join "" => @_ }
 
 package Logger {
     use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 
@@ -39,8 +38,7 @@ package Logger {
 
 package MyLogger {
     use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'Logger';
 

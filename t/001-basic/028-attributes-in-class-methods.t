@@ -8,9 +8,7 @@ use Test::More;
 # this comes up in, for instance, Plack::Middleware::wrap
 
 package Foo {
-    use v5.20;
-    use warnings;
-    use mop;
+    use Moxie;
 
     extends 'mop::object';
 

@@ -13,9 +13,7 @@ BEGIN {
 BEGIN {
 
     package Eq {
-        use v5.20;
-        use warnings;
-        use mop;
+        use Moxie;
 
         sub equal_to;
 
@@ -25,9 +23,7 @@ BEGIN {
     }
 
     package Comparable {
-        use v5.20;
-        use warnings;
-        use mop;
+        use Moxie;
 
         with 'Eq';
 
@@ -55,17 +51,13 @@ BEGIN {
     }
 
     package Printable {
-        use v5.20;
-        use warnings;
-        use mop;
+        use Moxie;
 
         sub to_string;
     }
 
     package US::Currency {
-        use v5.20;
-        use warnings;
-        use mop;
+        use Moxie;
 
         extends 'mop::object';
            with 'Comparable', 'Printable';
