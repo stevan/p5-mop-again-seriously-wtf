@@ -14,10 +14,14 @@ use mop::internal::util;
 sub new ($class, @args) {
     die "[mop::PANIC] cannot call 'new' with a blessed instance"
         if Scalar::Util::blessed $class;
-    my %args = scalar @args == 1 && ref $args[0] ? %{ $args[0] } : @args;
-    my $self = mop::class->new( name => $class )->construct_instance( \%args );
-    $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
+    my $args = $class->BUILDARGS( @args );
+    my $self = mop::class->new( name => $class )->construct_instance( $args );
+    $self->can('BUILD') && mop::internal::util::BUILDALL( $self, $args );
     $self;
+}
+
+sub BUILDARGS ($class, @args) {
+    return scalar @args == 1 && ref $args[0] ? $args[0] : { @args }
 }
 
 sub DOES ($self, $role) {
