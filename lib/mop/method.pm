@@ -11,10 +11,10 @@ our @ISA; BEGIN { @ISA  = ('mop::object') }
 
 sub new ($class, %args) {
     die "The parameter 'body' is required"
-        unless exists $args{'body'}
-            && ref    $args{'body'} eq 'CODE';
+        unless exists $args{body}
+            && ref    $args{body} eq 'CODE';
 
-    my $self = bless mop::internal::newMopMmV( $args{'body'} ) => $class;
+    my $self = bless mop::internal::newMopMmV( $args{body} ) => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self; 
 }

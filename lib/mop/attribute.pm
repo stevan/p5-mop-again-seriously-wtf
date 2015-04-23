@@ -12,13 +12,13 @@ our @ISA; BEGIN { @ISA  = ('mop::object') }
 sub new ($class, %args) {
 
     die "The parameter 'name' is required, and it must be a string"
-        unless exists  $args{'name'} 
-            && defined $args{'name'} 
-            && length  $args{'name'} > 0;
+        unless exists  $args{name} 
+            && defined $args{name} 
+            && length  $args{name} > 0;
 
     die "The parameter 'initializer' is required"
-        unless exists $args{'initializer'}
-            && ref    $args{'initializer'} eq 'CODE';
+        unless exists $args{initializer}
+            && ref    $args{initializer} eq 'CODE';
 
     # NOTE:
     # this is basically just a blessed HE (HashEntry)

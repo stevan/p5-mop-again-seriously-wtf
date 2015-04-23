@@ -19,11 +19,11 @@ our @ISA; BEGIN { @ISA = ('mop::object') }
 
 sub new ($class, %args) {
     die "The parameter 'name' is required, and it must be a string"
-        unless exists  $args{'name'} 
-            && defined $args{'name'} 
-            && length  $args{'name'} > 0;
+        unless exists  $args{name} 
+            && defined $args{name} 
+            && length  $args{name} > 0;
 
-    my $self = bless mop::internal::newMopMpV( $args{'name'} ) => $class;
+    my $self = bless mop::internal::newMopMpV( $args{name} ) => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self;    
 }
@@ -38,10 +38,10 @@ sub is_abstract ($self) {
     my $default = scalar $self->required_methods ? 1 : 0;
     # if there is no $IS_ABSTRACT variable, return the 
     # calculated default ...
-    return $default unless exists $self->$*->{'IS_ABSTRACT'};
+    return $default unless exists $self->$*->{IS_ABSTRACT};
     # if there is an $IS_ABSTRACT variable, only allow a 
     # true value to override the calculated default
-    return $self->$*->{'IS_ABSTRACT'}->*{'SCALAR'}->$* ? 1 : $default;
+    return $self->$*->{IS_ABSTRACT}->*{SCALAR}->$* ? 1 : $default;
     # this approach should allow someone to create 
     # an abstract class even if they do not have any
     # required methods, but also keep the strict 
@@ -55,13 +55,13 @@ sub add_finalizer ($self, $finalizer) {
     die "[mop::PANIC] Cannot add finalizer to (" . $self->name . ") because it has been closed"
         if $self->is_closed;
 
-    unless ( $self->$*->{'FINALIZERS'} ) {
+    unless ( $self->$*->{FINALIZERS} ) {
         no strict 'refs';
         no warnings 'once';
         *{ $self->name . '::FINALIZERS'} = [ $finalizer ];
     }
     else {
-        push $self->$*->{'FINALIZERS'}->*{'ARRAY'}->@* => $finalizer;
+        push $self->$*->{FINALIZERS}->*{ARRAY}->@* => $finalizer;
     }
 }
 
@@ -80,10 +80,10 @@ sub does_role ($self, $role_to_test) {
 # attributes 
 
 sub attributes ($self) {
-    my $HAS = $self->$*->{'HAS'};
+    my $HAS = $self->$*->{HAS};
     return () unless $HAS;
 
-    my $attrs = $HAS->*{'HASH'};
+    my $attrs = $HAS->*{HASH};
     return () unless keys %$attrs;
 
     my @attrs;
@@ -97,10 +97,10 @@ sub attributes ($self) {
 }
 
 sub has_attribute ($self, $name) {
-    my $HAS = $self->$*->{'HAS'};
+    my $HAS = $self->$*->{HAS};
     return 0 unless $HAS;
 
-    my $attrs = $HAS->*{'HASH'};
+    my $attrs = $HAS->*{HASH};
     return 0 unless exists $attrs->{ $name };
     
     my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
@@ -110,10 +110,10 @@ sub has_attribute ($self, $name) {
 }
 
 sub has_attribute_alias ($self, $name) {
-    my $HAS = $self->$*->{'HAS'};
+    my $HAS = $self->$*->{HAS};
     return 0 unless $HAS;
 
-    my $attrs = $HAS->*{'HASH'};
+    my $attrs = $HAS->*{HASH};
     return 0 unless exists $attrs->{ $name };
     
     my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
@@ -122,10 +122,10 @@ sub has_attribute_alias ($self, $name) {
 }
 
 sub get_attribute ($self, $name) {
-    my $HAS = $self->$*->{'HAS'};
+    my $HAS = $self->$*->{HAS};
     return unless $HAS;
 
-    my $attrs = $HAS->*{'HASH'};
+    my $attrs = $HAS->*{HASH};
     return unless exists $attrs->{ $name };
     
     my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
@@ -135,10 +135,10 @@ sub get_attribute ($self, $name) {
 }
 
 sub delete_attribute ($self, $name) {
-    my $HAS = $self->$*->{'HAS'};
+    my $HAS = $self->$*->{HAS};
     return unless $HAS;
 
-    my $attrs = $HAS->*{'HASH'};
+    my $attrs = $HAS->*{HASH};
     return unless exists $attrs->{ $name };
     
     my $attr = mop::attribute->new( name => $name, initializer => $attrs->{ $name } );
@@ -157,13 +157,13 @@ sub add_attribute ($self, $name, $initializer) {
     # make sure to set this up correctly ...
     Sub::Util::set_subname(($self->name . '::__ANON__'), $initializer);
 
-    unless ( $self->$*->{'HAS'} ) {
+    unless ( $self->$*->{HAS} ) {
         no strict 'refs';
         no warnings 'once';
         %{ $self->name . '::HAS'} = ( $name => $initializer );
     }
     else {
-        my $HAS = $self->$*->{'HAS'}->*{'HASH'};   
+        my $HAS = $self->$*->{HAS}->*{HASH};   
         $HAS->{ $name } = $initializer;
     }
 }
@@ -175,13 +175,13 @@ sub alias_attribute ($self, $name, $initializer) {
     $initializer = $initializer->initializer
         if Scalar::Util::blessed($initializer);
 
-    unless ( $self->$*->{'HAS'} ) {
+    unless ( $self->$*->{HAS} ) {
         no strict 'refs';
         no warnings 'once';
         %{ $self->name . '::HAS'} = ( $name => $initializer );
     }
     else {
-        my $HAS = $self->$*->{'HAS'}->*{'HASH'};   
+        my $HAS = $self->$*->{HAS}->*{HASH};   
         $HAS->{ $name } = $initializer;
     }
 }
@@ -197,10 +197,10 @@ sub required_methods ($self) {
                 # check the CODE slot for it, if 
                 # we do not have CODE slot, then
                 # we can move on ...
-                next if not defined $glob->*{'CODE'};
+                next if not defined $glob->*{CODE};
                 # if our CODE slot is defined, lets 
                 # check it in more detail ...
-                my $op = B::svref_2object( $glob->*{'CODE'} );
+                my $op = B::svref_2object( $glob->*{CODE} );
                 # if it is not a CV or the ROOT of it is
                 # not a NULL op, then we move on ...
                 next if not( $op->isa('B::CV') && $op->ROOT->isa('B::NULL') );
@@ -224,10 +224,10 @@ sub requires_method ($self, $name) {
         # check the CODE slot for it, if 
         # we do not have CODE slot, then
         # we can move on ...
-        return 0 if not defined $glob->*{'CODE'};
+        return 0 if not defined $glob->*{CODE};
         # if our CODE slot is defined, lets 
         # check it in more detail ...
-        my $op = B::svref_2object( $glob->*{'CODE'} );
+        my $op = B::svref_2object( $glob->*{CODE} );
         # if it is not a CV or the ROOT of it is
         # not a NULL op, then we move on ...
         return 1 if $op->isa('B::CV') && $op->ROOT->isa('B::NULL');
@@ -262,14 +262,14 @@ sub add_required_method ($self, $name) {
             # if we have a glob, but just not 
             # the CODE slot for it, then we can 
             # install our required method.
-            if ( not defined $glob->*{'CODE'} ) {
+            if ( not defined $glob->*{CODE} ) {
                 my $pkg_name = $self->name;
                 eval "package $pkg_name { sub ${name}; }; 1;" or do { warn $@ };
                 return;
             } else {
                 # if our CODE slot is defined, lets 
                 # check it in more detail ...
-                my $op = B::svref_2object( $glob->*{'CODE'} );
+                my $op = B::svref_2object( $glob->*{CODE} );
                 # if it is a CV and the ROOT of it is a NULL op
                 # then we know there already is a required method
                 # and we can just return 
@@ -312,10 +312,10 @@ sub delete_required_method ($self, $name) {
         # the CODE slot for it, then we can 
         # just return because we don't have 
         # a required method here ...
-        return if not defined $glob->*{'CODE'};
+        return if not defined $glob->*{CODE};
         # if our CODE slot is defined, lets 
         # check it in more detail ...
-        my $op = B::svref_2object( $glob->*{'CODE'} );
+        my $op = B::svref_2object( $glob->*{CODE} );
         # if it is a CV and the ROOT of it is a NULL op
         # then we know there already is a required method
         # and we can just return 
@@ -343,9 +343,9 @@ sub methods ($self) {
         if ( exists $self->$*->{ $candidate } ) {
             my $glob = \($self->$*->{ $candidate });
             next unless ref $glob eq 'GLOB';
-            if ( my $code = $glob->$*->*{'CODE'} ) {
+            if ( my $code = $glob->$*->*{CODE} ) {
                 
-                my $op = B::svref_2object( $glob->*{'CODE'} );
+                my $op = B::svref_2object( $glob->*{CODE} );
                 next if $op->isa('B::CV') 
                      && $op->ROOT->isa('B::NULL') 
                      && !$op->XSUB;
@@ -364,9 +364,9 @@ sub has_method ($self, $name) {
     return 0 unless exists $self->$*->{ $name };
     my $glob = \($self->$*->{ $name });
     return 0 unless ref $glob eq 'GLOB';
-    if ( my $code = $glob->$*->*{'CODE'} ) {
+    if ( my $code = $glob->$*->*{CODE} ) {
 
-        my $op = B::svref_2object( $glob->*{'CODE'} );
+        my $op = B::svref_2object( $glob->*{CODE} );
         return 0 if $op->isa('B::CV') 
                  && $op->ROOT->isa('B::NULL')
                  && !$op->XSUB;
@@ -382,8 +382,8 @@ sub has_method_alias ($self, $name) {
     return 0 unless exists $self->$*->{ $name };
     my $glob = \($self->$*->{ $name });
     return 0 unless ref $glob eq 'GLOB';
-    if ( my $code = $glob->$*->*{'CODE'} ) {
-        my $op = B::svref_2object( $glob->*{'CODE'} );
+    if ( my $code = $glob->$*->*{CODE} ) {
+        my $op = B::svref_2object( $glob->*{CODE} );
         return 0 if $op->isa('B::CV') 
                  && $op->ROOT->isa('B::NULL')
                  && !$op->XSUB;
@@ -398,8 +398,8 @@ sub get_method ($self, $name) {
     return unless exists $self->$*->{ $name };
     my $glob = \($self->$*->{ $name });
     return unless ref $glob eq 'GLOB';
-    if ( my $code = $glob->$*->*{'CODE'} ) {    
-        my $op = B::svref_2object( $glob->*{'CODE'} );
+    if ( my $code = $glob->$*->*{CODE} ) {    
+        my $op = B::svref_2object( $glob->*{CODE} );
         return if $op->isa('B::CV') 
                && $op->ROOT->isa('B::NULL')
                && !$op->XSUB;
@@ -420,8 +420,8 @@ sub delete_method ($self, $name) {
     my $glob = \($self->$*->{ $name });
     return unless ref $glob eq 'GLOB';
 
-    if ( my $code = $glob->$*->*{'CODE'} ) {
-        my $op = B::svref_2object( $glob->*{'CODE'} );
+    if ( my $code = $glob->$*->*{CODE} ) {
+        my $op = B::svref_2object( $glob->*{CODE} );
         return if $op->isa('B::CV') 
                && $op->ROOT->isa('B::NULL')
                && !$op->XSUB;

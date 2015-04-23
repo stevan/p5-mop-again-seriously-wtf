@@ -20,8 +20,8 @@ sub construct_instance ($self, $candidate) {
         if $self->is_abstract;
 
     my %instance;
-    if ( my $HAS = $self->stash->{'HAS'} ) {
-        my %proto =  $HAS->*{'HASH'}->%*;
+    if ( my $HAS = $self->stash->{HAS} ) {
+        my %proto =  $HAS->*{HASH}->%*;
         foreach my $k ( keys %proto ) {
             $instance{ $k } = exists $candidate->{ $k } 
                 ? $candidate->{ $k }
