@@ -9,9 +9,11 @@ use Scalar::Util ();
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub new ($class, $proto) {
+sub new ($class, $proto = {}) {
     die "[mop::PANIC] the prototype for a new mop::instance must not be a blessed object"
         if Scalar::Util::blessed( $proto );
+    die "[mop::PANIC] the prototype for a new mop::instance must be a HASH ref"
+        if ref $proto ne 'HASH';
     bless \$proto => $class;
 }
 
