@@ -19,19 +19,17 @@ sub construct_instance ($self, $candidate) {
     die "[mop::PANIC] Cannot construct instance, the class (" . $self->name . ") is abstract"
         if $self->is_abstract;
 
-    my $instance = mop::instance->new({});
+    my %instance;
     if ( my $HAS = $self->stash->{HAS} ) {
         my %proto =  $HAS->*{HASH}->%*;
         foreach my $k ( keys %proto ) {
-            $instance->set_slot( 
-                $k => exists $candidate->{ $k } 
-                    ? $candidate->{ $k }
-                    : $proto{ $k }->()
-            );
+            $instance{$k} = exists $candidate->{ $k } 
+                ? $candidate->{ $k }
+                : $proto{ $k }->();
         }
     }
 
-    return $instance->bless( $self->name );
+    return mop::instance->new(\%instance)->bless( $self->name );
 }
 
 # finalizer
