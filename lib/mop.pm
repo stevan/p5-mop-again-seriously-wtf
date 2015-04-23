@@ -15,6 +15,7 @@ BEGIN {
     XSLoader::load( __PACKAGE__, $VERSION ); 
 }
 
+use mop::instance;
 use mop::object;
 use mop::attribute;
 use mop::method;
