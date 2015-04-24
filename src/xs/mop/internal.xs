@@ -20,6 +20,55 @@ newMopMaV(name, init)
         SV* name; 
         SV* init;
 
+SV*
+newMopOV(rv)
+        SV* rv;
+    PPCODE:
+        (void)newMopOV(rv);
+        XSRETURN(1);
+
+MODULE = mop  PACKAGE = mop::internal::opaque
+
+SV*  
+get_slots(rv)
+        SV* rv;
+    PPCODE:
+        EXTEND(SP, 1);
+        PUSHs(newRV_inc((SV*) MopOV_get_slots(rv)));
+
+
+SV*  
+get_at_slot(rv, name)
+        SV* rv;
+        SV* name;
+    PPCODE:
+        EXTEND(SP, 1);
+        PUSHs(MopOV_get_at_slot(rv, name));
+
+void 
+set_at_slot(rv, name, value)
+        SV* rv;
+        SV* name;
+        SV* value;
+    CODE:
+        MopOV_set_at_slot(rv, name, value);
+
+bool 
+has_at_slot(rv, name)
+        SV* rv;
+        SV* name;
+    CODE:
+        RETVAL = MopOV_has_at_slot(rv, name);
+    OUTPUT:
+        RETVAL
+
+void
+clear_at_slot(rv, name);
+        SV* rv;
+        SV* name;
+    CODE:
+        MopOV_clear_at_slot(rv, name);
+
 MODULE = mop  PACKAGE = mop::internal::util
  
 AV* 
