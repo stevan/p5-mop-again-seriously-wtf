@@ -47,7 +47,7 @@ SV*
 is_closed(self)
         SV* self;
     CODE:
-        RETVAL = MopOV_get_at_slot(SvRV(self), "is_closed", 9);
+        RETVAL = boolSV(SvTRUE(MopOV_get_at_slot(SvRV(self), "is_closed", 9)));
     OUTPUT: 
         RETVAL
 
