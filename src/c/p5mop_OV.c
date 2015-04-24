@@ -71,26 +71,26 @@ HV* THX_MopOV_get_slots(pTHX_ SV* rv) {
     return opaque->slots;
 }
 
-SV* THX_MopOV_get_at_slot(pTHX_ SV* rv, SV* slot_name) {
+SV* THX_MopOV_get_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
     MopOV* opaque  = SVrv_to_MopOV(rv);
-    HE* slot_entry = hv_fetch_ent(opaque->slots, slot_name, 0, 0);
-    return slot_entry == NULL ? NULL : HeVAL(slot_entry);
+    SV** slot_value_ptr = hv_fetch(opaque->slots, slot_name, slot_name_len, 0);
+    return slot_value_ptr == NULL ? &PL_sv_undef : *slot_value_ptr;
 }
 
-void THX_MopOV_set_at_slot(pTHX_ SV* rv, SV* slot_name, SV* slot_value) {
+void THX_MopOV_set_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len, SV* slot_value) {
     MopOV* opaque = SVrv_to_MopOV(rv);
     SvREFCNT_inc(slot_value);
-    (void)hv_store_ent(opaque->slots, slot_name, slot_value, 0);
+    (void)hv_store(opaque->slots, slot_name, slot_name_len, slot_value, 0);
 }
 
-bool THX_MopOV_has_at_slot(pTHX_ SV* rv, SV* slot_name) {
+bool THX_MopOV_has_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
     MopOV* opaque = SVrv_to_MopOV(rv);
-    return hv_exists_ent(opaque->slots, slot_name, 0);
+    return hv_exists(opaque->slots, slot_name, slot_name_len);
 }
 
-void THX_MopOV_clear_at_slot(pTHX_ SV* rv, SV* slot_name) {
+void THX_MopOV_clear_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
     MopOV* opaque = SVrv_to_MopOV(rv);
-    (void)hv_delete_ent(opaque->slots, slot_name, G_DISCARD, 0);    
+    (void)hv_delete(opaque->slots, slot_name, slot_name_len, G_DISCARD);    
 }
 
 /* *****************************************************
@@ -99,10 +99,6 @@ void THX_MopOV_clear_at_slot(pTHX_ SV* rv, SV* slot_name) {
 
 bool isSVrv_a_MopOV(SV* rv) {
     assert(rv != NULL);
-
-    if (SvTYPE(rv) != SVt_RV && SvTYPE(SvRV(rv)) != SVt_PVMG) {
-        croak("rv is not a magic reference");
-    }
 
     if (SvMAGICAL(SvRV(rv))) {
         MAGIC* mg;
@@ -113,15 +109,11 @@ bool isSVrv_a_MopOV(SV* rv) {
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 MopOV* SVrv_to_MopOV(SV* rv) {
     assert(rv != NULL);
-
-    if (SvTYPE(rv) != SVt_RV && SvTYPE(SvRV(rv)) != SVt_PVMG) {
-        croak("rv is not a magic reference");
-    }
 
     if (SvMAGICAL(SvRV(rv))) {
         MAGIC* mg;

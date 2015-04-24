@@ -42,8 +42,7 @@ sub DESTROY ($self) {
 }
 
 BEGIN {
-    our $IS_CLOSED;
-    our @FINALIZERS = ( sub { $IS_CLOSED = 1 } );
+    our @FINALIZERS = ( sub { mop::internal::opaque::set_at_slot(\%mop::object::, 'is_closed', 1) } );
 }
 
 1;

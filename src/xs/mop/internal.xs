@@ -38,36 +38,52 @@ get_slots(rv)
 
 
 SV*  
-get_at_slot(rv, name)
+get_at_slot(rv, name_sv)
         SV* rv;
-        SV* name;
+        SV* name_sv;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
     PPCODE:
+        name = SvPV(name_sv, name_len);    
         EXTEND(SP, 1);
-        PUSHs(MopOV_get_at_slot(rv, name));
+        PUSHs(SvREFCNT_inc(MopOV_get_at_slot(rv, name, name_len)));
 
 void 
-set_at_slot(rv, name, value)
+set_at_slot(rv, name_sv, value)
         SV* rv;
-        SV* name;
+        SV* name_sv;
         SV* value;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
     CODE:
-        MopOV_set_at_slot(rv, name, value);
+        name = SvPV(name_sv, name_len);   
+        MopOV_set_at_slot(rv, name, name_len, value);
 
 bool 
-has_at_slot(rv, name)
+has_at_slot(rv, name_sv)
         SV* rv;
-        SV* name;
+        SV* name_sv;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
     CODE:
-        RETVAL = MopOV_has_at_slot(rv, name);
+        name = SvPV(name_sv, name_len);           
+        RETVAL = MopOV_has_at_slot(rv, name, name_len);
     OUTPUT:
         RETVAL
 
 void
-clear_at_slot(rv, name);
+clear_at_slot(rv, name_sv);
         SV* rv;
-        SV* name;
+        SV* name_sv;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
     CODE:
-        MopOV_clear_at_slot(rv, name);
+        name = SvPV(name_sv, name_len);           
+        MopOV_clear_at_slot(rv, name, name_len);
 
 MODULE = mop  PACKAGE = mop::internal::util
  

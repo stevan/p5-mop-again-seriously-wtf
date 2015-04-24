@@ -92,7 +92,13 @@ package FooBarClass {
             extends 'mop::object';
                with 'Foo', 'Bar';
 
-            BEGIN { our $IS_ABSTRACT = 1 };
+            BEGIN {
+                mop::internal::opaque::set_at_slot(
+                    \%Gorch::,
+                    'is_abstract', 
+                    1
+                );                
+            };
         }
     ];
     ok(!$@, '... no exception because the class is declared abstract');
