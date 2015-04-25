@@ -37,8 +37,8 @@ SV* THX_newMopOV(pTHX_ SV* rv) {
     MopOV* opaque;
 
     Newx(opaque, 1, MopOV);
-    opaque->id        = new_uuid();
-    opaque->slots     = newHV();
+    opaque->id    = new_uuid();
+    opaque->slots = newHV();
 
     sv_magicext(SvRV(rv), NULL, PERL_MAGIC_ext, &MopOV_vtbl, (char*) opaque, 0);
 
@@ -55,8 +55,8 @@ void THX_freeMopOV(pTHX_ MopOV* opaque) {
     hv_undef(opaque->slots);
 
     Safefree(opaque->id);
-    opaque->id        = NULL;
-    opaque->slots     = NULL;
+    opaque->id    = NULL;
+    opaque->slots = NULL;
 
     Safefree(opaque);
     opaque = NULL;
@@ -67,12 +67,12 @@ void THX_freeMopOV(pTHX_ MopOV* opaque) {
  * ***************************************************** */
 
 HV* THX_MopOV_get_slots(pTHX_ SV* rv) {
-    MopOV* opaque  = SVrv_to_MopOV(rv);
+    MopOV* opaque = SVrv_to_MopOV(rv);
     return opaque->slots;
 }
 
 SV* THX_MopOV_get_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
-    MopOV* opaque  = SVrv_to_MopOV(rv);
+    MopOV* opaque = SVrv_to_MopOV(rv);
     SV** slot_value_ptr = hv_fetch(opaque->slots, slot_name, slot_name_len, 0);
     return slot_value_ptr == NULL ? &PL_sv_undef : *slot_value_ptr;
 }
