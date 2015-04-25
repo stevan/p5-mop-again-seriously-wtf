@@ -21,7 +21,7 @@ sub repr ($self) {
     Scalar::Util::reftype( $self->$* )
 }
 
-sub bless ($self, $into_class) {
+sub BLESS ($self, $into_class) {
     bless $self->$* => $into_class;
 }
 

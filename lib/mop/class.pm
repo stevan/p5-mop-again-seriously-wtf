@@ -29,7 +29,7 @@ sub construct_instance ($self, $candidate) {
         }
     }
 
-    return mop::instance->new(\%instance)->bless( $self->name );
+    return mop::instance->new(\%instance)->BLESS( $self->name );
 }
 
 # finalizer
