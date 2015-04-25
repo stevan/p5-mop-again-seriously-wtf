@@ -10,7 +10,13 @@ package Foo {
 
     extends 'mop::object';
 
-    BEGIN { our $IS_ABSTRACT = 1 }
+    BEGIN { 
+        mop::internal::opaque::set_at_slot( 
+            \%Foo::, 
+            'is_abstract',
+            1 
+        );
+    }
 }
 
 ok(mop::class->new( name => 'Foo' )->is_abstract, '... Foo is an abstract class');

@@ -35,7 +35,6 @@ sub construct_instance ($self, $candidate) {
 # finalizer
 
 BEGIN {
-    our $IS_CLOSED;
     our @FINALIZERS = ( 
         sub {
             # NOTE:
@@ -53,7 +52,7 @@ BEGIN {
                 \@DOES, 
                 to => 'class' 
             );
-            $IS_CLOSED = 1;
+            mop::internal::opaque::set_at_slot(\%mop::class::, 'is_closed', 1);
         }
     )
 }

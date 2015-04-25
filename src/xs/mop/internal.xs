@@ -20,6 +20,71 @@ newMopMaV(name, init)
         SV* name; 
         SV* init;
 
+SV*
+newMopOV(rv)
+        SV* rv;
+    PPCODE:
+        (void)newMopOV(rv);
+        XSRETURN(1);
+
+MODULE = mop  PACKAGE = mop::internal::opaque
+
+SV*  
+get_slots(rv)
+        SV* rv;
+    PPCODE:
+        EXTEND(SP, 1);
+        PUSHs(newRV_inc((SV*) MopOV_get_slots(rv)));
+
+
+SV*  
+get_at_slot(rv, name_sv)
+        SV* rv;
+        SV* name_sv;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
+    PPCODE:
+        name = SvPV(name_sv, name_len);    
+        EXTEND(SP, 1);
+        PUSHs(SvREFCNT_inc(MopOV_get_at_slot(rv, name, name_len)));
+
+void 
+set_at_slot(rv, name_sv, value)
+        SV* rv;
+        SV* name_sv;
+        SV* value;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
+    CODE:
+        name = SvPV(name_sv, name_len);   
+        MopOV_set_at_slot(rv, name, name_len, value);
+
+bool 
+has_at_slot(rv, name_sv)
+        SV* rv;
+        SV* name_sv;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
+    CODE:
+        name = SvPV(name_sv, name_len);           
+        RETVAL = MopOV_has_at_slot(rv, name, name_len);
+    OUTPUT:
+        RETVAL
+
+void
+clear_at_slot(rv, name_sv);
+        SV* rv;
+        SV* name_sv;
+    PREINIT:
+        STRLEN name_len;
+        char*  name;
+    CODE:
+        name = SvPV(name_sv, name_len);           
+        MopOV_clear_at_slot(rv, name, name_len);
+
 MODULE = mop  PACKAGE = mop::internal::util
  
 AV* 

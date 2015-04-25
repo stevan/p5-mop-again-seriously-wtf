@@ -88,7 +88,7 @@ can_ok($Role, 'name');
 is($Role->name, 'mop::role', '... got the expected value from ->name');
 
 {
-    $mop::role::IS_CLOSED = 0;
+    mop::internal::opaque::set_at_slot(\%mop::role::, 'is_closed', 0);
 
     is(
         exception { $Role->add_method('foo' => sub { 'FOO' }) },
@@ -107,7 +107,7 @@ is($Role->name, 'mop::role', '... got the expected value from ->name');
 
     ok(!$Role->can('foo'), '... removed the ->foo method');
 
-    $mop::role::IS_CLOSED = 1;
+    mop::internal::opaque::set_at_slot(\%mop::role::, 'is_closed', 1);
 }
 
 like(

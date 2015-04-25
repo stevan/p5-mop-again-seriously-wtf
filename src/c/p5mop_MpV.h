@@ -31,8 +31,7 @@ void  THX_MopMpV_set_glob_AV_at(pTHX_ SV* self, GV* glob, AV* value);
 // Error handling
 
 #define MopMpV_Error_if_closed(self, name) STMT_START {                       \
-    GV* c = MopMpV_get_glob_at(self, "IS_CLOSED", 9);                         \
-    if (c != NULL && GvSV(c) != NULL && SvTRUE(GvSV(c))) {                    \
+    if (SvOK(MopOV_get_at_slot(SvRV(self), "is_closed", 9))) {                \
         die("[mop::PANIC] Cannot call %s on (%s) because it has been closed", \
             name, MopMpV_get_stash_name(self));                               \
     }} STMT_END

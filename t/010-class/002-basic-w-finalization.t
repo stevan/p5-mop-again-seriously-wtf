@@ -22,8 +22,7 @@ package Foo 0.01 {
     sub foo { 'Foo::foo' }
 
     BEGIN { 
-        our $IS_CLOSED;
-        our @FINALIZERS = sub { $IS_CLOSED = 1 };
+        our @FINALIZERS = sub { mop::internal::opaque::set_at_slot( \%Foo::, 'is_closed', 1 ) };
     }
 } 
 
@@ -39,8 +38,7 @@ package Bar {
     use base 'Foo';
 
     BEGIN { 
-        our $IS_CLOSED;
-        our @FINALIZERS = sub { $IS_CLOSED = 1 };
+        our @FINALIZERS = sub { mop::internal::opaque::set_at_slot( \%Bar::, 'is_closed', 1 ) };
     }
 } 
 
@@ -53,8 +51,7 @@ package Baz {
     our @ISA = ('Bar');
 
     BEGIN { 
-        our $IS_CLOSED;
-        our @FINALIZERS = sub { $IS_CLOSED = 1 };
+        our @FINALIZERS = sub { mop::internal::opaque::set_at_slot( \%Baz::, 'is_closed', 1 ) };
     }
 }
 

@@ -19,7 +19,13 @@ package Gorch {
     extends 'mop::object';
        with 'Foo';
 
-    BEGIN { our $IS_ABSTRACT = 1 }
+    BEGIN {
+        mop::internal::opaque::set_at_slot(
+            \%Gorch::,
+            'is_abstract', 
+            1
+        );
+    }
 }
 
 package Bar {

@@ -22,7 +22,6 @@ sub new ($class, %args) {
         unless exists  $args{name} 
             && defined $args{name} 
             && length  $args{name} > 0;
-
     my $self = bless mop::internal::newMopMpV( $args{name} ) => $class;
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, \%args );
     $self;    
@@ -38,10 +37,10 @@ sub is_abstract ($self) {
     my $default = scalar $self->required_methods ? 1 : 0;
     # if there is no $IS_ABSTRACT variable, return the 
     # calculated default ...
-    return $default unless exists $self->$*->{IS_ABSTRACT};
+    return $default unless mop::internal::opaque::has_at_slot( $self->$*, 'is_abstract');
     # if there is an $IS_ABSTRACT variable, only allow a 
     # true value to override the calculated default
-    return $self->$*->{IS_ABSTRACT}->*{SCALAR}->$* ? 1 : $default;
+    return mop::internal::opaque::get_at_slot( $self->$*, 'is_abstract') ? 1 : $default
     # this approach should allow someone to create 
     # an abstract class even if they do not have any
     # required methods, but also keep the strict 
@@ -473,8 +472,7 @@ sub alias_method ($self, $name, $code) {
 # Finalization
 
 BEGIN {
-    our $IS_CLOSED;
-    our @FINALIZERS = ( sub { $IS_CLOSED = 1 } );
+    our @FINALIZERS = ( sub { mop::internal::opaque::set_at_slot(\%mop::role::, 'is_closed', 1) } );
 }
 
 1;

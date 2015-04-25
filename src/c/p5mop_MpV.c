@@ -1,5 +1,6 @@
 #include "p5mop.h"
 #include "p5mop_MpV.h"
+#include "p5mop_OV.h"
 
 /* 
     TODO:
@@ -20,7 +21,7 @@ SV* THX_newMopMpV(pTHX_ SV* name) {
         croak("name is not a regular scalar");
     } 
 
-    return newRV_noinc(newRV_inc((SV*) gv_stashsv(name, GV_ADD)));
+    return newRV_noinc(newMopOV(newRV_inc((SV*) gv_stashsv(name, GV_ADD))));
 }
 
 /* *****************************************************
