@@ -16,7 +16,7 @@
 SV* THX_newMopMmV(pTHX_ CV* code) {
     assert(code != NULL);
 
-    return newRV_noinc(newRV_inc((SV*) code));
+    return newRV_noinc(newMopOV(newRV_inc((SV*) code)));
 }
 
 /* *****************************************************

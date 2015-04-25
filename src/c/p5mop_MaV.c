@@ -28,7 +28,7 @@ SV* newMopMaV(pTHX_ SV* name, SV* init) {
     AV* attr = newAV();
     av_store(attr, 0, SvREFCNT_inc(name));
     av_store(attr, 1, SvREFCNT_inc(init));
-    return newRV_noinc((SV*) attr);
+    return newMopOV(newRV_noinc((SV*) attr));
 }
 
 /* *****************************************************
