@@ -52,7 +52,7 @@ BEGIN {
                 \@DOES, 
                 to => 'class' 
             );
-            mop::internal::opaque::set_at_slot(\%mop::class::, 'is_closed', 1);
+            mop::internal::util::CLOSE_CLASS(__PACKAGE__);
         }
     )
 }

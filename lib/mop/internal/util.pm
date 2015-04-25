@@ -59,6 +59,13 @@ sub INSTALL_FINALIZATION_RUNNER ($pkg) {
     );
 }
 
+## Closing classes
+
+sub CLOSE_CLASS ($class) {
+    no strict 'refs';
+    mop::internal::opaque::set_at_slot( \%{$class.'::'}, is_closed => 1 );
+}
+
 ## Dispatching and class MRO walking
 
 # NOTE:

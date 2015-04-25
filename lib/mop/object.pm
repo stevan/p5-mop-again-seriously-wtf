@@ -42,7 +42,7 @@ sub DESTROY ($self) {
 }
 
 BEGIN {
-    our @FINALIZERS = ( sub { mop::internal::opaque::set_at_slot(\%mop::object::, 'is_closed', 1) } );
+    our @FINALIZERS = ( sub { mop::internal::util::CLOSE_CLASS(__PACKAGE__) } );
 }
 
 1;

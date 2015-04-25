@@ -31,7 +31,7 @@ sub new ($class, %args) {
 }
 
 BEGIN {
-    our @FINALIZERS = ( sub { mop::internal::opaque::set_at_slot(\%mop::attribute::, 'is_closed', 1) } );
+    our @FINALIZERS = ( sub { mop::internal::util::CLOSE_CLASS(__PACKAGE__) } );
 }
 
 1;
