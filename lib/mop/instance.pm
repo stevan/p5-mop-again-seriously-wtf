@@ -25,8 +25,6 @@ sub bless ($self, $into_class) {
     bless $self->$* => $into_class;
 }
 
-sub get_slot ($self, $name)         { $self->$*->{$name}          }
-sub set_slot ($self, $name, $value) { $self->$*->{$name} = $value }
 
 1;
 
