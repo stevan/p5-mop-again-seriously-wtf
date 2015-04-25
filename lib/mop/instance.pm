@@ -25,6 +25,9 @@ sub BLESS ($self, $into_class) {
     bless $self->$* => $into_class;
 }
 
+BEGIN {
+    our @FINALIZERS = ( sub { mop::internal::util::CLOSE_CLASS(__PACKAGE__) } );
+}
 
 1;
 
