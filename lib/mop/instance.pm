@@ -4,25 +4,33 @@ use v5.20;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-use Scalar::Util ();
-
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub new ($class, $proto = {}) {
-    die "[mop::PANIC] the prototype for a new mop::instance must not be a blessed object"
-        if Scalar::Util::blessed( $proto );
-    die "[mop::PANIC] the prototype for a new mop::instance must be a HASH ref"
-        if ref $proto ne 'HASH';
-    bless \$proto => $class;
+our %GENERATORS = (
+    HASH   => sub {  +{ @_ } },
+    ARRAY  => sub {   [ @_ ] },
+    SCALAR => sub { \(my $x) },    
+); 
+
+sub new ($class, $repr_or_generator) {
+    my $generator = ref $repr_or_generator 
+        ? $repr_or_generator 
+        : $GENERATORS{ $repr_or_generator };
+
+    die "[mop::PANIC] the generator for a new instance must be CODE reference"
+        unless ref $generator eq 'CODE';    
+        
+    bless \$generator => $class;
 }
 
-sub repr ($self) {
-    Scalar::Util::reftype( $self->$* )
-}
+sub generator { $_[0]->$* }
 
-sub BLESS ($self, $into_class) {
-    bless $self->$* => $into_class;
+sub CREATE ($self, @args) { $self->$*->( @args ) }
+
+sub BLESS ($self, $into_class, @args) {
+    my $instance = $self->CREATE( @args );
+    bless $instance => $into_class;
 }
 
 BEGIN {
