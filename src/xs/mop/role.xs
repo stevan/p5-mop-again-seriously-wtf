@@ -57,7 +57,7 @@ set_is_closed(self, value)
         SV* value;
     PPCODE:
         MopMpV_Error_if_closed(self, "set_is_closed");
-        MopOV_set_at_slot(SvRV(self), "is_closed", 9, value);
+        MopOV_set_at_slot(SvRV(self), "is_closed", 9, boolSV(SvTRUE(value)));
 
 void 
 set_is_abstract(self, value)
@@ -65,7 +65,7 @@ set_is_abstract(self, value)
         SV* value;
     PPCODE:
         MopMpV_Error_if_closed(self, "set_is_abstract");
-        MopOV_set_at_slot(SvRV(self), "is_abstract", 11, value);
+        MopOV_set_at_slot(SvRV(self), "is_abstract", 11, boolSV(SvTRUE(value)));
 
 # finalization 
 
