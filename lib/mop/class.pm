@@ -29,7 +29,7 @@ sub construct_instance ($self, $candidate, $repr = 'HASH') {
         }
     }
 
-    return mop::instance->new( $repr )->BLESS( $self->name => %instance );
+    return mop::instance->new( repr => $repr )->BLESS( $self->name => %instance );
 }
 
 # finalizer

@@ -25,13 +25,19 @@ BEGIN {
     ); 
 }
 
-sub new ($class, $repr_or_generator) {
-    my $generator = ref $repr_or_generator 
-        ? $repr_or_generator 
-        : ($GENERATORS{ $repr_or_generator } 
-            // die "[mop::PANIC] Unsupported repr type '$repr_or_generator'");
+sub new ($class, %args) {
+    my $generator = exists $args{generator} 
+        # use the generator if we got it 
+        ? $args{generator}
+        # otherwise look for a repr arg
+        : exists $args{repr}
+            # and try and find that in the %GENERATORS hash, or error 
+            ? ($GENERATORS{ $args{repr} } || die "[mop::PANIC] Unsupported `repr` type: '".$args{repr}."'")
+            # otherwise error out ...
+            : die "[mop::PANIC] You must supply either a `generator` or a `repr` argument";
 
-    die "[mop::PANIC] the generator for a new instance must be CODE reference"
+    # and after all that, ... double check we got what we want 
+    die "[mop::PANIC] the generator for a new instance must be CODE reference, not $generator"
         unless ref $generator eq 'CODE';    
 
     my $self = bless \$generator => $class;
