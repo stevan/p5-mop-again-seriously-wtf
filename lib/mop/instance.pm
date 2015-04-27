@@ -34,7 +34,9 @@ sub new ($class, $repr_or_generator) {
     die "[mop::PANIC] the generator for a new instance must be CODE reference"
         unless ref $generator eq 'CODE';    
 
-    bless \$generator => $class;
+    my $self = bless \$generator => $class;
+    $self->can('BUILD') && mop::internal::util::BUILDALL( $self, {} );
+    $self; 
 }
 
 sub generator { $_[0]->$* }
