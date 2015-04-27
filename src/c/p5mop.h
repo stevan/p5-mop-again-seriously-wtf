@@ -8,7 +8,8 @@
 
 // basically the same as of evaluating C<@foo> in bool context
 
-#define av_to_bool(av)   (av != NULL && av_top_index(av) > -1) ? &PL_sv_yes : &PL_sv_no
+#define AV_to_bool(av) (av != NULL && av_top_index(av) > -1) ? &PL_sv_yes : &PL_sv_no
+#define SV_to_bool(sv) (boolSV(SvTRUE(sv)))
 
 // some common GV accessing shortcuts 
 

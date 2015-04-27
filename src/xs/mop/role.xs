@@ -47,7 +47,7 @@ SV*
 is_closed(self)
         SV* self;
     CODE:
-        RETVAL = boolSV(SvTRUE(MopOV_get_at_slot(SvRV(self), "is_closed", 9)));
+        RETVAL = SV_to_bool(MopOV_get_at_slot(SvRV(self), "is_closed", 9));
     OUTPUT: 
         RETVAL
 
@@ -57,7 +57,7 @@ set_is_closed(self, value)
         SV* value;
     PPCODE:
         MopMpV_Error_if_closed(self, "set_is_closed");
-        MopOV_set_at_slot(SvRV(self), "is_closed", 9, boolSV(SvTRUE(value)));
+        MopOV_set_at_slot(SvRV(self), "is_closed", 9, SV_to_bool(value));
 
 void 
 set_is_abstract(self, value)
@@ -65,7 +65,7 @@ set_is_abstract(self, value)
         SV* value;
     PPCODE:
         MopMpV_Error_if_closed(self, "set_is_abstract");
-        MopOV_set_at_slot(SvRV(self), "is_abstract", 11, boolSV(SvTRUE(value)));
+        MopOV_set_at_slot(SvRV(self), "is_abstract", 11, SV_to_bool(value));
 
 # finalization 
 
@@ -89,7 +89,7 @@ has_finalizers(self)
         finalizers = MopMpV_get_glob_at(self, "FINALIZERS", 10);
         if (finalizers != NULL) {
             AV* f = GvAV(finalizers);
-            RETVAL = av_to_bool(f);
+            RETVAL = AV_to_bool(f);
         }
         else {
             RETVAL = &PL_sv_no;
