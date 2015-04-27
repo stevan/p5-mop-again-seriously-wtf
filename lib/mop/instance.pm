@@ -16,10 +16,8 @@ BEGIN {
         SCALAR => sub { my $x = $_[0]; \$x                        }, 
         GLOB   => sub { select select my $fh; %{ *$fh } = @_; $fh },  
         OPAQUE => sub { 
-            my %args      = @_;
-            my $repr      = delete $args{repr}   || 'SCALAR';
-            my $generator = $GENERATORS{ $repr } || die "[mop::PANIC] Unknown repr type '$repr'";
-            my $opaque    = mop::internal::newMopOV( $generator->() );
+            my %args   = @_;
+            my $opaque = mop::internal::newMopOV( \(my $x) );
             mop::internal::opaque::set_at_slot( $opaque, $_, $args{ $_ } ) 
                 foreach keys %args;
             return $opaque;
