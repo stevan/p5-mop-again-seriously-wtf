@@ -15,9 +15,21 @@ sub new ($class, @args) {
     die "[mop::PANIC] cannot call 'new' with a blessed instance"
         if Scalar::Util::blessed $class;
     my $args = $class->BUILDARGS( @args );
-    my $self = mop::class->new( name => $class )->construct_instance( $args );
+    my $self = $class->CREATE( $args );
     $self->can('BUILD') && mop::internal::util::BUILDALL( $self, $args );
     $self;
+}
+
+# ----------------
+# API:
+# ----------------
+# sub BUILD;
+# sub DEMOLISH;
+# ----------------
+
+sub CREATE {
+    my ($class, $args) = @_;
+    mop::class->new( name => $class )->construct_instance( $args, repr => 'HASH' );
 }
 
 sub BUILDARGS ($class, @args) {

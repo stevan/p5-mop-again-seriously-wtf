@@ -15,9 +15,11 @@ our @DOES; BEGIN { @DOES = ('mop::role')   }
 
 # instance construction 
 
-sub construct_instance ($self, $candidate, $repr = 'HASH') {
+sub construct_instance ($self, $candidate, %args) {
     die "[mop::PANIC] Cannot construct instance, the class (" . $self->name . ") is abstract"
         if $self->is_abstract;
+
+    $args{repr} ||= 'HASH';
 
     my %instance;
     if ( my $HAS = $self->stash->{HAS} ) {
@@ -29,7 +31,7 @@ sub construct_instance ($self, $candidate, $repr = 'HASH') {
         }
     }
 
-    return mop::instance->new( repr => $repr )->BLESS( $self->name => %instance );
+    return mop::instance->new( repr => $args{repr} )->BLESS( $self->name => %instance );
 }
 
 # finalizer
