@@ -7,12 +7,25 @@ use experimental 'signatures', 'postderef';
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-our %GENERATORS = (
-    HASH   => sub { +{ @_ }                                   },
-    ARRAY  => sub { +[ @_ ]                                   },
-    SCALAR => sub { my $x = $_[0]; \$x                        }, 
-    GLOB   => sub { select select my $fh; %{ *$fh } = @_; $fh },   
-); 
+our %GENERATORS;
+
+BEGIN {
+    %GENERATORS = (
+        HASH   => sub { +{ @_ }                                   },
+        ARRAY  => sub { +[ @_ ]                                   },
+        SCALAR => sub { my $x = $_[0]; \$x                        }, 
+        GLOB   => sub { select select my $fh; %{ *$fh } = @_; $fh },  
+        OPAQUE => sub { 
+            my %args      = @_;
+            my $repr      = delete $args{repr}   || 'SCALAR';
+            my $generator = $GENERATORS{ $repr } || die "[mop::PANIC] Unknown repr type '$repr'";
+            my $opaque    = mop::internal::newMopOV( $generator->() );
+            mop::internal::opaque::set_at_slot( $opaque, $_, $args{ $_ } ) 
+                foreach keys %args;
+            return $opaque;
+        } 
+    ); 
+}
 
 sub new ($class, $repr_or_generator) {
     my $generator = ref $repr_or_generator 
