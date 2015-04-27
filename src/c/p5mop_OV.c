@@ -30,7 +30,7 @@ SV* THX_newMopOV(pTHX_ SV* rv) {
         croak("rv is not a reference");
     }
 
-    if (isSVrv_a_MopOV(rv)) {
+    if (isSvRV_a_MopOV(rv)) {
         return rv;
     }
 
@@ -67,29 +67,29 @@ void THX_freeMopOV(pTHX_ MopOV* opaque) {
  * ***************************************************** */
 
 HV* THX_MopOV_get_slots(pTHX_ SV* rv) {
-    MopOV* opaque = SVrv_to_MopOV(rv);
+    MopOV* opaque = SvRV_to_MopOV(rv);
     return opaque->slots;
 }
 
 SV* THX_MopOV_get_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
-    MopOV* opaque = SVrv_to_MopOV(rv);
+    MopOV* opaque = SvRV_to_MopOV(rv);
     SV** slot_value_ptr = hv_fetch(opaque->slots, slot_name, slot_name_len, 0);
     return slot_value_ptr == NULL ? &PL_sv_undef : *slot_value_ptr;
 }
 
 void THX_MopOV_set_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len, SV* slot_value) {
-    MopOV* opaque = SVrv_to_MopOV(rv);
+    MopOV* opaque = SvRV_to_MopOV(rv);
     SvREFCNT_inc(slot_value);
     (void)hv_store(opaque->slots, slot_name, slot_name_len, slot_value, 0);
 }
 
 bool THX_MopOV_has_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
-    MopOV* opaque = SVrv_to_MopOV(rv);
+    MopOV* opaque = SvRV_to_MopOV(rv);
     return hv_exists(opaque->slots, slot_name, slot_name_len);
 }
 
 void THX_MopOV_clear_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
-    MopOV* opaque = SVrv_to_MopOV(rv);
+    MopOV* opaque = SvRV_to_MopOV(rv);
     (void)hv_delete(opaque->slots, slot_name, slot_name_len, G_DISCARD);    
 }
 
@@ -97,7 +97,7 @@ void THX_MopOV_clear_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len) {
  * Util functions ...
  * ***************************************************** */
 
-bool isSVrv_a_MopOV(SV* rv) {
+bool isSvRV_a_MopOV(SV* rv) {
     assert(rv != NULL);
 
     if (SvMAGICAL(SvRV(rv))) {
@@ -112,7 +112,7 @@ bool isSVrv_a_MopOV(SV* rv) {
     return FALSE;
 }
 
-MopOV* SVrv_to_MopOV(SV* rv) {
+MopOV* SvRV_to_MopOV(SV* rv) {
     assert(rv != NULL);
 
     if (SvMAGICAL(SvRV(rv))) {

@@ -41,7 +41,7 @@ void THX_MopOV_clear_at_slot(pTHX_ SV* rv, char* slot_name, I32 slot_name_len);
  * General Utilities
  * ***************************************************** */
 
-MopOV* SVrv_to_MopOV(SV* rv);
-bool   isSVrv_a_MopOV(SV* rv);
+MopOV* SvRV_to_MopOV(SV* rv);
+bool   isSvRV_a_MopOV(SV* rv);
 
 #endif /* MOP_OV_H */
