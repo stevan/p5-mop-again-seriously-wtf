@@ -45,8 +45,6 @@ sub new ($class, %args) {
     $self; 
 }
 
-sub generator { $_[0]->$* }
-
 sub CREATE ($self, @args) { $self->$*->( @args ) }
 
 sub BLESS ($self, $into_class, @args) {
