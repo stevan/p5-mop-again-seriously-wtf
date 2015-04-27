@@ -8,19 +8,21 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 our %GENERATORS = (
-    HASH   => sub {  +{ @_ } },
-    ARRAY  => sub {   [ @_ ] },
-    SCALAR => sub { \(my $x) },    
+    HASH   => sub { +{ @_ }                                   },
+    ARRAY  => sub { +[ @_ ]                                   },
+    SCALAR => sub { my $x = $_[0]; \$x                        }, 
+    GLOB   => sub { select select my $fh; %{ *$fh } = @_; $fh },   
 ); 
 
 sub new ($class, $repr_or_generator) {
     my $generator = ref $repr_or_generator 
         ? $repr_or_generator 
-        : $GENERATORS{ $repr_or_generator };
+        : ($GENERATORS{ $repr_or_generator } 
+            // die "[mop::PANIC] Unsupported repr type '$repr_or_generator'");
 
     die "[mop::PANIC] the generator for a new instance must be CODE reference"
         unless ref $generator eq 'CODE';    
-        
+
     bless \$generator => $class;
 }
 
