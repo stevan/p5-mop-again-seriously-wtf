@@ -15,6 +15,7 @@
 #define MopMpV_create_glob_at(self, name, len)   THX_MopMpV_create_glob_at(aTHX_ self, name, len)
 #define MopMpV_set_glob_SV_at(self, glob, value) THX_MopMpV_set_glob_SV_at(aTHX_ self, glob, value)
 #define MopMpV_set_glob_AV_at(self, glob, value) THX_MopMpV_set_glob_AV_at(aTHX_ self, glob, value)
+#define MopMpV_set_glob_HV_at(self, glob, value) THX_MopMpV_set_glob_HV_at(aTHX_ self, glob, value)
 
 // ...
 
@@ -27,6 +28,7 @@ GV*   THX_MopMpV_get_glob_at(pTHX_ SV* self, char* name, I32 len);
 GV*   THX_MopMpV_create_glob_at(pTHX_ SV* self, char* name, I32 len);
 void  THX_MopMpV_set_glob_SV_at(pTHX_ SV* self, GV* glob, SV* value);
 void  THX_MopMpV_set_glob_AV_at(pTHX_ SV* self, GV* glob, AV* value);
+void  THX_MopMpV_set_glob_HV_at(pTHX_ SV* self, GV* glob, HV* value);
 
 // Error handling
 
