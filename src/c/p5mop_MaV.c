@@ -14,7 +14,7 @@
  * Constructors
  * ***************************************************** */
 
-SV* newMopMaV(pTHX_ SV* name, SV* init) {
+SV* THX_newMopMaV(pTHX_ SV* name, SV* init) {
     assert(name != NULL && init != NULL);
 
     if (SvTYPE(name) >= SVt_PVAV) {
@@ -35,7 +35,7 @@ SV* newMopMaV(pTHX_ SV* name, SV* init) {
  * Accessors
  * ***************************************************** */
 
-char* MopMaV_get_name(pTHX_ SV* self) {       
+char* THX_MopMaV_get_name(pTHX_ SV* self) {       
     assert(self != NULL);
 
     if (SvTYPE(self) != SVt_RV && SvTYPE(SvRV(self)) != SVt_PVAV) {
@@ -47,7 +47,7 @@ char* MopMaV_get_name(pTHX_ SV* self) {
     return SvPV_nolen((SV*) *name_p);
 }
 
-CV* MopMaV_get_initializer(pTHX_ SV* self) {
+CV* THX_MopMaV_get_initializer(pTHX_ SV* self) {
     assert(self != NULL);
 
     if (SvTYPE(self) != SVt_RV && SvTYPE(SvRV(self)) != SVt_PVAV) {
@@ -59,19 +59,19 @@ CV* MopMaV_get_initializer(pTHX_ SV* self) {
     return (CV*) SvRV((SV*) *init_p);
 }
 
-GV* MopMaV_get_glob(pTHX_ SV* self) {
+GV* THX_MopMaV_get_glob(pTHX_ SV* self) {
     assert(self != NULL);
 
     return CvGV((CV*) MopMaV_get_initializer(self));
 }
 
-HV* MopMaV_get_stash(pTHX_ SV* self) {
+HV* THX_MopMaV_get_stash(pTHX_ SV* self) {
     assert(self != NULL);
 
     return (HV*) GvSTASH(MopMaV_get_glob(self));
 }
 
-char* MopMaV_get_stash_name(pTHX_ SV* self) {
+char* THX_MopMaV_get_stash_name(pTHX_ SV* self) {
     assert(self != NULL);
 
     return HvNAME(MopMaV_get_stash(self));
