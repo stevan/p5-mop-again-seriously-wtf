@@ -58,7 +58,7 @@ like(
     $e->stack_trace->as_string,
     qr[^Trace begun at \Q$file\E line \Q$line1\E
 main::bar at \Q$file\E line \Q$line2\E
-eval {\.\.\.} at \Q$file\E line \Q$line3\E
+eval \{\.\.\.\} at \Q$file\E line \Q$line3\E
 ],
     '... got the exception'
 );
