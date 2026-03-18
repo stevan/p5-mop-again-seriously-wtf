@@ -12,10 +12,10 @@ package Foo {
 
     has 'collector' => ( default => sub { [] } );
 
-    sub collector { $_[0]->{collector} };
+    sub collector ($self) { $self->{collector} };
 
     sub collect ($self, $stuff) {
-        push @{ $_[0]->{collector} } => $stuff;
+        push @{ $self->{collector} } => $stuff;
     }
 
     sub BUILD ($self, $params) {
